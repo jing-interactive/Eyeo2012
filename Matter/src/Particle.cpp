@@ -1,7 +1,7 @@
 #include "Particle.h"
 #include "cinder/Rand.h"
 #include "cinder/gl/gl.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 
 #define M_4_PI 12.566370614359172
 
@@ -11,12 +11,12 @@ Particle::Particle()
 {
 }
 
-Particle::Particle( const Vec3f &pos, const Vec3f &vel, float charge )
+Particle::Particle( const vec3 &pos, const vec3 &vel, float charge )
 {
 	init( pos, vel, charge );
 }
 
-Particle::Particle( const Vec3f &pos, const Vec3f &vel )
+Particle::Particle( const vec3 &pos, const vec3 &vel )
 {
 	float charge = -1.0f;
 	if( Rand::randBool() ){
@@ -25,11 +25,11 @@ Particle::Particle( const Vec3f &pos, const Vec3f &vel )
 	init( pos, vel, charge );
 }
 
-void Particle::init( const Vec3f &pos, const Vec3f &vel, float charge )
+void Particle::init( const vec3 &pos, const vec3 &vel, float charge )
 {
 	mPos			= pos;
 	mVel			= vel;
-	mAcc			= Vec3f::zero();
+	mAcc			= vec3();
 	
 	mCharge			= charge;
 	mCol			= Color( 0.0f, 1.0f, 0.0f );
@@ -70,7 +70,7 @@ void Particle::update( Room *room, float dt )
 	mMass = getMassFromRadius( mRadius );
 	mInvMass = 1.0f/mMass;
 	
-	Vec3f roomBounds = room->getDims();
+	vec3 roomBounds = room->getDims();
 
 	float bounceDecay = -0.815f;
 	if( mPos.x - mRadius < -roomBounds.x ){
@@ -100,7 +100,7 @@ void Particle::update( Room *room, float dt )
 	mVel -= mVel * 0.01f * dt;
 	mFusionThresh -= ( mFusionThresh ) * 0.1f;
 	
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 }
 
 void Particle::draw( gl::VboMesh &sphereLo, gl::VboMesh &sphereHi )

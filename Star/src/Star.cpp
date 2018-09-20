@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "Star.h"
 
@@ -19,7 +19,7 @@ Star::Star()
 {
 }
 
-Star::Star( const Vec3f &pos, float mass )
+Star::Star( const vec3 &pos, float mass )
 	: mPos( pos ), mMass( mass )
 {
 	mRadiusDest = powf( (3.0f * mMass )/(float)M_4_PI, 0.3333333f );
@@ -80,9 +80,9 @@ void Star::drawOrbitRings()
 {
 	if( mCurrentPlanets > 0 ){
 		gl::pushModelView();
-		gl::rotate( Vec3f( 90.0f, 0.0f, 0.0f ) );
+		gl::rotate( vec3( 90.0f, 0.0f, 0.0f ) );
 		for( vector<Planet>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it ){
-			gl::drawStrokedCircle( Vec2f::zero(), it->mOrbitRadius );
+			gl::drawStrokedCircle( vec2(), it->mOrbitRadius );
 		}
 		gl::popModelView();
 	}
@@ -92,7 +92,7 @@ void Star::drawPlanets( gl::GlslProg *shader )
 {	
 	if( mCurrentPlanets > 0 ){
 //		gl::pushModelView();
-//		gl::rotate( Vec3f( 87.0f, 8.0f, 0.0f ) );
+//		gl::rotate( vec3( 87.0f, 8.0f, 0.0f ) );
 		for( vector<Planet>::iterator it = mPlanets.begin(); it != mPlanets.end(); ++it ){
 			shader->uniform( "planetColor", it->mColor );
 			it->draw();

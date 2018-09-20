@@ -15,16 +15,16 @@ class FieldLine {
 public:
 	
 	FieldLine();
-	FieldLine( const ci::Vec3f &pos, const ci::Vec3f &vel, float charge, float lifespan );
+	FieldLine( const ci::vec3 &pos, const ci::vec3 &vel, float charge, float lifespan );
 	void update( float dt, bool tick );
 	void draw();
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
 	
-	std::vector<ci::Vec3f>	mPositions;
-//	std::vector<ci::Vec3f>	mNormals;
-//	std::vector<ci::Vec3f>	mPerps;
+	std::vector<ci::vec3>	mPositions;
+//	std::vector<ci::vec3>	mNormals;
+//	std::vector<ci::vec3>	mPerps;
 	
 	float		mMaxSpeed;
 	float		mCharge;

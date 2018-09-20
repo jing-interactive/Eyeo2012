@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/TextureFont.h"
@@ -27,12 +27,12 @@ using namespace std;
 enum stageName{ INTRO, CIRCLE, GRADIENT, CORONA, SPHERE, NEBULAS, GLOWS, DUSTS, EVERYTHING, LESSON };
 
 
-class StarApp : public AppBasic {
+class StarApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
 	void			createSphere( gl::VboMesh &mesh, int res );
-	void			drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div );
+	void			drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div );
 	virtual void	mouseDown( MouseEvent event );
 	virtual void	mouseUp( MouseEvent event );
 	virtual void	mouseMove( MouseEvent event );
@@ -89,16 +89,16 @@ class StarApp : public AppBasic {
 	Star				mStar;
 	gl::VboMesh			mStarVbo;
 	gl::VboMesh			mStarVboLo;
-	std::vector<Vec3f>	mPosCoords;
-	std::vector<Vec3f>	mNormals;
-	Vec3f				mCanisMajorisPos;
+	std::vector<vec3>	mPosCoords;
+	std::vector<vec3>	mNormals;
+	vec3				mCanisMajorisPos;
 	float				mCanisMajorisPer;
 
 	// CONTROLLER
 	Controller			mController;
 	
 	// POSITION/VELOCITY FBOS
-	ci::Vec2f			mFboSize;
+	ci::vec2			mFboSize;
 	ci::Area			mFboBounds;
 	int					mThisFbo, mPrevFbo;
 	
@@ -120,7 +120,7 @@ class StarApp : public AppBasic {
 	
 	int					mRandIterations;
 
-	Vec2f				mRandSeed;
+	vec2				mRandSeed;
 	bool				mBillboard;
 	
 	bool				mRenderGlows;
@@ -132,7 +132,7 @@ class StarApp : public AppBasic {
 	bool				mRenderCanisMajoris;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 };
 
@@ -155,29 +155,29 @@ void StarApp::setup()
 	
 	// LOAD SHADERS
 	try {
-		mGradientShader = gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "gradient.frag" ) );
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mStarShader		= gl::GlslProg( loadResource( "star.vert" ), loadResource( "star.frag" ) );
-		mGlowShader		= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "glow.frag" ) );
-		mNebulaShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "nebula.frag" ) );
-		mCoronaShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "corona.frag" ) );
-		mDustShader		= gl::GlslProg( loadResource( "passThruColor.vert" ), loadResource( "dust.frag" ) );
-		mPlanetShader	= gl::GlslProg( loadResource( "passThruNormals.vert" ), loadResource( "planet.frag" ) );
+		mGradientShader = gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "gradient.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mStarShader		= gl::GlslProg::create( loadResource( "star.vert" ), loadResource( "star.frag" ) );
+		mGlowShader		= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "glow.frag" ) );
+		mNebulaShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "nebula.frag" ) );
+		mCoronaShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "corona.frag" ) );
+		mDustShader		= gl::GlslProg::create( loadResource( "passThruColor.vert" ), loadResource( "dust.frag" ) );
+		mPlanetShader	= gl::GlslProg::create( loadResource( "passThruNormals.vert" ), loadResource( "planet.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
 	// LOAD TEXTURES
-	mSpectrumTex		= gl::Texture( loadImage( loadResource( "spectrum.png" ) ) );
-	mGlowTex			= gl::Texture( loadImage( loadResource( "glow.png" ) ) );
-	mNebulaTex			= gl::Texture( loadImage( loadResource( "nebula.png" ) ) );
-	mCoronaTex			= gl::Texture( loadImage( loadResource( "corona.png" ) ) );
-	mGridTex			= gl::Texture( loadImage( loadResource( "grid.png" ) ) );
-	mSmallGridTex		= gl::Texture( loadImage( loadResource( "smallGrid.png" ) ) );
-	mBigGlow0Tex		= gl::Texture( loadImage( loadResource( "bigGlow0.png" ) ) );
-	mBigGlow1Tex		= gl::Texture( loadImage( loadResource( "bigGlow1.png" ) ) );
-	mIconTex			= gl::Texture( loadImage( loadResource( "iconStar.png" ) ) );
+	mSpectrumTex		= gl::Texture::create( loadImage( loadResource( "spectrum.png" ) ) );
+	mGlowTex			= gl::Texture::create( loadImage( loadResource( "glow.png" ) ) );
+	mNebulaTex			= gl::Texture::create( loadImage( loadResource( "nebula.png" ) ) );
+	mCoronaTex			= gl::Texture::create( loadImage( loadResource( "corona.png" ) ) );
+	mGridTex			= gl::Texture::create( loadImage( loadResource( "grid.png" ) ) );
+	mSmallGridTex		= gl::Texture::create( loadImage( loadResource( "smallGrid.png" ) ) );
+	mBigGlow0Tex		= gl::Texture::create( loadImage( loadResource( "bigGlow0.png" ) ) );
+	mBigGlow1Tex		= gl::Texture::create( loadImage( loadResource( "bigGlow1.png" ) ) );
+	mIconTex			= gl::Texture::create( loadImage( loadResource( "iconStar.png" ) ) );
 	mCubeMap			= CubeMap( GLsizei(512), GLsizei(512),
 								  Surface8u( loadImage( loadResource( RES_CUBE1_ID ) ) ),
 								  Surface8u( loadImage( loadResource( RES_CUBE2_ID ) ) ),
@@ -201,24 +201,24 @@ void StarApp::setup()
 	roomFormat.setColorInternalFormat( GL_RGB );
 	int fboXRes			= APP_WIDTH/ROOM_FBO_RES;
 	int fboYRes			= APP_HEIGHT/ROOM_FBO_RES;
-	mRoomFbo			= gl::Fbo( fboXRes, fboYRes, roomFormat );
+	mRoomFbo			= gl::Fbo::create( fboXRes, fboYRes, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );
 	mRoomLightIntensity	= 0.5f;
 	mRoom.init();
 	
 	// STAR
-	mStar				= Star( Vec3f::zero(), 4000000.0f );
+	mStar				= Star( vec3(), 4000000.0f );
 	createSphere( mStarVbo, 4 );
 	createSphere( mStarVboLo, 3 );
-	mCanisMajorisPos	= Vec3f( getWindowWidth(), 0.0f, 0.0f );
+	mCanisMajorisPos	= vec3( getWindowWidth(), 0.0f, 0.0f );
 	mCanisMajorisPer	= 0.0f;
 	
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 
 	// RENDER MODES
@@ -314,10 +314,10 @@ void StarApp::createSphere( gl::VboMesh &vbo, int res )
 	float X = 0.525731112119f; 
 	float Z = 0.850650808352f;
 	
-	static Vec3f verts[12] = {
-		Vec3f( -X, 0.0f, Z ), Vec3f( X, 0.0f, Z ), Vec3f( -X, 0.0f, -Z ), Vec3f( X, 0.0f, -Z ),
-		Vec3f( 0.0f, Z, X ), Vec3f( 0.0f, Z, -X ), Vec3f( 0.0f, -Z, X ), Vec3f( 0.0f, -Z, -X ),
-		Vec3f( Z, X, 0.0f ), Vec3f( -Z, X, 0.0f ), Vec3f( Z, -X, 0.0f ), Vec3f( -Z, -X, 0.0f ) };
+	static vec3 verts[12] = {
+		vec3( -X, 0.0f, Z ), vec3( X, 0.0f, Z ), vec3( -X, 0.0f, -Z ), vec3( X, 0.0f, -Z ),
+		vec3( 0.0f, Z, X ), vec3( 0.0f, Z, -X ), vec3( 0.0f, -Z, X ), vec3( 0.0f, -Z, -X ),
+		vec3( Z, X, 0.0f ), vec3( -Z, X, 0.0f ), vec3( Z, -X, 0.0f ), vec3( -Z, -X, 0.0f ) };
 	
 	static GLuint triIndices[20][3] = { 
 		{0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1}, {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
@@ -339,20 +339,20 @@ void StarApp::createSphere( gl::VboMesh &vbo, int res )
 	vbo.unbindBuffers();
 }
 
-void StarApp::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div )
+void StarApp::drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div )
 {
 	if( div <= 0 ){
 		mPosCoords.push_back( va );
 		mPosCoords.push_back( vb );
 		mPosCoords.push_back( vc );
-		Vec3f vn = ( va + vb + vc ) * 0.3333f;
+		vec3 vn = ( va + vb + vc ) * 0.3333f;
 		mNormals.push_back( va );
 		mNormals.push_back( vb );
 		mNormals.push_back( vc );
 	} else {
-		Vec3f vab = ( ( va + vb ) * 0.5f ).normalized();
-		Vec3f vac = ( ( va + vc ) * 0.5f ).normalized();
-		Vec3f vbc = ( ( vb + vc ) * 0.5f ).normalized();
+		vec3 vab = ( ( va + vb ) * 0.5f ).normalized();
+		vec3 vac = ( ( va + vc ) * 0.5f ).normalized();
+		vec3 vbc = ( ( vb + vc ) * 0.5f ).normalized();
 		drawSphereTri( va, vab, vac, div-1 );
 		drawSphereTri( vb, vbc, vab, div-1 );
 		drawSphereTri( vc, vac, vbc, div-1 );
@@ -366,13 +366,13 @@ void StarApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void StarApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void StarApp::mouseMove( MouseEvent event )
@@ -522,7 +522,7 @@ void StarApp::setStage( int i )
 		mRenderCorona	= true;
 		mRenderTexture	= true;
 		mRenderDusts	= true;
-		mSpringCam.mEyeNode.mRestPos = Vec3f( 0.0f, 80.0f, -466.0f );
+		mSpringCam.mEyeNode.mRestPos = vec3( 0.0f, 80.0f, -466.0f );
 		mBillboard		= true;
 		setStar( 0 );
 	}
@@ -530,7 +530,7 @@ void StarApp::setStage( int i )
 
 void StarApp::randSeed()
 {
-	mRandSeed	= Rand::randVec2f() * Rand::randFloat( 100.0f );
+	mRandSeed	= Rand::randvec2() * Rand::randFloat( 100.0f );
 }
 
 void StarApp::update()
@@ -568,7 +568,7 @@ void StarApp::update()
 		
 		if( mCanisMajorisPer > 0.01f ){
 			float radius = 4000.0f;
-			Vec3f pos = Vec3f( radius + 350.0f, 0.0f, 0.0f ) + mCanisMajorisPos * 0.5f;
+			vec3 pos = vec3( radius + 350.0f, 0.0f, 0.0f ) + mCanisMajorisPos * 0.5f;
 			int amt = 24;
 			// nebulas off canis majoris
 			mController.addCMNebulas( pos, radius, 3.0f, amt );
@@ -576,7 +576,7 @@ void StarApp::update()
 			mController.addCMGlows( pos, radius, amt/2 );
 			
 			// nebulas at home star
-			mController.addCMNebulas( Vec3f::zero(), 0.0f, 1.0f, 1 );
+			mController.addCMNebulas( vec3(), 0.0f, 1.0f, 1 );
 		}
 	}
 	mController.update( mRoom.getTimeDelta() );
@@ -603,44 +603,44 @@ void StarApp::update()
 
 void StarApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
 	//	mLightsTex.bind( 0 );
 	mCubeMap.bind();
 	mSpectrumTex.bind( 1 );
-	mRoomShader.bind();
-//	mRoomShader.uniform( "lightsTex", 0 );
-//	mRoomShader.uniform( "numLights", (float)mNumLights );
-//	mRoomShader.uniform( "invNumLights", mInvNumLights );
-//	mRoomShader.uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
-	mRoomShader.uniform( "att", 1.0115f );
-	mRoomShader.uniform( "cubeMap", 0 );
-	mRoomShader.uniform( "spectrumTex", 1 );
-	mRoomShader.uniform( "starPos", Vec4f( mStar.mPos.xyz(), mStar.mRadius ) );
-	mRoomShader.uniform( "color", mStar.mColor );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.getEye() );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "mainPower", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "lightIntensity", mRoomLightIntensity );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+//	mRoomShader->uniform( "lightsTex", 0 );
+//	mRoomShader->uniform( "numLights", (float)mNumLights );
+//	mRoomShader->uniform( "invNumLights", mInvNumLights );
+//	mRoomShader->uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
+	mRoomShader->uniform( "att", 1.0115f );
+	mRoomShader->uniform( "cubeMap", 0 );
+	mRoomShader->uniform( "spectrumTex", 1 );
+	mRoomShader->uniform( "starPos", Vec4f( mStar.mPos.xyz(), mStar.mRadius ) );
+	mRoomShader->uniform( "color", mStar.mColor );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.getEye() );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "mainPower", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "lightIntensity", mRoomLightIntensity );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -649,7 +649,7 @@ void StarApp::draw()
 	gl::clear( ColorA( 0, 0, 0, 0 ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -659,7 +659,7 @@ void StarApp::draw()
 	
 	// DRAW ROOM
 	if( mRoom.getPower() < 0.9f ){ // TURN ROOM OFF WHEN POWER IS ON
-		mRoomFbo.bindTexture();
+		mRoomFbo->bindTexture();
 		gl::drawSolidRect( getWindowBounds() );
 	}
 	
@@ -740,13 +740,13 @@ void StarApp::draw()
 	mPlanetShader.uniform( "spectrumTex", 0 );
 	mPlanetShader.uniform( "starColor", mStar.mColor );
 	mPlanetShader.uniform( "power", mRoom.getPower() );
-	mPlanetShader.uniform( "windowDims", Vec2f( getWindowWidth(), getWindowHeight() ) );
+	mPlanetShader.uniform( "windowDims", vec2( getWindowWidth(), getWindowHeight() ) );
 	mPlanetShader.uniform( "eyePos", mSpringCam.getEye() );
 	mStar.drawPlanets( &mPlanetShader );
 	mPlanetShader.unbind();
 	
 	if( getElapsedFrames()%60 == 59 ){
-		std::cout << "FPS: " << getAverageFps() << std::endl;
+		console() << "FPS: " << getAverageFps() << std::endl;
 	}
 	
 	mThisFbo	= ( mThisFbo + 1 ) % 2;
@@ -850,8 +850,8 @@ void StarApp::drawGlows()
 	mGlowShader.uniform( "color", mStar.mColor );
 	mGlowShader.uniform( "power", mRoom.getPower() );
 	mGlowShader.uniform( "starRadius", mStar.mRadiusDrawn );
-	Vec3f right = Vec3f::xAxis();
-	Vec3f up	= Vec3f::yAxis();
+	vec3 right = vec3::xAxis();
+	vec3 up	= {0, 1, 0};
 	if( mBillboard ) mSpringCam.mCam.getBillboardVectors( &right, &up );
 
 	mController.drawGlows( &mGlowShader, right, up );
@@ -870,8 +870,8 @@ void StarApp::drawNebulas()
 	mNebulaShader.uniform( "color", mStar.mColor );
 	mNebulaShader.uniform( "power", mRoom.getPower() );
 	mNebulaShader.uniform( "starRadius", mStar.mRadiusDrawn );
-	Vec3f right = Vec3f::xAxis();
-	Vec3f up	= Vec3f::yAxis();
+	vec3 right = vec3::xAxis();
+	vec3 up	= {0, 1, 0};
 	if( mBillboard ) mSpringCam.mCam.getBillboardVectors( &right, &up );
 	
 	mController.drawNebulas( &mNebulaShader, right, up );
@@ -882,7 +882,7 @@ void StarApp::drawDusts()
 {
 	gl::pushModelView();
 	float per = 1.75f * mStar.mRadius/mStar.mMaxRadius;
-	gl::scale( Vec3f( per, per, per ) );
+	gl::scale( vec3( per, per, per ) );
 	mSpectrumTex.bind();
 	mDustShader.bind();
 	mDustShader.uniform( "spectrumTex", 0 );
@@ -906,17 +906,17 @@ void StarApp::drawCanisMajoris()
 
 void StarApp::drawInfoPanel()
 {
-	Vec3f roomDims = mRoom.getDims();
+	vec3 roomDims = mRoom.getDims();
 	
 	gl::pushMatrices();
 	gl::translate( roomDims );
 	float s = 1.0f;
-	gl::scale( Vec3f( -s, -s, 1.0f ) );
+	gl::scale( vec3( -s, -s, 1.0f ) );
 	gl::color( Color( mRoom.getPower(), mRoom.getPower(), mRoom.getPower() ) * 0.5f );
 
 	if( mStage == LESSON ){		// RENDER STAR DATA
 		string str = mStarNames[mStarTypeIndex];
-		mTextureFontM->drawString( str, Vec2f( 70.0f, 330.0f ) );
+		mTextureFontM->drawString( str, vec2( 70.0f, 330.0f ) );
 	}
 	
 	float iconWidth		= 50.0f;
@@ -937,11 +937,11 @@ void StarApp::drawInfoPanel()
 
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	gl::popMatrices();
 }

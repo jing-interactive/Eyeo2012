@@ -14,13 +14,13 @@
 class Predator {
 public:
 	Predator();
-	Predator( const ci::Vec3f &v );
-	void update( const ci::Vec3f &v );
+	Predator( const ci::vec3 &v );
+	void update( const ci::vec3 &v );
 	void draw();
 	
 	int mLen;
-	ci::Vec3f	mPos;
-	std::vector<ci::Vec3f>	mPositions;
+	ci::vec3	mPos;
+	std::vector<ci::vec3>	mPositions;
 	
 	float					mRadius;
 	std::vector<float>		mRadii;

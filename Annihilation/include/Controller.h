@@ -27,7 +27,7 @@
 class Controller {
 public:
 	struct SparkVertex {
-        ci::Vec3f vertex;
+        ci::vec3 vertex;
         ci::Vec4f color;
     };
 	
@@ -48,17 +48,17 @@ public:
 			mRadii.push_back( amt );
 		}
 		
-		ci::Vec3f getTipPos(){
+		ci::vec3 getTipPos(){
 			return mNodes[ mNodes.size() - 1 ]->mPos;
 		}
 		
-		ci::Vec3f getTipDir(){
-			ci::Vec3f p1( mNodes[ mNodes.size() - 1 ]->mPos );
-			ci::Vec3f p2( mNodes[ mNodes.size() - 2 ]->mPos );
+		ci::vec3 getTipDir(){
+			ci::vec3 p1( mNodes[ mNodes.size() - 1 ]->mPos );
+			ci::vec3 p2( mNodes[ mNodes.size() - 2 ]->mPos );
 			return ( p1 - p2 ).normalized();
 		}
 		
-		ci::Vec3f getPos( int i ){
+		ci::vec3 getPos( int i ){
 			return mNodes[i]->mPos;
 		}
 		
@@ -79,7 +79,7 @@ public:
 	Controller();
 	void init( Room *room );
 	void createSphere( ci::gl::VboMesh &mesh, int res, bool savePositions );
-	void drawSphereTri( ci::Vec3f va, ci::Vec3f vb, ci::Vec3f vc, int div, bool savePositions );
+	void drawSphereTri( ci::vec3 va, ci::vec3 vb, ci::vec3 vc, int div, bool savePositions );
 	void applyForces();
 	void zap( traer::physics::Particle *p );
 	void annihilate();
@@ -92,18 +92,18 @@ public:
 	void drawAntimatter();
 	void drawMatterShadow( Room *room );
 	void drawAntimatterParticles();
-	void drawShockwaves( const ci::Vec3f &camPos );
-	void drawSmokes( const ci::Vec3f &right, const ci::Vec3f &up );
+	void drawShockwaves( const ci::vec3 &camPos );
+	void drawSmokes( const ci::vec3 &right, const ci::vec3 &up );
 	void drawSparks();
 	void drawGlows();
 	void drawHairs();
 	void makeParticles();
-	void drawSphericalBillboard( const ci::Vec3f &camEye, const ci::Vec3f &objPos, const ci::Vec2f &scale, float rotInRadians );
+	void drawSphericalBillboard( const ci::vec3 &camEye, const ci::vec3 &objPos, const ci::vec2 &scale, float rotInRadians );
 
 	Room					*mRoom;
 	
 	// TRAER PHYSICS
-	std::vector<ci::Vec3f>					mStartPositions;
+	std::vector<ci::vec3>					mStartPositions;
 	float mRadii[NUM_SHELLS];
 	traer::physics::ParticleSystem*			mPhysics;
 	std::vector<traer::physics::Particle>	mParticles;
@@ -131,9 +131,9 @@ public:
 	ci::gl::VboMesh			mSphereLo, mSphereMd, mSphereHi;
 	int						mIndex;
 	std::vector<uint32_t>	mIndices;
-	std::vector<ci::Vec3f>	mPosCoords;
-	std::vector<ci::Vec3f>	mNormals;
-	std::vector<ci::Vec2f>	mTexCoords;
+	std::vector<ci::vec3>	mPosCoords;
+	std::vector<ci::vec3>	mNormals;
+	std::vector<ci::vec2>	mTexCoords;
 	
 	bool					mBroken;
 };

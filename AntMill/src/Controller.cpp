@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Controller.h"
@@ -28,30 +28,30 @@ Controller::Controller( Room *room )
 
 void Controller::init( int maxAnts, int numSpecialAnts )
 {
-	std::cout << "SIMULATION INITIALIZED WITH " << maxAnts << " ANTS AND " << numSpecialAnts << " OF THEM ARE SPECIAL." << std::endl;
+	console() << "SIMULATION INITIALIZED WITH " << maxAnts << " ANTS AND " << numSpecialAnts << " OF THEM ARE SPECIAL." << std::endl;
 	
 	mFoods.clear();
 	mAnts.clear();
 	
 	mNumSpecialAnts			= numSpecialAnts;
 	
-	mHomePos				= Vec3f( 0.0f, mRoom->getFloorLevel(), 0.0f );
+	mHomePos				= vec3( 0.0f, mRoom->getFloorLevel(), 0.0f );
 	mHomeRadius				= 55.0f;
 	mHomeRadiusSqrd			= mHomeRadius * mHomeRadius;
 	
-	mFoodPos				= Vec3f( 200.0f, mRoom->getFloorLevel(),-200.0f );//200.0
+	mFoodPos				= vec3( 200.0f, mRoom->getFloorLevel(),-200.0f );//200.0
 	mFoodRadius				= 25.0f;
 	mFoodRadiusSqrd			= mFoodRadius * mFoodRadius;
 
 	int numFoods = 200;
 	for( int i=0; i<numFoods; i++ ){
-		Vec3f pos = mFoodPos + Rand::randVec3f() * Vec3f( 20.0f, 0.0f, 20.0f );
+		vec3 pos = mFoodPos + Rand::randvec3() * vec3( 20.0f, 0.0f, 20.0f );
 		mFoods.push_back( Food( pos,-1.0f ) );
 	}
 	
 	int specialCounter = 0;
 	for( int i=0; i<maxAnts; i++ ){
-		Vec3f pos = Rand::randVec3f() * mHomeRadius;
+		vec3 pos = Rand::randvec3() * mHomeRadius;
 		pos.y = mRoom->getFloorLevel();
 		mAnts.push_back( Ant( this, pos ) );
 		
@@ -71,7 +71,7 @@ void Controller::repelAnts()
 		
 		vector<Ant>::iterator p2 = p1;
 		for( ++p2; p2 != mAnts.end(); ++p2 ) {
-			Vec3f dir = p1->mPos - p2->mPos;
+			vec3 dir = p1->mPos - p2->mPos;
 			float distSqrd = dir.lengthSquared();
 			
 			if( distSqrd < zoneRadiusSqrd && distSqrd > 25.0f ){
@@ -101,7 +101,7 @@ void Controller::updateAnts( float dt )
 		it->update( dt, mRoom->getDims() );
 		
 		if( !it->mHasFood ){
-			Vec3f dirToFood			= it->mPos - mFoodPos;
+			vec3 dirToFood			= it->mPos - mFoodPos;
 			float distToFoodSqrd	= dirToFood.lengthSquared();
 		
 			if( distToFoodSqrd < mFoodRadiusSqrd ){
@@ -109,7 +109,7 @@ void Controller::updateAnts( float dt )
 			}
 			
 		} else {
-			Vec3f dirToHome			= it->mPos - mHomePos;
+			vec3 dirToHome			= it->mPos - mHomePos;
 			float distToHomeSqrd	= dirToHome.lengthSquared();
 			
 			if( distToHomeSqrd < mHomeRadiusSqrd && Rand::randFloat() < 0.02f ){
@@ -126,7 +126,7 @@ void Controller::updateAnts( float dt )
 void Controller::pickupFood( Ant *ant )
 {
 	for( vector<Food>::iterator it = mFoods.begin(); it != mFoods.end(); ++it ){
-		Vec3f dirToFood = ant->mPos - it->mPos;
+		vec3 dirToFood = ant->mPos - it->mPos;
 		float distToFood = dirToFood.length();
 		
 		if( distToFood < 5.0f && !ant->mHasFood && !it->mGrabbed){
@@ -182,7 +182,7 @@ void Controller::drawFoods()
 
 void Controller::drawHome()
 {
-	gl::drawBillboard( mHomePos, Vec2f( mHomeRadius, mHomeRadius ) * 2.0f, 0.0f, Vec3f::xAxis(), Vec3f::zAxis() );
+	gl::drawBillboard( mHomePos, vec2( mHomeRadius, mHomeRadius ) * 2.0f, 0.0f, vec3::xAxis(), vec3::zAxis() );
 }
 
 bool depthSortFunc( Ant *a, Ant *b ){

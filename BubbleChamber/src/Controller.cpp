@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Controller.h"
@@ -41,7 +41,7 @@ void Controller::update()
 		if( Rand::randFloat() < mIntensity ){
 			int amt = 1;
 			for( int i=0; i<amt; i++ ){
-				vector<Vec3f> posAndVel = mRoom->getRandRoomEntryPos();
+				vector<vec3> posAndVel = mRoom->getRandRoomEntryPos();
 				int len = 5;
 				addParticle( 0, posAndVel[0], posAndVel[1], PARTICLE_SPEED, len );
 			}
@@ -61,7 +61,7 @@ void Controller::update()
 bool Controller::checkMothCollisions( Particle *particle )
 {
 	for( vector<Moth>::iterator it = mMoths.begin(); it != mMoths.end(); ){
-		Vec3f dirToMoth = it->mPos - particle->mPos;
+		vec3 dirToMoth = it->mPos - particle->mPos;
 		float distToMoth = dirToMoth.length();
 		
 		if( distToMoth < 5.0f ){
@@ -94,14 +94,14 @@ void Controller::updateParticles( float dt, bool tick )
 			it->update( mRoom, dt, tick );
 			if( tick || it->mBounced ){ // ADD BUBBLES ALONG THE LENGTH OF ONE TICK
 										// WORTH OF PARTICLE MOVEMENT
-				Vec3f dir	= it->mPos - it->mPosLastTick;
+				vec3 dir	= it->mPos - it->mPosLastTick;
 				float dist	= dir.length();
 				
 				int numDivs = dist/( it->mGen * 4 + 2 );	// THE NUMBER OF BUBBLES PROPORTIONAL TO LENGTH
 				for( int i=0; i<numDivs; i++ ){
 					float per = (float)i/(float)numDivs;
-					Vec3f pos = lerp( it->mPosLastTick, it->mPos, per );
-					addBubble( pos, Rand::randVec3f() * 0.025f, dt*( 1.0f - per ) );
+					vec3 pos = lerp( it->mPosLastTick, it->mPos, per );
+					addBubble( pos, Rand::randvec3() * 0.025f, dt*( 1.0f - per ) );
 				}
 				
 				it->mPosLastTick = it->mPos;
@@ -123,7 +123,7 @@ void Controller::updateParticles( float dt, bool tick )
 		// MAKE NEW PARTICLES
 		int numParticles = 30;
 		for( int i=0; i<numParticles; i++ ){
-			Vec3f dir		= Rand::randVec3f();
+			vec3 dir		= Rand::randvec3();
 			int len			= 25;
 			mNewParticles.push_back( Particle( this, 3, (*it)->mPos, dir, PARTICLE_SPEED * 0.3f, len ) );
 		}
@@ -131,14 +131,14 @@ void Controller::updateParticles( float dt, bool tick )
 		// MAKE EXTRA BUBBLES
 		for( int i=0; i<400; i++ ){
 			float r = Rand::randFloat( 5.0f );
-			Vec3f rv = Rand::randVec3f() * 3.0f;
-			Vec3f pos = (*it)->mPos + rv * r * r;
+			vec3 rv = Rand::randvec3() * 3.0f;
+			vec3 pos = (*it)->mPos + rv * r * r;
 			addBubble( pos, rv, 0.0f );
 		}
 		
 //		// MAKE SMOKES
 //		for( int i=0; i<3; i++ ){
-//			mSmokes.push_back( Smoke( (*it)->mPos, Vec3f::zero(), Rand::randFloat( 25.0f, 27.0f ), Rand::randFloat( 4.0f, 8.0f ) ) ); 
+//			mSmokes.push_back( Smoke( (*it)->mPos, vec3(), Rand::randFloat( 25.0f, 27.0f ), Rand::randFloat( 4.0f, 8.0f ) ) ); 
 //		}
 	}
 	
@@ -188,8 +188,8 @@ void Controller::updateDecals( float dt, bool tick )
 			if( tick ){
 				// MAKE EXTRA BUBBLES
 				for( int i=0; i<2; i++ ){
-					Vec3f pos = it->mPos + Rand::randVec3f() * Rand::randFloat( 2.0f );
-					addBubble( pos, Rand::randVec3f(), 0.0f );
+					vec3 pos = it->mPos + Rand::randvec3() * Rand::randFloat( 2.0f );
+					addBubble( pos, Rand::randvec3(), 0.0f );
 				}
 			}
 			
@@ -271,17 +271,17 @@ void Controller::applyForcesToMoths()
 		
 		for( vector<Shockwave>::iterator shockIt = mShockwaves.begin(); shockIt != mShockwaves.end(); ++shockIt )
 		{
-			Vec3f dirToMoth = shockIt->mPos - p1->mPos;
+			vec3 dirToMoth = shockIt->mPos - p1->mPos;
 			float dist = dirToMoth.length();
 			if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-				Vec3f dirToMothNorm = dirToMoth.normalized();
+				vec3 dirToMothNorm = dirToMoth.normalized();
 				p1->mAcc -= dirToMothNorm * shockIt->mImpulse * 5.0f;
 			}
 		}
 		
 		vector<Moth>::iterator p2 = p1;
 		for( ++p2; p2 != mMoths.end(); ++p2 ) {
-			Vec3f dir = p1->mPos - p2->mPos;
+			vec3 dir = p1->mPos - p2->mPos;
 			float distSqrd = dir.lengthSquared();
 
 			if( distSqrd < zoneRadiusSqrd ){			// Neighbor is in the zone
@@ -323,26 +323,26 @@ void Controller::explode( Particle *particle )
 	// MAKE NEW PARTICLES
 	for( int i=0; i<numParticles; i++ ){
 		float angle		= Rand::randFloat( M_PI * 2.0f );
-		Vec3f dir		= ( cos( angle ) * particle->mPerp1 + sin( angle ) * particle->mPerp2 );
+		vec3 dir		= ( cos( angle ) * particle->mPerp1 + sin( angle ) * particle->mPerp2 );
 		int len = 25;
 		mNewParticles.push_back( Particle( this, particle->mGen++, particle->mPos, dir, particle->mSpeed * 0.5f, len ) );
 	}
 	
 	// MAKE SMOKES
 	for( int i=0; i<3; i++ ){
-		mSmokes.push_back( Smoke( particle->mPos, Vec3f::zero(), Rand::randFloat( 5.0f, 7.0f ), Rand::randFloat( 4.0f, 8.0f ) ) ); 
+		mSmokes.push_back( Smoke( particle->mPos, vec3(), Rand::randFloat( 5.0f, 7.0f ), Rand::randFloat( 4.0f, 8.0f ) ) ); 
 	}
 	
 	// MAKE EXTRA BUBBLES
 	for( int i=0; i<200; i++ ){
 		float r = Rand::randFloat( 5.0f );
-		Vec3f rv = Rand::randVec3f();
-		Vec3f pos = particle->mPos + rv * r * r;
+		vec3 rv = Rand::randvec3();
+		vec3 pos = particle->mPos + rv * r * r;
 		addBubble( pos, rv, 0.0f );
 	}
 	
 	// MAKE BANK
-//	mDecals.push_back( Bank( particle->mPos, -Vec3f::zAxis(), particle->mVel.length() * 4.0f, 30.0f ) );
+//	mDecals.push_back( Bank( particle->mPos, -vec3::zAxis(), particle->mVel.length() * 4.0f, 30.0f ) );
 	
 	// MAKE SHOCKWAVE
 	float lifespan	= 25.0f;
@@ -353,13 +353,13 @@ void Controller::explode( Particle *particle )
 	int numGibs = Rand::randInt( 100, 200 );
 	for( int i=0; i<numGibs; i++ ){
 		float radius = Rand::randFloat( 0.25f, 3.0f );
-		mGibs.push_back( Gib( particle->mPos, Rand::randVec3f() * Rand::randFloat( 1.0f ), radius ) );
+		mGibs.push_back( Gib( particle->mPos, Rand::randvec3() * Rand::randFloat( 1.0f ), radius ) );
 	}
 	
 	// MAKE GLOWCUBES
 	int numCubes = Rand::randInt( 10, 15 );
 	for( int i=0; i<numCubes; i++ ){
-		mGlowCubes.push_back( GlowCube( particle->mPos + Rand::randVec3f() * 5.0f ) );
+		mGlowCubes.push_back( GlowCube( particle->mPos + Rand::randvec3() * 5.0f ) );
 	}
 }
 
@@ -417,7 +417,7 @@ void Controller::drawDecals()
 	}
 }
 
-void Controller::drawSmokes( const Vec3f &right, const Vec3f &up )
+void Controller::drawSmokes( const vec3 &right, const vec3 &up )
 {
 	for( vector<Smoke>::iterator it = mSmokes.begin(); it != mSmokes.end(); ++it ){
 		it->draw( right, up );
@@ -446,24 +446,24 @@ void Controller::drawGlowCubes( gl::GlslProg *shader )
 	}
 }
 
-void Controller::addBubble( const Vec3f &pos, const Vec3f &vel, float age )
+void Controller::addBubble( const vec3 &pos, const vec3 &vel, float age )
 {
 	mBubbles.push_back( Bubble( pos, vel, age ) );
 }
 
-void Controller::addParticle( int gen, const Vec3f &pos, const Vec3f &dir, float speed, int len )
+void Controller::addParticle( int gen, const vec3 &pos, const vec3 &dir, float speed, int len )
 {
 	mParticles.push_back( Particle( this, gen, pos, dir, speed, len ) );
-	mDecals.push_back( Decal( pos, Vec3f::yAxis(), speed, 30.0f ) );
+	mDecals.push_back( Decal( pos, {0, 1, 0}, speed, 30.0f ) );
 }
 
 void Controller::addParticles( int amt, bool isShort )
 {
 	for( int i=0; i<amt; i++ ){
 		int gen = 0;
-		vector<Vec3f> posAndVel = mRoom->getRandRoomEntryPos();
-		Vec3f pos = posAndVel[0];
-		Vec3f vel = posAndVel[1];
+		vector<vec3> posAndVel = mRoom->getRandRoomEntryPos();
+		vec3 pos = posAndVel[0];
+		vec3 vel = posAndVel[1];
 		float speed = 25.0f;
 		int len;
 		if( isShort )	len = 12;
@@ -472,7 +472,7 @@ void Controller::addParticles( int amt, bool isShort )
 	}
 }
 
-void Controller::addMoth( const Vec3f &pos )
+void Controller::addMoth( const vec3 &pos )
 {
 	mMoths.push_back( Moth( pos ) );
 }
@@ -480,7 +480,7 @@ void Controller::addMoth( const Vec3f &pos )
 void Controller::releaseMoths()
 {
 	for( int i=0; i<50; i++ ){
-		addMoth( Rand::randVec3f() * 50.0f );
+		addMoth( Rand::randvec3() * 50.0f );
 	}
 }
 

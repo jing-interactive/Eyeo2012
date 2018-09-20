@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Controller.h"
@@ -29,19 +29,19 @@ void Controller::init( Room *room, int maxParticles )
 	
 	mDraggedParticle	= NULL;
 	
-	addParticle( Vec3f(-340.0f,   0.0f,-28.0f ), 1.0f );
-	addParticle( Vec3f( 340.0f,   0.0f,-10.0f ),-1.0f );
-	addParticle( Vec3f(   0.0f,-200.0f,-30.0f ), 1.0f );
-	addParticle( Vec3f(   0.0f, 200.0f, 40.0f ),-1.0f );
-	addParticle( Vec3f(-200.0f, 100.0f, 50.0f ),-1.0f );
-	addParticle( Vec3f( 200.0f, 100.0f, 70.0f ), 1.0f );
+	addParticle( vec3(-340.0f,   0.0f,-28.0f ), 1.0f );
+	addParticle( vec3( 340.0f,   0.0f,-10.0f ),-1.0f );
+	addParticle( vec3(   0.0f,-200.0f,-30.0f ), 1.0f );
+	addParticle( vec3(   0.0f, 200.0f, 40.0f ),-1.0f );
+	addParticle( vec3(-200.0f, 100.0f, 50.0f ),-1.0f );
+	addParticle( vec3( 200.0f, 100.0f, 70.0f ), 1.0f );
 }
 
 void Controller::initParticles()
 {
 	int numParticles = mMaxParticles;
 	for( int i=0; i<numParticles; i++ ){
-		Vec3f pos = mRoom->getRandRoomPos();
+		vec3 pos = mRoom->getRandRoomPos();
 		float charge = 1.0f;
 		if( Rand::randBool() ) charge = -1.0f;
 		addParticle( pos, charge );
@@ -50,7 +50,7 @@ void Controller::initParticles()
 
 void Controller::applyForce()
 {
-//	Vec3f dir			= mLeftParticle->mPos - mRightParticle->mPos;
+//	vec3 dir			= mLeftParticle->mPos - mRightParticle->mPos;
 //	float distSqrd		= dir.lengthSquared();
 //	float q				= ( mLeftParticle->mCharge * mRightParticle->mCharge ) / distSqrd;
 //	mLeftParticle->mForce  = q;
@@ -58,7 +58,7 @@ void Controller::applyForce()
 	
 	for( vector<Particle>::iterator particle = mParticles.begin(); particle != mParticles.end(); ++particle ){
 		for( vector<FieldLine>::iterator it = mFieldLines.begin(); it != mFieldLines.end(); ++it ){
-			Vec3f dir			= it->mPos - particle->mPos;
+			vec3 dir			= it->mPos - particle->mPos;
 			float totalCharge	= it->mCharge * particle->mCharge;
 			float distSqrd		= dir.lengthSquared();
 			
@@ -140,7 +140,7 @@ void Controller::update( const ci::Camera &cam, float dt, bool tick )
 				if( it->mRadius > 3.0f ){
 					int numNewGlobs = 10;
 					for( int i=0; i<numNewGlobs; i++ ){
-						Vec3f vel			= it->mVel * 0.5f + Rand::randVec3f();
+						vec3 vel			= it->mVel * 0.5f + Rand::randvec3();
 						if( vel.y < 0.0f ) vel.y *= -0.8f;
 						float radius		= it->mRadius * 0.5f;
 						float lifespan		= it->mLifespan * 0.25f;
@@ -221,7 +221,7 @@ void Controller::drawFieldLines( gl::GlslProg *shader )
 //		shader->uniform( "shadow", 1.0f );
 		glDrawArrays( GL_LINES, 0, mTotalVerts );
 //		gl::pushModelView();
-//		gl::translate( Vec3f( 0.0f, 0.3f, 0.0f ) );
+//		gl::translate( vec3( 0.0f, 0.3f, 0.0f ) );
 //		shader->uniform( "shadow", 0.0f );
 //		glDrawArrays( GL_LINES, 0, mTotalVerts );
 //		gl::popModelView();
@@ -232,12 +232,12 @@ void Controller::drawFieldLines( gl::GlslProg *shader )
 	}
 }
 
-void Controller::drawCoronas( const Vec3f &right, const Vec3f &up )
+void Controller::drawCoronas( const vec3 &right, const vec3 &up )
 {
 	for( vector<Particle>::iterator it = mParticles.begin(); it != mParticles.end(); ++it ){
 		if( it->mCharge > 0.0f ){
-			Vec3f pos	= it->mPos;
-			Vec2f size	= Vec2f( it->mRadius, it->mRadius ) * 5.0f;
+			vec3 pos	= it->mPos;
+			vec2 size	= vec2( it->mRadius, it->mRadius ) * 5.0f;
 			float rot	= 0.0f;
 			float c		= it->mColor;
 			
@@ -247,7 +247,7 @@ void Controller::drawCoronas( const Vec3f &right, const Vec3f &up )
 	}
 }
 
-void Controller::drawGlows( const Vec3f &right, const Vec3f &up )
+void Controller::drawGlows( const vec3 &right, const vec3 &up )
 {
 	for( vector<Glow>::iterator it = mGlows.begin(); it != mGlows.end(); ++it ){
 		float c		= it->mColor;
@@ -256,7 +256,7 @@ void Controller::drawGlows( const Vec3f &right, const Vec3f &up )
 	}
 }
 
-void Controller::drawNebulas( const Vec3f &right, const Vec3f &up )
+void Controller::drawNebulas( const vec3 &right, const vec3 &up )
 {
 	for( vector<Nebula>::iterator it = mNebulas.begin(); it != mNebulas.end(); ++it ){
 		float c		= it->mColor;
@@ -266,7 +266,7 @@ void Controller::drawNebulas( const Vec3f &right, const Vec3f &up )
 	}
 }
 
-void Controller::drawGlobs( const Vec3f &right, const Vec3f &up )
+void Controller::drawGlobs( const vec3 &right, const vec3 &up )
 {
 	for( vector<Glob>::iterator it = mGlobs.begin(); it != mGlobs.end(); ++it ){
 		it->draw( right, up );
@@ -281,7 +281,7 @@ void Controller::drawShards( gl::GlslProg *shader )
 	}
 }
 
-void Controller::addParticle( const Vec3f &pos, float charge )
+void Controller::addParticle( const vec3 &pos, float charge )
 {
 	mParticles.push_back( Particle( pos, charge ) );
 }
@@ -289,9 +289,9 @@ void Controller::addParticle( const Vec3f &pos, float charge )
 void Controller::addFieldLines( Particle *p, int amt )
 {
 	for( int i=0; i<amt; i++ ){
-		Vec3f dir		= Rand::randVec3f();
-		Vec3f pos		= p->mPos + dir * p->mRadius;
-		Vec3f vel		= dir;
+		vec3 dir		= Rand::randvec3();
+		vec3 pos		= p->mPos + dir * p->mRadius;
+		vec3 vel		= dir;
 		float lifespan	= 30.0f;
 		
 		mFieldLines.push_back( FieldLine( pos, vel, p->mCharge, lifespan ) );
@@ -302,9 +302,9 @@ void Controller::addGlows( Particle *p, int amt )
 {
 	for( int i=0; i<amt; i++ ){
 		float radius	= Rand::randFloat( 10.0f, 18.0f );
-		Vec3f dir		= Rand::randVec3f();
-		Vec3f pos		= p->mPos + dir;
-		Vec3f vel		= dir * Rand::randFloat( 0.5f, 0.75f );
+		vec3 dir		= Rand::randvec3();
+		vec3 pos		= p->mPos + dir;
+		vec3 vel		= dir * Rand::randFloat( 0.5f, 0.75f );
 		float lifespan	= 30.0f;
 		
 		mGlows.push_back( Glow( pos, vel, radius, p->mCharge, lifespan ) );
@@ -315,29 +315,29 @@ void Controller::addNebulas( Particle *p, int amt )
 {
 	for( int i=0; i<amt; i++ ){
 		float radius		= Rand::randFloat( 40.0f, 50.0f );
-		Vec3f dir			= Rand::randVec3f();
-		Vec3f pos			= p->mPos + dir * ( p->mRadius - radius * 0.25f );
-		Vec3f vel			= dir * Rand::randFloat( 0.1f, 0.3f );
+		vec3 dir			= Rand::randvec3();
+		vec3 pos			= p->mPos + dir * ( p->mRadius - radius * 0.25f );
+		vec3 vel			= dir * Rand::randFloat( 0.1f, 0.3f );
 		float lifespan		= 45.0f;
 		
 		mNebulas.push_back( Nebula( pos, vel, radius, p->mCharge, lifespan ) );
 	}
 }
 
-void Controller::addGlobs( const Vec3f &pos, int amt )
+void Controller::addGlobs( const vec3 &pos, int amt )
 {
 	for( int i=0; i<amt; i++ ){
-		Vec3f vel			= Vec3f::zero();
+		vec3 vel			= vec3();
 		float radius		= Rand::randFloat( 5.0f, 8.0f );
 		float lifespan		= 500.0f;
 		mGlobs.push_back( Glob( pos, vel, radius, lifespan ) );
 	}
 }
 
-void Controller::checkForParticleTouch( const Vec2f &mousePos )
+void Controller::checkForParticleTouch( const vec2 &mousePos )
 {
 	for( vector<Particle>::iterator it = mParticles.begin(); it != mParticles.end(); ++it ){
-		Vec2f dir	= it->mScreenPos - mousePos;
+		vec2 dir	= it->mScreenPos - mousePos;
 		float dist	= dir.length();
 		if( dist < it->mScreenRadius ){
 			mDraggedParticle = &(*it);
@@ -345,12 +345,12 @@ void Controller::checkForParticleTouch( const Vec2f &mousePos )
 	}
 }
 
-void Controller::dragParticle( const Vec2f &mousePos )
+void Controller::dragParticle( const vec2 &mousePos )
 {
 	if( mDraggedParticle != NULL ){
 		float x = -( mousePos.x - app::getWindowCenter().x )/app::getWindowCenter().x;
 		float y = -( mousePos.y - app::getWindowCenter().y )/app::getWindowCenter().y;
-		Vec3f mouseWorldPos = Vec3f( x * mRoom->mDims.x, y * mRoom->mDims.y, mDraggedParticle->mPos.z/1.425f ) * 1.425f;
+		vec3 mouseWorldPos = vec3( x * mRoom->mDims.x, y * mRoom->mDims.y, mDraggedParticle->mPos.z/1.425f ) * 1.425f;
 		mDraggedParticle->mPos = mouseWorldPos;
 	}
 }

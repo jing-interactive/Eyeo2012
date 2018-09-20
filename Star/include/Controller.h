@@ -11,12 +11,12 @@
 class Controller {
   public:
 	struct DustVertex {
-        ci::Vec3f vertex;
+        ci::vec3 vertex;
         ci::Vec4f color;
     };
 	
 	struct Dust {
-		Dust( const ci::Vec3f &pos, const ci::Vec3f &vel )
+		Dust( const ci::vec3 &pos, const ci::vec3 &vel )
 			: mPos( pos ), mVel( vel )
 		{
 			mPosInit		= mPos;
@@ -40,7 +40,7 @@ class Controller {
 			mCol	= ci::ColorA( 1.0f, 1.0f, 1.0f, mAgePer * 0.15f );
 		}
 		
-		ci::Vec3f mPosInit, mPos, mVel;
+		ci::vec3 mPosInit, mPos, mVel;
 		ci::ColorA mCol;
 		float mAge, mLifespanInit, mLifespan, mInvLifespan, mAgePer;
 		bool mIsDead;
@@ -49,8 +49,8 @@ class Controller {
 	Controller();
 	void update( float dt );
 	void updateDusts( float dt );
-	void drawGlows( ci::gl::GlslProg *shader, const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawNebulas( ci::gl::GlslProg *shader, const ci::Vec3f &right, const ci::Vec3f &up );
+	void drawGlows( ci::gl::GlslProg *shader, const ci::vec3 &right, const ci::vec3 &up );
+	void drawNebulas( ci::gl::GlslProg *shader, const ci::vec3 &right, const ci::vec3 &up );
 	void drawDusts();
 	
 	void addGlows( const Star &star, float power, int amt );
@@ -58,8 +58,8 @@ class Controller {
 	void addDusts( const Star &star, int amt );
 	
 	// CANIS MAJORIS
-	void addCMNebulas( const ci::Vec3f &starPos, float starRadius, float radiusMulti, int amt );
-	void addCMGlows( const ci::Vec3f &starPos, float starRadius, int amt );
+	void addCMNebulas( const ci::vec3 &starPos, float starRadius, float radiusMulti, int amt );
+	void addCMGlows( const ci::vec3 &starPos, float starRadius, int amt );
 	
 	std::vector<Glow>	mGlows;
 	std::vector<Nebula>	mNebulas;

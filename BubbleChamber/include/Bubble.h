@@ -14,19 +14,19 @@
 class Bubble {
 public:
 	Bubble();
-	Bubble( const ci::Vec3f &pos, const ci::Vec3f &vec, float age );
-	void init( const ci::Vec3f &pos, const ci::Vec3f &vec, float lifespan );
+	Bubble( const ci::vec3 &pos, const ci::vec3 &vec, float age );
+	void init( const ci::vec3 &pos, const ci::vec3 &vec, float lifespan );
 	void update( Room *room, float dt );
 	void draw();
 	
-	ci::Vec3f		mPos;
-	ci::Vec3f		mVel;
-	ci::Vec3f		mAcc;
+	ci::vec3		mPos;
+	ci::vec3		mVel;
+	ci::vec3		mAcc;
 	
 	float			mAge, mAgePer;
 	float			mLifespan;
 	
 	bool			mIsDead;
 	
-	static ci::Vec3f mBuoyancy;
+	static ci::vec3 mBuoyancy;
 };

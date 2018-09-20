@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Timeline.h"
 #include "cinder/Text.h"
 #include "cinder/Font.h"
@@ -46,7 +46,7 @@ using std::stringstream;
 #define FBO_WIDTH		78	//
 #define FBO_HEIGHT		78	//
 
-class CatalogApp : public AppBasic {
+class CatalogApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -60,7 +60,7 @@ class CatalogApp : public AppBasic {
 	virtual void	keyDown( KeyEvent event );
 	void			setFboPositions( gl::Fbo &fbo );
 	void		parseData( const fs::path &path );
-	Vec3f		convertToCartesian( double ra, double dec, double dist );
+	vec3		convertToCartesian( double ra, double dec, double dist );
 	void		createStar( const std::string &text, int lineNumber );
 	void			setView( int homeIndex, int destIndex );
 	virtual void	update();
@@ -98,7 +98,7 @@ class CatalogApp : public AppBasic {
 	gl::TextureFontRef	mTextureFontT, mTextureFontS, mTextureFontM, mTextureFontL;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed, mMouseRightPressed;
 	float				mMouseTimePressed;
 	float				mMouseTimeReleased;
@@ -148,11 +148,11 @@ void CatalogApp::setup()
 
 	// LOAD SHADERS
 	try {
-		mBrightStarsShader	= gl::GlslProg( loadResource( "brightStars.vert" ), loadResource( "brightStars.frag" ) );
-		mFaintStarsShader	= gl::GlslProg( loadResource( "faintStars.vert" ), loadResource( "faintStars.frag" ) );
-		mRoomShader			= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mBrightStarsShader	= gl::GlslProg::create( loadResource( "brightStars.vert" ), loadResource( "brightStars.frag" ) );
+		mFaintStarsShader	= gl::GlslProg::create( loadResource( "faintStars.vert" ), loadResource( "faintStars.frag" ) );
+		mRoomShader			= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -163,12 +163,12 @@ void CatalogApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconCatalog.png" ) ), mipFmt );
-	mMilkyWayTex	= gl::Texture( loadImage( loadResource( "milkyWay.jpg" ) ) );
-	mStarTex		= gl::Texture( loadImage( loadResource( "star.png" ) ), mipFmt );
-	mStarGlowTex	= gl::Texture( loadImage( loadResource( "starGlow.png" ) ), mipFmt );
-	mDarkStarTex	= gl::Texture( loadImage( loadResource( "darkStar.png" ) ) );
-	mSpectrumTex	= gl::Texture( loadImage( loadResource( "spectrum.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconCatalog.png" ) ), mipFmt );
+	mMilkyWayTex	= gl::Texture::create( loadImage( loadResource( "milkyWay.jpg" ) ) );
+	mStarTex		= gl::Texture::create( loadImage( loadResource( "star.png" ) ), mipFmt );
+	mStarGlowTex	= gl::Texture::create( loadImage( loadResource( "starGlow.png" ) ), mipFmt );
+	mDarkStarTex	= gl::Texture::create( loadImage( loadResource( "darkStar.png" ) ) );
+	mSpectrumTex	= gl::Texture::create( loadImage( loadResource( "spectrum.png" ) ) );
 	
 	// FONTS
 	mFontBlackT		= Font( "Arial", 8 );
@@ -183,16 +183,16 @@ void CatalogApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	// MOUSE
-	mMousePos		= Vec2f::zero();
-	mMouseDownPos	= Vec2f::zero();
-	mMouseOffset	= Vec2f::zero();
+	mMousePos		= vec2();
+	mMouseDownPos	= vec2();
+	mMouseOffset	= vec2();
 	mMousePressed	= false;
 	mMouseTimePressed	= 0.0f;
 	mMouseTimeReleased	= 0.0f;
@@ -204,7 +204,7 @@ void CatalogApp::setup()
 	format.setColorInternalFormat( GL_RGBA32F_ARB );
 	format.setMinFilter( GL_NEAREST );
 	format.setMagFilter( GL_NEAREST );
-	mPositionFbo = gl::Fbo( FBO_WIDTH, FBO_HEIGHT, format );
+	mPositionFbo = gl::Fbo::create( FBO_WIDTH, FBO_HEIGHT, format );
 	
 	// STARS
 	mScaleDest	= 0.2f;
@@ -216,7 +216,7 @@ void CatalogApp::setup()
 	mHomeStar	= NULL;
 	mDestStar	= NULL;
 	
-	std::cout << mStars.size() << std::endl;
+	console() << mStars.size() << std::endl;
 
 	setFboPositions( mPositionFbo );
 	
@@ -242,7 +242,7 @@ void CatalogApp::setFboPositions( gl::Fbo &fbo )
 	Surface32f::Iter it = posSurface.getIter();
 	while( it.line() ){
 		while( it.pixel() ){
-			Vec3f pos = Vec3f( 1000000.0f, 0.0f, 0.0f );
+			vec3 pos = vec3( 1000000.0f, 0.0f, 0.0f );
 			float col = 0.4f;
 			float rad = 0.0f;
 			if( index < numBrightStars ){
@@ -262,7 +262,7 @@ void CatalogApp::setFboPositions( gl::Fbo &fbo )
 	gl::Texture posTexture( posSurface );
 	fbo.bindFramebuffer();
 	gl::setMatricesWindow( fbo.getSize(), false );
-	gl::setViewport( fbo.getBounds() );
+	gl::viewport( fbo.getBounds() );
 	gl::clear( ColorA( 0, 0, 0, 0 ), true );
 	gl::draw( posTexture );
 	fbo.unbindFramebuffer();
@@ -282,18 +282,18 @@ void CatalogApp::initBrightVbo()
 	mBrightVbo		= gl::VboMesh( numVertices * 2 * 3, 0, layout, GL_TRIANGLES );
 	
 	float s = 0.5f;
-	Vec3f p0( -s, -s, 0.0f );
-	Vec3f p1( -s,  s, 0.0f );
-	Vec3f p2(  s,  s, 0.0f );
-	Vec3f p3(  s, -s, 0.0f );
+	vec3 p0( -s, -s, 0.0f );
+	vec3 p1( -s,  s, 0.0f );
+	vec3 p2(  s,  s, 0.0f );
+	vec3 p3(  s, -s, 0.0f );
 	
-	Vec2f t0( 0.0f, 0.0f );
-	Vec2f t1( 0.0f, 1.0f );
-	Vec2f t2( 1.0f, 1.0f );
-	Vec2f t3( 1.0f, 0.0f );
+	vec2 t0( 0.0f, 0.0f );
+	vec2 t1( 0.0f, 1.0f );
+	vec2 t2( 1.0f, 1.0f );
+	vec2 t3( 1.0f, 0.0f );
 	
-	vector<Vec3f>		positions;
-	vector<Vec2f>		texCoords;
+	vector<vec3>		positions;
+	vector<vec2>		texCoords;
 	vector<Color>		colors;
 	
 	for( int x = 0; x < FBO_WIDTH; ++x ) {
@@ -338,7 +338,7 @@ void CatalogApp::initFaintVbo()
 	
 	int numFaintStars	= mFaintStars.size();
 	mFaintVbo			= gl::VboMesh( numFaintStars, 0, layout, GL_POINTS );
-	vector<Vec3f> positions;
+	vector<vec3> positions;
 	vector<Color> colors;
 
 	for( int i=0; i<numFaintStars; i++ ){
@@ -362,14 +362,14 @@ void CatalogApp::mouseDown( MouseEvent event )
 	mMouseTimePressed	= getElapsedSeconds();
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void CatalogApp::mouseUp( MouseEvent event )
 {
 	mMouseTimeReleased	= getElapsedSeconds();
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void CatalogApp::mouseMove( MouseEvent event )
@@ -427,7 +427,7 @@ void CatalogApp::update()
 	
 	// CAMERA
 	if( mHomeStar != NULL ){
-		mSpringCam.setEye( mHomeStar->mPos + Vec3f( 100.0f, 0.0f, 40.0f ) );
+		mSpringCam.setEye( mHomeStar->mPos + vec3( 100.0f, 0.0f, 40.0f ) );
 	}
 	
 	if( mDestStar != NULL ){
@@ -447,7 +447,7 @@ void CatalogApp::update()
 
 void CatalogApp::selectStar( bool wasRightClick )
 {
-	std::cout << "select star" << std::endl;
+	console() << "select star" << std::endl;
 	Star *touchedStar = NULL;
 	float closestDist = 100000.0f;
 	BOOST_FOREACH( Star* &s, mBrightStars ){
@@ -463,7 +463,7 @@ void CatalogApp::selectStar( bool wasRightClick )
 		if( wasRightClick ){
 			mHomeStar = touchedStar;
 		} else {
-			std::cout << "TOUCHED " << touchedStar->mName << std::endl;
+			console() << "TOUCHED " << touchedStar->mName << std::endl;
 			if( mDestStar ){
 				mDestStar->mIsSelected = false;
 			}
@@ -475,30 +475,30 @@ void CatalogApp::selectStar( bool wasRightClick )
 
 void CatalogApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->bind();
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -508,7 +508,7 @@ void CatalogApp::draw()
 	gl::color( ColorA( 1, 1, 1, 1 ) );
 
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -517,7 +517,7 @@ void CatalogApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatricesWindow( getWindowSize(), true );
@@ -546,10 +546,10 @@ void CatalogApp::draw()
 	if( power > 0.01f ){
 		gl::pushMatrices();
 		gl::translate( mSpringCam.getCam().getEyePoint() );
-		gl::rotate( Vec3f( 75.0f, 0.0f, 0.0f ) );
+		gl::rotate( vec3( 75.0f, 0.0f, 0.0f ) );
 		gl::color( ColorA( 1.0f, 1.0f, 1.0f, power * mScalePer ) );
 		mMilkyWayTex.bind();
-		gl::drawSphere( Vec3f::zero(), 195000.0f, 32 );
+		gl::drawSphere( vec3(), 195000.0f, 32 );
 		gl::popMatrices();
 	}
 	
@@ -594,7 +594,7 @@ void CatalogApp::draw()
 		mBrightStarsShader.uniform( "scale", mScale );
 		mBrightStarsShader.uniform( "power", mRoom.getPower() );
 		mBrightStarsShader.uniform( "roomDims", mRoom.getDims() );
-		mBrightStarsShader.uniform( "mvMatrix", mSpringCam.mCam.getModelViewMatrix() );
+		mBrightStarsShader.uniform( "mvMatrix", mSpringCam.mCam.getViewMatrix() );
 		mBrightStarsShader.uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
 		if( power > 0.5f ){
 			mBrightStarsShader.uniform( "texScale", 0.5f );
@@ -631,7 +631,7 @@ void CatalogApp::draw()
 	}
 	
 	if( getElapsedFrames()%60 == 59 ){
-		std::cout << "FPS: " << getAverageFps() << std::endl;
+		console() << "FPS: " << getAverageFps() << std::endl;
 	}
 }
 
@@ -639,7 +639,7 @@ void CatalogApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -661,11 +661,11 @@ void CatalogApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();
@@ -685,7 +685,7 @@ void CatalogApp::parseData( const fs::path &path )
 		}
 		
 		myfile.close();
-	} else std::cout << "Unable to open file";
+	} else console() << "Unable to open file";
 }
 
 void CatalogApp::createStar( const std::string &text, int lineNumber )
@@ -737,7 +737,7 @@ void CatalogApp::createStar( const std::string &text, int lineNumber )
 		index ++;
 	}
 	
-	Vec3f pos = convertToCartesian( ra, dec, dist );
+	vec3 pos = convertToCartesian( ra, dec, dist );
 	
 	float mag = ( 80 - appMag ) * 0.1f;
 	Color col = Color( mag, mag, mag );
@@ -773,14 +773,14 @@ void CatalogApp::createStar( const std::string &text, int lineNumber )
 		
 		if( name == "Sol" || name == "Sirius" || name == "Vega" || name == "Gliese 581" ){
 			mTouringStars.push_back( star );
-			std::cout << "ADDED TOURING STAR: " << star->mName << " " << star->mPos << std::endl;
+			console() << "ADDED TOURING STAR: " << star->mName << " " << star->mPos << std::endl;
 		}
 	}
 }
 
-Vec3f CatalogApp::convertToCartesian( double ra, double dec, double dist )
+vec3 CatalogApp::convertToCartesian( double ra, double dec, double dist )
 {
-	Vec3f pos;
+	vec3 pos;
 	float RA = toRadians( ra * 15.0 );
 	float DEC = toRadians( dec );
 	

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Controller.h"
@@ -36,10 +36,10 @@ void Controller::createSphere( gl::VboMesh &vbo, int res )
 	float X = 0.525731112119f; 
 	float Z = 0.850650808352f;
 	
-	static Vec3f verts[12] = {
-		Vec3f( -X, 0.0f, Z ), Vec3f( X, 0.0f, Z ), Vec3f( -X, 0.0f, -Z ), Vec3f( X, 0.0f, -Z ),
-		Vec3f( 0.0f, Z, X ), Vec3f( 0.0f, Z, -X ), Vec3f( 0.0f, -Z, X ), Vec3f( 0.0f, -Z, -X ),
-		Vec3f( Z, X, 0.0f ), Vec3f( -Z, X, 0.0f ), Vec3f( Z, -X, 0.0f ), Vec3f( -Z, -X, 0.0f ) };
+	static vec3 verts[12] = {
+		vec3( -X, 0.0f, Z ), vec3( X, 0.0f, Z ), vec3( -X, 0.0f, -Z ), vec3( X, 0.0f, -Z ),
+		vec3( 0.0f, Z, X ), vec3( 0.0f, Z, -X ), vec3( 0.0f, -Z, X ), vec3( 0.0f, -Z, -X ),
+		vec3( Z, X, 0.0f ), vec3( -Z, X, 0.0f ), vec3( Z, -X, 0.0f ), vec3( -Z, -X, 0.0f ) };
 	
 	static GLuint triIndices[20][3] = { 
 		{0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1}, {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
@@ -60,11 +60,11 @@ void Controller::createSphere( gl::VboMesh &vbo, int res )
 	float y1 = -0.975f;
 	float y2 = -1.1f;
 	
-	Vec3f v0 = Vec3f( z, y1, z );
-	Vec3f v1 = Vec3f( s, y2, s );
-	Vec3f v2 = Vec3f(-s, y2, s );
-	Vec3f v3 = Vec3f(-s, y2,-s );
-	Vec3f v4 = Vec3f( s, y2,-s );
+	vec3 v0 = vec3( z, y1, z );
+	vec3 v1 = vec3( s, y2, s );
+	vec3 v2 = vec3(-s, y2, s );
+	vec3 v3 = vec3(-s, y2,-s );
+	vec3 v4 = vec3( s, y2,-s );
 	
 	mPosCoords.push_back( v1 );	// back
 	mPosCoords.push_back( v2 );
@@ -90,36 +90,36 @@ void Controller::createSphere( gl::VboMesh &vbo, int res )
 	mPosCoords.push_back( v3 );
 	mPosCoords.push_back( v4 );
 
-	mNormals.push_back( Vec3f::zAxis() );	// back
-	mNormals.push_back( Vec3f::zAxis() );
-	mNormals.push_back( Vec3f::zAxis() );
+	mNormals.push_back( vec3::zAxis() );	// back
+	mNormals.push_back( vec3::zAxis() );
+	mNormals.push_back( vec3::zAxis() );
 	
-	mNormals.push_back( Vec3f::xAxis() );	// right
-	mNormals.push_back( Vec3f::xAxis() );
-	mNormals.push_back( Vec3f::xAxis() );
+	mNormals.push_back( vec3::xAxis() );	// right
+	mNormals.push_back( vec3::xAxis() );
+	mNormals.push_back( vec3::xAxis() );
 	
-	mNormals.push_back(-Vec3f::zAxis() );	// front
-	mNormals.push_back(-Vec3f::zAxis() );
-	mNormals.push_back(-Vec3f::zAxis() );
+	mNormals.push_back(-vec3::zAxis() );	// front
+	mNormals.push_back(-vec3::zAxis() );
+	mNormals.push_back(-vec3::zAxis() );
 	
-	mNormals.push_back( Vec3f::xAxis() );	// left
-	mNormals.push_back( Vec3f::xAxis() );
-	mNormals.push_back( Vec3f::xAxis() );
+	mNormals.push_back( vec3::xAxis() );	// left
+	mNormals.push_back( vec3::xAxis() );
+	mNormals.push_back( vec3::xAxis() );
 	
-	mNormals.push_back( Vec3f::yAxis() );	// bottom
-	mNormals.push_back( Vec3f::yAxis() );
-	mNormals.push_back( Vec3f::yAxis() );
+	mNormals.push_back( {0, 1, 0} );	// bottom
+	mNormals.push_back( {0, 1, 0} );
+	mNormals.push_back( {0, 1, 0} );
 	
-	mNormals.push_back( Vec3f::yAxis() );	// bottom
-	mNormals.push_back( Vec3f::yAxis() );
-	mNormals.push_back( Vec3f::yAxis() );
+	mNormals.push_back( {0, 1, 0} );	// bottom
+	mNormals.push_back( {0, 1, 0} );
+	mNormals.push_back( {0, 1, 0} );
 	
 	vbo = gl::VboMesh( mPosCoords.size(), 0, layout, GL_TRIANGLES );	
 	vbo.bufferPositions( mPosCoords );
 	vbo.bufferNormals( mNormals );
 }
 
-void Controller::modVert( Vec3f *v )
+void Controller::modVert( vec3 *v )
 {
 	float yPer = 1.0f;
 	yPer = pow( v->y * 0.5f + 0.5f, 0.3f );
@@ -128,7 +128,7 @@ void Controller::modVert( Vec3f *v )
 	v->z *= 0.9f * yPer;
 }
 
-void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div )
+void Controller::drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div )
 {
 	// TURNS THE SPHERE INTO A BALLOON
 	// BUT ULTIMATELY MESSES UP THE NORMALS
@@ -141,14 +141,14 @@ void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div )
 		mPosCoords.push_back( va );
 		mPosCoords.push_back( vb );
 		mPosCoords.push_back( vc );
-		Vec3f vn = ( va + vb + vc ) * 0.3333f;
+		vec3 vn = ( va + vb + vc ) * 0.3333f;
 		mNormals.push_back( va.normalized() );
 		mNormals.push_back( vb.normalized() );
 		mNormals.push_back( vc.normalized() );
 	} else {
-		Vec3f vab = ( ( va + vb ) * 0.5f ).normalized();
-		Vec3f vac = ( ( va + vc ) * 0.5f ).normalized();
-		Vec3f vbc = ( ( vb + vc ) * 0.5f ).normalized();
+		vec3 vab = ( ( va + vb ) * 0.5f ).normalized();
+		vec3 vac = ( ( va + vc ) * 0.5f ).normalized();
+		vec3 vbc = ( ( vb + vc ) * 0.5f ).normalized();
 		drawSphereTri( va, vab, vac, div-1 );
 		drawSphereTri( vb, vbc, vab, div-1 );
 		drawSphereTri( vc, vac, vbc, div-1 );
@@ -166,25 +166,25 @@ void Controller::bang()
 		numBalloons		= 500;
 	}
 	
-	addConfettis( numConfettis, Vec3f::zero(), 1.0f );
-	addStreamers( numStreamers, Vec3f::zero() );
-	addBalloons( numBalloons, Vec3f::zero() );
+	addConfettis( numConfettis, vec3(), 1.0f );
+	addStreamers( numStreamers, vec3() );
+	addBalloons( numBalloons, vec3() );
 	
 	// PLAY A BIG BANG SOUND HERE
 	
 	mTimeSinceBang		= 0.0f;
 }
 
-void Controller::checkForBalloonPop( const Vec2f &mousePos )
+void Controller::checkForBalloonPop( const vec2 &mousePos )
 {
 	for( vector<Balloon>::reverse_iterator it = mBalloons.rbegin(); it != mBalloons.rend(); ++it ){
-		Vec2f dir		= mousePos - it->mScreenPos;
+		vec2 dir		= mousePos - it->mScreenPos;
 		float distSqrd	= dir.lengthSquared();
 		if( distSqrd < 1000.0f ){
-			Vec3f pos		= it->mPos;
+			vec3 pos		= it->mPos;
 			float lifespan	= 12.0f;
 			float speed		= 20.0f;
-			mShockwaves.push_back( Shockwave( it->mPos, Vec3f::yAxis(), lifespan, speed ) );
+			mShockwaves.push_back( Shockwave( it->mPos, {0, 1, 0}, lifespan, speed ) );
 			
 			int numConfettis = 250;
 			addConfettis( numConfettis, pos, 0.5f );
@@ -258,10 +258,10 @@ void Controller::applyBalloonCollisions()
 		// APPLY SHOCKWAVES TO BALLOONS
 		for( vector<Shockwave>::iterator shockIt = mShockwaves.begin(); shockIt != mShockwaves.end(); ++shockIt )
 		{
-			Vec3f dirToParticle = shockIt->mPos - it1->mPos;
+			vec3 dirToParticle = shockIt->mPos - it1->mPos;
 			float dist = dirToParticle.length();
 			if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-				Vec3f dirToParticleNorm = dirToParticle.normalized();
+				vec3 dirToParticleNorm = dirToParticle.normalized();
 				it1->mAcc -= dirToParticleNorm * shockIt->mImpulse * 2.5f;
 			}
 		}
@@ -269,11 +269,11 @@ void Controller::applyBalloonCollisions()
 		vector<Balloon>::iterator it2 = it1;
 		for( std::advance( it2, 1 ); it2 != mBalloons.end(); ++it2 )
 		{
-			Vec3f dir			= it1->mPos - it2->mPos;
-			Vec3f dirNormal		= dir.normalized();
+			vec3 dir			= it1->mPos - it2->mPos;
+			vec3 dirNormal		= dir.normalized();
 			float dist			= dir.length();
 			
-			Vec3f moveVec		= it2->mVel - it1->mVel;
+			vec3 moveVec		= it2->mVel - it1->mVel;
 			
 			float sumRadii		= ( it1->mRadius * 0.7f + it2->mRadius * 0.7f );
 			float sumRadiiSqrd	= sumRadii * sumRadii;
@@ -290,7 +290,7 @@ void Controller::applyBalloonCollisions()
 				dist -= sumRadii;
 				
 				if( dist < 0.0f ){
-					Vec3f off	= dirNormal * dist;
+					vec3 off	= dirNormal * dist;
 					
 					it1->mPos -= off * 0.25f;
 					it1->mVel -= off * 0.125f;
@@ -300,7 +300,7 @@ void Controller::applyBalloonCollisions()
 				}
 				
 				float collisionDecay = 0.375f;
-				Vec3f newDir = pVar * dirNormal * collisionDecay;
+				vec3 newDir = pVar * dirNormal * collisionDecay;
 				it1->mVel -= newDir;
 				it2->mVel += newDir;
 			}
@@ -308,7 +308,7 @@ void Controller::applyBalloonCollisions()
 	}
 }
 
-bool Controller::didParticlesCollide( const ci::Vec3f &dir, const ci::Vec3f &dirNormal, const float dist, const float sumRadii, const float sumRadiiSqrd, ci::Vec3f *moveVec )
+bool Controller::didParticlesCollide( const ci::vec3 &dir, const ci::vec3 &dirNormal, const float dist, const float sumRadii, const float sumRadiiSqrd, ci::vec3 *moveVec )
 {
 	float moveVecLength = sqrtf( moveVec->x * moveVec->x + moveVec->y * moveVec->y + moveVec->z * moveVec->z );
 	float newDist = dist - sumRadii;
@@ -381,38 +381,38 @@ void Controller::drawPhysics()
 {
 	gl::color( Color( 1.0f, 0.0f, 0.0f ) );
 	for( vector<Balloon>::iterator it = mBalloons.begin(); it != mBalloons.end(); ++it ){
-		gl::drawCube( it->mPos, Vec3f( it->mRadius, it->mRadius, it->mRadius ) * 0.2f );
-		gl::drawCube( it->mSpringPos, Vec3f( it->mRadius, it->mRadius, it->mRadius ) * 0.1f );
+		gl::drawCube( it->mPos, vec3( it->mRadius, it->mRadius, it->mRadius ) * 0.2f );
+		gl::drawCube( it->mSpringPos, vec3( it->mRadius, it->mRadius, it->mRadius ) * 0.1f );
 		gl::drawLine( it->mPos, it->mSpringPos );
 	}
 	
 	gl::color( Color( 0.0f, 1.0f, 0.0f ) );
 	for( vector<Confetti>::iterator it = mConfettis.begin(); it != mConfettis.end(); ++it ){
-		gl::drawCube( it->mPos, Vec3f( 2.0f, 2.0f, 2.0f ) );
+		gl::drawCube( it->mPos, vec3( 2.0f, 2.0f, 2.0f ) );
 	}
 
 	gl::color( Color( 0.0f, 0.0f, 1.0f ) );
 	for( vector<Streamer>::iterator it = mStreamers.begin(); it != mStreamers.end(); ++it ){
-		gl::drawCube( it->mPos, Vec3f( 4.0f, 4.0f, 4.0f ) );
+		gl::drawCube( it->mPos, vec3( 4.0f, 4.0f, 4.0f ) );
 		it->draw();
 	}
 }
 
-void Controller::addConfettis( int amt, const Vec3f &pos, float speedMulti )
+void Controller::addConfettis( int amt, const vec3 &pos, float speedMulti )
 {
 	for( int i=0; i<amt; i++ ){
 		mConfettis.push_back( Confetti( pos, speedMulti, mPresetIndex ) );
 	}
 }
 
-void Controller::addStreamers( int amt, const Vec3f &pos )
+void Controller::addStreamers( int amt, const vec3 &pos )
 {
 	for( int i=0; i<amt; i++ ){
 		mStreamers.push_back( Streamer( pos, mPresetIndex ) );
 	}
 }
 
-void Controller::addBalloons( int amt, const Vec3f &pos )
+void Controller::addBalloons( int amt, const vec3 &pos )
 {
 	for( int i=0; i<amt; i++ ){
 		mBalloons.push_back( Balloon( pos, mPresetIndex ) );

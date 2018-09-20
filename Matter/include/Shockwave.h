@@ -14,11 +14,11 @@
 class Shockwave {
   public:
 	Shockwave();
-	Shockwave( const ci::Vec3f &pos, const ci::Vec3f &axis, float lifespan, float speed );
+	Shockwave( const ci::vec3 &pos, const ci::vec3 &axis, float lifespan, float speed );
 	void update( float timeDelta );
 
-	ci::Vec3f	mPos;
-	ci::Vec3f	mAxis;
+	ci::vec3	mPos;
+	ci::vec3	mAxis;
 	float		mRadius, mRadiusPrev;
 	float		mRot, mRotVel;
 	float		mStrength;

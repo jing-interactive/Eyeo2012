@@ -18,7 +18,7 @@ class Controller;
 class Particle {
   public:
 	Particle();
-	Particle( Controller *controller, int mGen, const ci::Vec3f &pos, const ci::Vec3f &dir, float speed, int len );
+	Particle( Controller *controller, int mGen, const ci::vec3 &pos, const ci::vec3 &dir, float speed, int len );
 	void update( Room *room, float dt, bool tick );
 	void draw();
 	bool isOutOfBounds( Room *room );
@@ -30,10 +30,10 @@ class Particle {
 	ci::Ray			mRay;
 	
 	int				mLen;
-	std::vector<ci::Vec3f>	mPs;
-	ci::Vec3f		mPos;
-	ci::Vec3f		mVel;
-	ci::Vec3f		mDeathAxis;
+	std::vector<ci::vec3>	mPs;
+	ci::vec3		mPos;
+	ci::vec3		mVel;
+	ci::vec3		mDeathAxis;
 	float			mSpeed;
 	
 	float			mCharge;
@@ -41,10 +41,10 @@ class Particle {
 	float			mAngleDelta;
 	float			mAngleDeltaDelta;
 	
-	ci::Vec3f		mAxis, mPerp1, mPerp2;
+	ci::vec3		mAxis, mPerp1, mPerp2;
 	
-	ci::Vec3f		mDeathPos;
-	ci::Vec3f		mPosLastTick;
+	ci::vec3		mDeathPos;
+	ci::vec3		mPosLastTick;
 
 	float			mAge, mAgePer;
 	float			mLifespan;

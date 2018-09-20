@@ -16,7 +16,7 @@ Smoke::Smoke()
 {
 }
 
-Smoke::Smoke( const Vec3f &pos, const Vec3f &vel, float radius, float lifespan )
+Smoke::Smoke( const vec3 &pos, const vec3 &vel, float radius, float lifespan )
 {
 	mPos		= pos;
 	mVel		= vel;
@@ -47,8 +47,8 @@ void Smoke::update( float dt )
 	}
 }
 
-void Smoke::draw( const Vec3f &right, const Vec3f &up )
+void Smoke::draw( const vec3 &right, const vec3 &up )
 {
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, mAgePer * 0.75f ) );
-	gl::drawBillboard( mPos, Vec2f( mRadius, mRadius ), mRot, right, up );
+	gl::drawBillboard( mPos, vec2( mRadius, mRadius ), mRot, right, up );
 }

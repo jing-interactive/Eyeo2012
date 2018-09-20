@@ -13,13 +13,13 @@
 class Spark {
 public:
 	Spark();
-	Spark( ci::Vec3f pos, ci::Vec3f vel );
+	Spark( ci::vec3 pos, ci::vec3 vel );
 	void update( float timeDelta );
 	void draw();
 	
 	// properties
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
 	float		mAge, mLifespan;
 	float		mAgePer;
 	

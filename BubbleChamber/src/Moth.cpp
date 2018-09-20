@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Moth.h"
@@ -17,11 +17,11 @@ Moth::Moth()
 {
 }
 
-Moth::Moth( const Vec3f &pos )
+Moth::Moth( const vec3 &pos )
 : mPos( pos )
 {
-	mAcc	= Vec3f::zero();
-	mVel	= Vec3f::zero();
+	mAcc	= vec3();
+	mVel	= vec3();
 	
 	mIsDead		= false;
 	
@@ -32,9 +32,9 @@ Moth::Moth( const Vec3f &pos )
 
 void Moth::update( Room *room, float dt )
 {
-	Vec3f oldPos = mPos;
+	vec3 oldPos = mPos;
 		
-	mAcc += Vec3f( 0.0f, sin( mAge * Rand::randFloat( 5.0f, 10.0f ) ) * 0.1f, 0.0f );
+	mAcc += vec3( 0.0f, sin( mAge * Rand::randFloat( 5.0f, 10.0f ) ) * 0.1f, 0.0f );
 	mVel += mAcc * dt;
 	
 	float velLength = mVel.length();
@@ -51,7 +51,7 @@ void Moth::update( Room *room, float dt )
 	
 	mPos += mVel * dt;
 	mVel -= mVel * 0.01f * dt;
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 	
 	mAge += dt;
 }
@@ -59,7 +59,7 @@ void Moth::update( Room *room, float dt )
 void Moth::checkBoundary( Room *room )
 {
 	// TEST BOUNDARY
-	Vec3f dims = room->getDims() * 0.85f;
+	vec3 dims = room->getDims() * 0.85f;
 	
 	
 	if( mPos.x < -dims.x ){
@@ -86,5 +86,5 @@ void Moth::draw()
 	float size = ( sin( mAge ) * 0.5f + 0.5f ) * 0.5f + 0.75f;
 	mColorf = sin( mAge * 3.0f ) * 0.3f + 0.5f;
 	gl::color( Color( mColorf, mColorf, mColorf ) );
-	gl::drawCube( mPos, Vec3f( size, size, size ) );
+	gl::drawCube( mPos, vec3( size, size, size ) );
 }

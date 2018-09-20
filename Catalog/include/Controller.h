@@ -14,8 +14,8 @@ class Controller {
 	Controller();
 	void init( Room *room );
 	void update( float dt );
-	void drawGlows( ci::gl::GlslProg *shader, const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawNebulas( ci::gl::GlslProg *shader, const ci::Vec3f &right, const ci::Vec3f &up );
+	void drawGlows( ci::gl::GlslProg *shader, const ci::vec3 &right, const ci::vec3 &up );
+	void drawNebulas( ci::gl::GlslProg *shader, const ci::vec3 &right, const ci::vec3 &up );
 	void clear();
 	void addGlows( const Star &star, int amt );
 	void addNebulas( const Star &star, int amt );

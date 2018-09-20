@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
@@ -28,7 +28,7 @@ using namespace std;
 #define GRID_DIM		45
 
 
-class ShockwavesApp : public AppBasic {
+class ShockwavesApp : public App {
   public:
 	virtual void		prepareSettings( Settings *settings );
 	virtual void		setup();
@@ -63,7 +63,7 @@ class ShockwavesApp : public AppBasic {
 	gl::Fbo				mRoomFbo;
 	
 //	// POSITION/VELOCITY FBOS
-//	ci::Vec2f			mFboSize;
+//	ci::vec2			mFboSize;
 //	ci::Area			mFboBounds;
 //	int					mThisFbo, mPrevFbo;
 	
@@ -74,7 +74,7 @@ class ShockwavesApp : public AppBasic {
 	gl::VboMesh			mVboMesh;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 //	// PARAMS
@@ -102,11 +102,11 @@ void ShockwavesApp::setup()
 	
 	// LOAD SHADERS
 	try {
-		mRoomShader		 = gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mShockwaveShader = gl::GlslProg( loadResource( "shockwave.vert" ), loadResource( "shockwave.frag" ) );
-		mNodeShader		 = gl::GlslProg( loadResource( "node.vert" ), loadResource( "node.frag" ) );
+		mRoomShader		 = gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mShockwaveShader = gl::GlslProg::create( loadResource( "shockwave.vert" ), loadResource( "shockwave.frag" ) );
+		mNodeShader		 = gl::GlslProg::create( loadResource( "node.vert" ), loadResource( "node.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -117,9 +117,9 @@ void ShockwavesApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconShockwaves.png" ) ), mipFmt );
-	mSmokeTex		= gl::Texture( loadImage( loadResource( "smoke.png" ) ), mipFmt );
-	mGlowTex		= gl::Texture( loadImage( loadResource( "glow.png" ) ), mipFmt );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconShockwaves.png" ) ), mipFmt );
+	mSmokeTex		= gl::Texture::create( loadImage( loadResource( "smoke.png" ) ), mipFmt );
+	mGlowTex		= gl::Texture::create( loadImage( loadResource( "glow.png" ) ), mipFmt );
 	mCubeMap		= CubeMap( GLsizei(512), GLsizei(512),
 							   Surface8u( loadImage( loadResource( RES_CUBE1_ID ) ) ),
 							   Surface8u( loadImage( loadResource( RES_CUBE2_ID ) ) ),
@@ -132,16 +132,16 @@ void ShockwavesApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= true;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 	
 	// CONTROLLER
@@ -168,23 +168,23 @@ void ShockwavesApp::initVbo()
 	mVboMesh		= gl::VboMesh( numVertices * 8 * 3, 0, layout, GL_TRIANGLES );
 	
 	float s = 10.0f;
-	Vec3f p0( 0.0f,    s, 0.0f );
-	Vec3f p1(   -s, 0.0f, 0.0f );
-	Vec3f p2( 0.0f, 0.0f,    s );
-	Vec3f p3(    s, 0.0f, 0.0f );
-	Vec3f p4( 0.0f, 0.0f,   -s );
-	Vec3f p5( 0.0f,   -s, 0.0f );
+	vec3 p0( 0.0f,    s, 0.0f );
+	vec3 p1(   -s, 0.0f, 0.0f );
+	vec3 p2( 0.0f, 0.0f,    s );
+	vec3 p3(    s, 0.0f, 0.0f );
+	vec3 p4( 0.0f, 0.0f,   -s );
+	vec3 p5( 0.0f,   -s, 0.0f );
 	
-	Vec3f n;
-	Vec3f n0 = Vec3f( 0.0f, 0.0f, 1.0f );
-	Vec3f n1 = Vec3f(-1.0f,-1.0f, 0.0f );
-	Vec3f n2 = Vec3f(-1.0f, 1.0f, 0.0f );
-	Vec3f n3 = Vec3f( 1.0f, 1.0f, 0.0f );
-	Vec3f n4 = Vec3f( 1.0f,-1.0f, 0.0f );
-	Vec3f n5 = Vec3f( 0.0f, 0.0f,-1.0f );
+	vec3 n;
+	vec3 n0 = vec3( 0.0f, 0.0f, 1.0f );
+	vec3 n1 = vec3(-1.0f,-1.0f, 0.0f );
+	vec3 n2 = vec3(-1.0f, 1.0f, 0.0f );
+	vec3 n3 = vec3( 1.0f, 1.0f, 0.0f );
+	vec3 n4 = vec3( 1.0f,-1.0f, 0.0f );
+	vec3 n5 = vec3( 0.0f, 0.0f,-1.0f );
 	
-	vector<Vec3f>		positions;
-	vector<Vec3f>		normals;
+	vector<vec3>		positions;
+	vector<vec3>		normals;
 	
 	for( int x = 0; x < GRID_DIM; ++x ) {
 		for( int y = 0; y < GRID_DIM; ++y ) {
@@ -269,13 +269,13 @@ void ShockwavesApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void ShockwavesApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void ShockwavesApp::mouseMove( MouseEvent event )
@@ -333,39 +333,39 @@ void ShockwavesApp::update()
 
 void ShockwavesApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
 	//	mLightsTex.bind( 0 );
 	mCubeMap.bind();
-	mRoomShader.bind();
-	//	mRoomShader.uniform( "lightsTex", 0 );
-	//	mRoomShader.uniform( "numLights", (float)mNumLights );
-	//	mRoomShader.uniform( "invNumLights", mInvNumLights );
-	//	mRoomShader.uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
-	//	mRoomShader.uniform( "att", 1.015f );
-	mRoomShader.uniform( "cubeMap", 0 );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	//	mRoomShader->uniform( "lightsTex", 0 );
+	//	mRoomShader->uniform( "numLights", (float)mNumLights );
+	//	mRoomShader->uniform( "invNumLights", mInvNumLights );
+	//	mRoomShader->uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
+	//	mRoomShader->uniform( "att", 1.015f );
+	mRoomShader->uniform( "cubeMap", 0 );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -374,7 +374,7 @@ void ShockwavesApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -383,7 +383,7 @@ void ShockwavesApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM FBO
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -428,7 +428,7 @@ void ShockwavesApp::draw()
 	gl::enable( GL_TEXTURE_2D );
 	
 	// DRAW SMOKES
-	Vec3f right, up;
+	vec3 right, up;
 	mSpringCam.mCam.getBillboardVectors( &right, &up );
 	mSmokeTex.bind();
 	mController.drawSmokes( right, up );
@@ -455,14 +455,14 @@ void ShockwavesApp::draw()
 //	mPrevFbo	= ( mThisFbo + 1 ) % 2;
 	
 	if( getElapsedFrames()%60 == 59 )
-		std::cout << "FPS: " << getAverageFps() << std::endl;
+		console() << "FPS: " << getAverageFps() << std::endl;
 }
 
 void ShockwavesApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -484,11 +484,11 @@ void ShockwavesApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();

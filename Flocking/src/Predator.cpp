@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "Predator.h"
 
@@ -15,17 +15,17 @@ using std::vector;
 
 Predator::Predator(){}
 
-Predator::Predator( const Vec3f &pos )
+Predator::Predator( const vec3 &pos )
 {
 	mLen = 15;
 	for( int i=0; i<mLen; i++ ){
 		float per = (float)i/(float)(mLen-1);
 		mRadii.push_back( sin( per * M_PI ) );
-		mPositions.push_back( Rand::randVec3f() * 50.0f );
+		mPositions.push_back( Rand::randvec3() * 50.0f );
 	}
 }
 
-void Predator::update( const Vec3f &pos )
+void Predator::update( const vec3 &pos )
 {
 	for( int i=mLen-1; i>0; i-- ){
 		mPositions[i] = mPositions[i-1];

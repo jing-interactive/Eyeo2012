@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/Texture.h"
@@ -26,7 +26,7 @@ using namespace std;
 
 
 
-class MatterApp : public AppBasic {
+class MatterApp : public App {
   public:
 	void			prepareSettings( Settings *settings );
 	void			setup();
@@ -96,7 +96,7 @@ class MatterApp : public AppBasic {
 	Controller			mController;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 };
 
@@ -116,7 +116,7 @@ void MatterApp::setup()
 	mInvNumLights		= 1.0f/(float)mNumLights;
 	gl::Texture::Format hdTexFormat;
 	hdTexFormat.setInternalFormat( GL_RGB32F_ARB );
-	mLightsTex			= gl::Texture( mNumLights, 2, hdTexFormat );
+	mLightsTex			= gl::Texture::create( mNumLights, 2, hdTexFormat );
 	mLightsSurface		= Surface32f( mNumLights, 2, false );
 	
 	// SETUP CUBEMAP
@@ -130,18 +130,18 @@ void MatterApp::setup()
 					   );
 	
 	// TEXTURES
-	mGlowsTex		= gl::Texture( loadImage( loadResource( "glow.png" ) ) );
-	mSmokeTex		= gl::Texture( loadImage( loadResource( "smoke.png" ) ) );
-	mShadowTex		= gl::Texture( loadImage( loadResource( "shadow.png" ) ) );
-	mWarningTex		= gl::Texture( loadImage( loadResource( "warning.png" ) ) );
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconMatter.png" ) ) );
+	mGlowsTex		= gl::Texture::create( loadImage( loadResource( "glow.png" ) ) );
+	mSmokeTex		= gl::Texture::create( loadImage( loadResource( "smoke.png" ) ) );
+	mShadowTex		= gl::Texture::create( loadImage( loadResource( "shadow.png" ) ) );
+	mWarningTex		= gl::Texture::create( loadImage( loadResource( "warning.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconMatter.png" ) ) );
 	
 	// SHADERS
 	try {
-		mRoomShader			= gl::GlslProg( loadResource( "room.vert"	),		loadResource( "room.frag" ) );
-		mParticleShader		= gl::GlslProg( loadResource( "particle.vert" ),	loadResource( "particle.frag" ) );	
+		mRoomShader			= gl::GlslProg::create( loadResource( "room.vert"	),		loadResource( "room.frag" ) );
+		mParticleShader		= gl::GlslProg::create( loadResource( "particle.vert" ),	loadResource( "particle.frag" ) );	
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 
@@ -150,7 +150,7 @@ void MatterApp::setup()
 	format.setColorInternalFormat( GL_RGB );
 	
 	gl::Fbo::Format formatAlpha;
-//	std::cout << gl::Fbo::getMaxSamples() << std::endl;
+//	console() << gl::Fbo::getMaxSamples() << std::endl;
 //	formatAlpha.setSamples( 2 ); // not using because the result is speckly, unknown why
 	formatAlpha.setColorInternalFormat( GL_RGBA32F_ARB );
 	
@@ -159,9 +159,9 @@ void MatterApp::setup()
 	mFboSize		= Vec2i( fboXRes, fboYRes );
 	mFboRect		= Rectf( 0.0f, 0.0f, (float)fboXRes, (float)fboYRes );
 	mFboArea		= Area( 0, 0, fboXRes, fboYRes );
-	mRoomFbo		= gl::Fbo( fboXRes, fboYRes, format );
+	mRoomFbo		= gl::Fbo::create( fboXRes, fboYRes, format );
 	
-	mParticlesFbo	= gl::Fbo( APP_WIDTH, APP_HEIGHT, formatAlpha );
+	mParticlesFbo	= gl::Fbo::create( APP_WIDTH, APP_HEIGHT, formatAlpha );
 	
 	mParticlesFbo.bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
@@ -169,8 +169,8 @@ void MatterApp::setup()
 	
 	mThisFbo = 0;
 	mNextFbo = 1;
-	mParticlesBloomFbo[0] = gl::Fbo( fboXRes, fboYRes, format );
-	mParticlesBloomFbo[1] = gl::Fbo( fboXRes, fboYRes, format );
+	mParticlesBloomFbo[0] = gl::Fbo::create( fboXRes, fboYRes, format );
+	mParticlesBloomFbo[1] = gl::Fbo::create( fboXRes, fboYRes, format );
 	
 	// CONDITIONS
 	mWarning		= false;
@@ -180,10 +180,10 @@ void MatterApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	mRoomScale			= 1.0f;
 
@@ -191,9 +191,9 @@ void MatterApp::setup()
 	mController.init( &mRoom );
 	
 	// MOUSE
-	mMousePos		= Vec2f::zero();
-	mMouseDownPos	= Vec2f::zero();
-	mMouseOffset	= Vec2f::zero();
+	mMousePos		= vec2();
+	mMouseDownPos	= vec2();
+	mMouseOffset	= vec2();
 	mMousePressed	= false;
 	
 //	mParams = params::InterfaceGl( "Matter/Antimatter", Vec2i( 200, 150 ) );
@@ -208,7 +208,7 @@ void MatterApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 	
 	if( event.isRight() ){
 		mSpringCam.setFov( 40.0f );
@@ -218,7 +218,7 @@ void MatterApp::mouseDown( MouseEvent event )
 void MatterApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 	
 	if( event.isRight() ){
 		mSpringCam.setFov( 65.0f );
@@ -233,7 +233,7 @@ void MatterApp::mouseMove( MouseEvent event )
 void MatterApp::mouseDrag( MouseEvent event )
 {
 	mouseMove( event );
-	mMouseOffset = ( mMousePos * Vec2f( 1.0f, 2.0f ) - mMouseDownPos * Vec2f( 1.0f, 2.0f ) ) * 0.8f;
+	mMouseOffset = ( mMousePos * vec2( 1.0f, 2.0f ) - mMouseDownPos * vec2( 1.0f, 2.0f ) ) * 0.8f;
 }
 
 void MatterApp::mouseWheel( MouseEvent event )
@@ -313,44 +313,44 @@ void MatterApp::update()
 	mController.applyShockwavesToTime();
 	
 	if( getElapsedFrames()%60 == 0 ){
-		std::cout << "FPS = " << getAverageFps() << std::endl;
+		console() << "FPS = " << getAverageFps() << std::endl;
 	}
 }
 
 
 void MatterApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboArea );
+	gl::viewport( mFboArea );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
 	mLightsTex.bind( 0 );
-	mRoomShader.bind();
-	mRoomShader.uniform( "lightsTex", 0 );
-	mRoomShader.uniform( "numLights", (float)mNumLights );
-	mRoomShader.uniform( "invNumLights", mInvNumLights );
-	mRoomShader.uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
-	mRoomShader.uniform( "att", 1.015f );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
-	mRoomShader.uniform( "roomDim", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "lightsTex", 0 );
+	mRoomShader->uniform( "numLights", (float)mNumLights );
+	mRoomShader->uniform( "invNumLights", mInvNumLights );
+	mRoomShader->uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
+	mRoomShader->uniform( "att", 1.015f );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
+	mRoomShader->uniform( "roomDim", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -363,7 +363,7 @@ void MatterApp::drawIntoParticlesFbo()
 	gl::enableAlphaBlending();
 	//	gl::setMatricesWindow( getWindowSize(), false );
 	gl::setMatrices( mSpringCam.getCam() );
-	gl::setViewport( mParticlesFbo.getBounds() );
+	gl::viewport( mParticlesFbo.getBounds() );
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 //	// DRAW PANEL
@@ -404,7 +404,7 @@ void MatterApp::draw()
 	gl::clear( ColorA( 0, 0, 0, 0 ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 	
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -414,7 +414,7 @@ void MatterApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 
 	gl::setMatrices( mSpringCam.getCam() );
@@ -443,7 +443,7 @@ void MatterApp::draw()
 //	gl::enableAlphaBlending();
 	
 	// DRAW SMOKES
-	Vec3f right, up;
+	vec3 right, up;
 	mSpringCam.mCam.getBillboardVectors( &right, &up );
 	mSmokeTex.bind();
 	mController.drawSmokes( right, up );
@@ -475,7 +475,7 @@ void MatterApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -497,11 +497,11 @@ void MatterApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();
@@ -540,7 +540,7 @@ void MatterApp::drawToLightsSurface()
 		}
 	}
 	
-	mLightsTex = gl::Texture( mLightsSurface );
+	mLightsTex = gl::Texture::create( mLightsSurface );
 }
 
 CINDER_APP_BASIC( MatterApp, RendererGl )

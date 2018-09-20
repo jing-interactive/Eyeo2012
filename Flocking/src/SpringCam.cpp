@@ -18,12 +18,12 @@ SpringCam::SpringCam( float camDist, float aspectRatio )
 {
 	mCamDist		= camDist;
 	
-	mEye			= Vec3f( 0.0f, 0.0f, mCamDist );
-	mCenter			= Vec3f( 0.0f, 0.0f, 0.0f );
-	mUp				= Vec3f::yAxis();
+	mEye			= vec3( 0.0f, 0.0f, mCamDist );
+	mCenter			= vec3( 0.0f, 0.0f, 0.0f );
+	mUp				= {0, 1, 0};
 	
-	mBillboardRight	= Vec3f::xAxis();
-	mBillboardUp	= Vec3f::yAxis();
+	mBillboardRight	= vec3::xAxis();
+	mBillboardUp	= {0, 1, 0};
 	
 	mEyeNode		= SpringNode( mEye );
 	mCenNode		= SpringNode( mCenter );
@@ -41,13 +41,13 @@ void SpringCam::update( float timeDelta )
 	mCenNode.update( timeDelta );
 	
 	mCam.lookAt( mEyeNode.mPos, mCenNode.mPos, mUpNode.mPos );
-	mMvpMatrix		= mCam.getProjectionMatrix() * mCam.getModelViewMatrix();
+	mMvpMatrix		= mCam.getProjectionMatrix() * mCam.getViewMatrix();
 	
 
 	mCam.getBillboardVectors( &mBillboardRight, &mBillboardUp );
 }
 
-void SpringCam::dragCam( const Vec2f &posOffset, float distFromCenter )
+void SpringCam::dragCam( const vec2 &posOffset, float distFromCenter )
 {
-	mEyeNode.mAcc += Vec3f( posOffset.xy(), distFromCenter );
+	mEyeNode.mAcc += vec3( posOffset.xy(), distFromCenter );
 }

@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/Fbo.h"
@@ -18,7 +18,7 @@ using namespace std;
 #define APP_HEIGHT		720
 #define ROOM_FBO_RES	2
 
-class ShadedSphereApp : public AppBasic {
+class ShadedSphereApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -47,7 +47,7 @@ class ShadedSphereApp : public AppBasic {
 	gl::Fbo				mRoomFbo;
 
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 };
 
@@ -63,10 +63,10 @@ void ShadedSphereApp::setup()
 	
 	// LOAD SHADERS
 	try {
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mSphereShader	= gl::GlslProg( loadResource( "sphere.vert" ), loadResource( "sphere.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mSphereShader	= gl::GlslProg::create( loadResource( "sphere.vert" ), loadResource( "sphere.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -85,16 +85,16 @@ void ShadedSphereApp::setup()
 	roomFormat.setColorInternalFormat( GL_RGB );
 	int fboXRes			= APP_WIDTH/ROOM_FBO_RES;
 	int fboYRes			= APP_HEIGHT/ROOM_FBO_RES;
-	mRoomFbo			= gl::Fbo( fboXRes, fboYRes, roomFormat );
+	mRoomFbo			= gl::Fbo::create( fboXRes, fboYRes, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );
 	mRoom.init();
 	
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 }
 
@@ -102,13 +102,13 @@ void ShadedSphereApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void ShadedSphereApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void ShadedSphereApp::mouseMove( MouseEvent event )
@@ -139,31 +139,31 @@ void ShadedSphereApp::update()
 
 void ShadedSphereApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
 	//	mLightsTex.bind( 0 );
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.getEye() );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "mainPower", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->bind();
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.getEye() );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "mainPower", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -173,7 +173,7 @@ void ShadedSphereApp::draw()
 	gl::color( ColorA( 1, 1, 1, 1 ) );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -181,7 +181,7 @@ void ShadedSphereApp::draw()
 	gl::enable( GL_TEXTURE_2D );
 	
 	// DRAW ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -203,7 +203,7 @@ void ShadedSphereApp::drawSphere()
 	mSphereShader.uniform( "eyePos", mSpringCam.getEye() );
 	mSphereShader.uniform( "power", mRoom.getPower() );
 	mSphereShader.uniform( "roomDim", mRoom.getDims() );
-	gl::drawSphere( Vec3f::zero(), 1.0f, 128 );
+	gl::drawSphere( vec3(), 1.0f, 128 );
 	mSphereShader.unbind();
 }
 

@@ -14,12 +14,12 @@ class Glow {
 public:
 	
 	Glow();
-	Glow( const ci::Vec3f &pos, const ci::Vec3f &vel, float radius, float lifespan );
+	Glow( const ci::vec3 &pos, const ci::vec3 &vel, float radius, float lifespan );
 	void update( float timeDelta );
-	void draw( const ci::Vec3f &right, const ci::Vec3f &up );
+	void draw( const ci::vec3 &right, const ci::vec3 &up );
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
 	float		mRot, mRotVel;
 	float		mRadius, mRadiusDest;
 	float		mAge, mAgePer, mLifespan;

@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
@@ -27,7 +27,7 @@ using namespace std;
 #define FBO_SIZE		512
 #define VBO_SIZE		600
 
-class TerrainApp : public AppBasic {
+class TerrainApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -69,14 +69,14 @@ class TerrainApp : public AppBasic {
 	// ENVIRONMENT AND LIGHTING
 	Color				mFogColor;
 	Color				mBlueSkyColor;
-	Vec3f				mLightPosDay;
-	Vec3f				mLightPosNight;
-	Vec3f				mLightPos, mLightDir;
+	vec3				mLightPosDay;
+	vec3				mLightPosNight;
+	vec3				mLightPos, mLightDir;
 	float				mLightDist;
 	
 	// TERRAIN
 	Terrain				mTerrain;
-	Vec3f				mTerrainScale;
+	vec3				mTerrainScale;
 	Color				mSandColor;
 	gl::Texture			mGradientTex;
 	gl::Texture			mSandNormalTex;
@@ -89,11 +89,11 @@ class TerrainApp : public AppBasic {
 
 	// SPHERE
 	Sphere				mSphere;
-	Vec3f				mSpherePos, mSpherePosDest;
+	vec3				mSpherePos, mSpherePosDest;
 	
 	// MOUSE
-	Vec2f				mMouseRightPos;
-	Vec2f				mMousePos, mMousePosNorm, mMouseDownPos, mMouseOffset;
+	vec2				mMouseRightPos;
+	vec2				mMousePos, mMousePosNorm, mMouseDownPos, mMouseOffset;
 	bool				mMouseLeftDown, mMouseRightDown;
 };
 
@@ -110,14 +110,14 @@ void TerrainApp::setup()
 
 	// LOAD SHADERS
 	try {
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mRdShader		= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "rd.frag" ) );
-		mHeightsShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "heights.frag" ) );
-		mNormalsShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "normals.frag" ) );
-		mTerrainShader	= gl::GlslProg( loadResource( "terrain.vert" ), loadResource( "terrain.frag" ) );
-		mSphereShader	= gl::GlslProg( loadResource( "sphere.vert" ), loadResource( "sphere.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mRdShader		= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "rd.frag" ) );
+		mHeightsShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "heights.frag" ) );
+		mNormalsShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "normals.frag" ) );
+		mTerrainShader	= gl::GlslProg::create( loadResource( "terrain.vert" ), loadResource( "terrain.frag" ) );
+		mSphereShader	= gl::GlslProg::create( loadResource( "sphere.vert" ), loadResource( "sphere.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -128,8 +128,8 @@ void TerrainApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconTerrain.png" ) ) );
-	mGlowTex		= gl::Texture( loadImage( loadResource( "glow.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconTerrain.png" ) ) );
+	mGlowTex		= gl::Texture::create( loadImage( loadResource( "glow.png" ) ) );
 	mCubeMap		= CubeMap( GLsizei(512), GLsizei(512),
 							   Surface8u( loadImage( loadResource( RES_CUBE1_ID ) ) ),
 							   Surface8u( loadImage( loadResource( RES_CUBE2_ID ) ) ),
@@ -142,49 +142,49 @@ void TerrainApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 300.0f, 200.0f, 300.0f ), isPowerOn, isGravityOn );	
-	mRoomBackWallTex	= gl::Texture( loadImage( loadResource( "roomWall0.png" ) ) );
-	mRoomLeftWallTex	= gl::Texture( loadImage( loadResource( "roomWall1.png" ) ) );
-	mRoomRightWallTex	= gl::Texture( loadImage( loadResource( "roomWall1.png" ) ) );
-	mRoomCeilingTex		= gl::Texture( loadImage( loadResource( "roomCeiling.png" ) ) );
-	mRoomFloorTex		= gl::Texture( loadImage( loadResource( "roomFloor.png" ) ) );
-	mRoomBlankTex		= gl::Texture( loadImage( loadResource( "roomBlank.png" ) ) );
+	mRoom				= Room( vec3( 300.0f, 200.0f, 300.0f ), isPowerOn, isGravityOn );	
+	mRoomBackWallTex	= gl::Texture::create( loadImage( loadResource( "roomWall0.png" ) ) );
+	mRoomLeftWallTex	= gl::Texture::create( loadImage( loadResource( "roomWall1.png" ) ) );
+	mRoomRightWallTex	= gl::Texture::create( loadImage( loadResource( "roomWall1.png" ) ) );
+	mRoomCeilingTex		= gl::Texture::create( loadImage( loadResource( "roomCeiling.png" ) ) );
+	mRoomFloorTex		= gl::Texture::create( loadImage( loadResource( "roomFloor.png" ) ) );
+	mRoomBlankTex		= gl::Texture::create( loadImage( loadResource( "roomBlank.png" ) ) );
 	
 	// ENVIRONMENT AND LIGHTING
 	mFogColor		= Color( 255.0f/255.0f, 255.0f/255.0f, 230.0f/255.0f );
 	mSandColor		= Color( 255.0f/255.0f, 133.0f/255.0f,  67.0f/255.0f );
 	mBlueSkyColor	= Color( 1.0f/255.0f, 78.0f/255.0f, 174.0f/255.0f );
-	mLightPos		= Vec3f( 0.0f, 0.6f, 1.0f );
+	mLightPos		= vec3( 0.0f, 0.6f, 1.0f );
 	mLightDist		= 500.0f;
 	mLightDir		= mLightPos.normalized();
 	
 	// TERRAIN
-	mTerrainScale	= Vec3f( 1.0f, 2.0f, 1.0f );
+	mTerrainScale	= vec3( 1.0f, 2.0f, 1.0f );
 	mTerrain		= Terrain( VBO_SIZE, VBO_SIZE );
 	mZoomMulti		= 1.0f;
 	mZoomMultiDest	= 1.0f;
-	mGradientTex	= gl::Texture( loadImage( loadResource( "gradient.png" ) ) );
-	mSandNormalTex	= gl::Texture( loadImage( loadResource( "sandNormal.png" ) ) );
+	mGradientTex	= gl::Texture::create( loadImage( loadResource( "gradient.png" ) ) );
+	mSandNormalTex	= gl::Texture::create( loadImage( loadResource( "sandNormal.png" ) ) );
 	mSandNormalTex.setWrap( GL_REPEAT, GL_REPEAT );
 	
 	// REACTION DIFFUSION
 	mRd				= RDiffusion( FBO_SIZE, FBO_SIZE );
 
 	// SPHERE
-	mSpherePos		= Vec3f::zero();
-	mSpherePosDest	= Vec3f::zero();
+	mSpherePos		= vec3();
+	mSpherePosDest	= vec3();
 	mSphere.setCenter( mSpherePosDest );
 	mSphere.setRadius( 20.0f );
 	
 	// MOUSE
 	mMouseRightPos	= getWindowCenter();
-	mMousePos		= Vec2f::zero();
-	mMouseDownPos	= Vec2f::zero();
-	mMouseOffset	= Vec2f::zero();
-	mMousePosNorm	= Vec2f::zero();
+	mMousePos		= vec2();
+	mMouseDownPos	= vec2();
+	mMouseOffset	= vec2();
+	mMousePosNorm	= vec2();
 	mMouseLeftDown	= false;
 	mMouseRightDown	= false;
 	
@@ -194,7 +194,7 @@ void TerrainApp::setup()
 void TerrainApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 	
 	if( event.isLeft() ){
 		mMouseLeftDown = true;
@@ -217,7 +217,7 @@ void TerrainApp::mouseUp( MouseEvent event )
 		mMouseRightPos	= getWindowSize() - event.getPos();
 	}
 	
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void TerrainApp::mouseMove( MouseEvent event )
@@ -269,14 +269,14 @@ void TerrainApp::keyDown( KeyEvent event )
 	}
 	
 	switch( event.getCode() ){
-		case KeyEvent::KEY_UP:		mMouseRightPos = Vec2f( 222.0f, 205.0f ) + getWindowCenter();	break;
-		case KeyEvent::KEY_LEFT:	mMouseRightPos = Vec2f(-128.0f,-178.0f ) + getWindowCenter();	break;
-		case KeyEvent::KEY_RIGHT:	mMouseRightPos = Vec2f(-256.0f, 122.0f ) + getWindowCenter();	break;
-		case KeyEvent::KEY_DOWN:	mMouseRightPos = Vec2f(   0.0f,   0.0f ) + getWindowCenter();	break;
+		case KeyEvent::KEY_UP:		mMouseRightPos = vec2( 222.0f, 205.0f ) + getWindowCenter();	break;
+		case KeyEvent::KEY_LEFT:	mMouseRightPos = vec2(-128.0f,-178.0f ) + getWindowCenter();	break;
+		case KeyEvent::KEY_RIGHT:	mMouseRightPos = vec2(-256.0f, 122.0f ) + getWindowCenter();	break;
+		case KeyEvent::KEY_DOWN:	mMouseRightPos = vec2(   0.0f,   0.0f ) + getWindowCenter();	break;
 		default: break;
 	}
 	
-	std::cout << "F: " << mRd.mParamF << " K: " << mRd.mParamK << std::endl;
+	console() << "F: " << mRd.mParamF << " K: " << mRd.mParamK << std::endl;
 }
 
 
@@ -286,7 +286,7 @@ void TerrainApp::update()
 	float x = mMouseRightPos.x - getWindowSize().x * 0.5f;
 	float y = mSphere.getCenter().y;
 	float z = mMouseRightPos.y - getWindowSize().y * 0.5f;
-	mSpherePosDest = Vec3f( x, y, z );
+	mSpherePosDest = vec3( x, y, z );
 	mSpherePos -= ( mSpherePos - mSpherePosDest ) * 0.02f;
 	
 	mSphere.setCenter( mSpherePos );
@@ -317,33 +317,33 @@ void TerrainApp::update()
 
 void TerrainApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 
 	mCubeMap.bind();
-	mRoomShader.bind();
-	mRoomShader.uniform( "cubeMap", 0 );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "cubeMap", 0 );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -354,7 +354,7 @@ void TerrainApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -363,7 +363,7 @@ void TerrainApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM FBO
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -394,11 +394,11 @@ void TerrainApp::draw()
 
 void TerrainApp::drawSphere()
 {
-	Vec3f spherePos = mSphere.getCenter();
-	Vec3f roomDims	= mRoom.getDims();
+	vec3 spherePos = mSphere.getCenter();
+	vec3 roomDims	= mRoom.getDims();
 	float x = ( spherePos.x + roomDims.x ) / ( roomDims.x * 2.0f );
 	float y = ( spherePos.z + roomDims.z ) / ( roomDims.z * 2.0f );;
-	Vec2f texCoord = Vec2f( x, y );
+	vec2 texCoord = vec2( x, y );
 	
 	mCubeMap.bind();
 	mRd.getHeightsTexture().bind( 1 );
@@ -442,7 +442,7 @@ void TerrainApp::drawTerrain()
 	mTerrainShader.uniform( "lightPos", mLightPos );
 	mTerrainShader.uniform( "fogColor", mFogColor );
 	mTerrainShader.uniform( "sandColor", mSandColor );
-	mTerrainShader.uniform( "mousePosNorm", -( mMousePosNorm - Vec2f( 0.5f, 0.5f ) ) * getElapsedSeconds() * 2.0f );
+	mTerrainShader.uniform( "mousePosNorm", -( mMousePosNorm - vec2( 0.5f, 0.5f ) ) * getElapsedSeconds() * 2.0f );
 	mTerrainShader.uniform( "spherePos", mSphere.getCenter() );
 	mTerrainShader.uniform( "sphereRadius", mSphere.getRadius() );
 	mTerrain.draw();
@@ -453,7 +453,7 @@ void TerrainApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -475,11 +475,11 @@ void TerrainApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();

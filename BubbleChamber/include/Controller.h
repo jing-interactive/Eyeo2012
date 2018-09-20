@@ -24,13 +24,13 @@ class Controller
 {
   public:
 	struct BubbleVertex {
-        ci::Vec3f vertex;
+        ci::vec3 vertex;
         ci::Vec4f color;
     };
 	
 	struct Gib {
 		Gib() {}
-		Gib( ci::Vec3f pos, ci::Vec3f vel, float radius ){
+		Gib( ci::vec3 pos, ci::vec3 vel, float radius ){
 			mPos		= pos;
 			mVel		= vel;
 			mRadiusDest = radius;
@@ -42,34 +42,34 @@ class Controller
 			mIsDead		= false;
 		}
 		
-		void update( const ci::Vec3f &gravity, const ci::Vec3f &roomDims, float dt ){
+		void update( const ci::vec3 &gravity, const ci::vec3 &roomDims, float dt ){
 			mRadius -= ( mRadius - mRadiusDest ) * 0.2f * dt;
 			mVel += gravity * dt;
 			
-			ci::Vec3f tempPos = mPos + mVel * dt;
+			ci::vec3 tempPos = mPos + mVel * dt;
 
 			if( tempPos.x - mRadius < -roomDims.x ){
 				mIsDead = true;
-				mDeathAxis = ci::Vec3f( -1.0f, 0.0f, 0.0f );
+				mDeathAxis = ci::vec3( -1.0f, 0.0f, 0.0f );
 			} else if( tempPos.x + mRadius > roomDims.x ){
 				mIsDead = true;
-				mDeathAxis = ci::Vec3f( 1.0f, 0.0f, 0.0f );
+				mDeathAxis = ci::vec3( 1.0f, 0.0f, 0.0f );
 			}
 			
 			if( tempPos.y - mRadius < -roomDims.y ){
 				mIsDead = true;
-				mDeathAxis = ci::Vec3f( 0.0f, -1.0f, 0.0f );
+				mDeathAxis = ci::vec3( 0.0f, -1.0f, 0.0f );
 			} else if( tempPos.y + mRadius > roomDims.y ){
 				mIsDead = true;
-				mDeathAxis = ci::Vec3f( 0.0f, -1.0f, 0.0f );
+				mDeathAxis = ci::vec3( 0.0f, -1.0f, 0.0f );
 			}
 			
 			if( tempPos.z - mRadius < -roomDims.z ){
 				mIsDead = true;
-				mDeathAxis = ci::Vec3f( 0.0f, 0.0f, -1.0f );
+				mDeathAxis = ci::vec3( 0.0f, 0.0f, -1.0f );
 			} else if( tempPos.z + mRadius > roomDims.z ){
 				mIsDead = true;
-				mDeathAxis = ci::Vec3f( 0.0f, 0.0f, 1.0f );
+				mDeathAxis = ci::vec3( 0.0f, 0.0f, 1.0f );
 			}
 			
 			mPos += mVel * dt;
@@ -80,11 +80,11 @@ class Controller
 		}
 		
 		void draw(){
-			ci::gl::drawCube( mPos, ci::Vec3f( mRadius, mRadius, mRadius ) * mAgePer );
+			ci::gl::drawCube( mPos, ci::vec3( mRadius, mRadius, mRadius ) * mAgePer );
 		}
 		
-		ci::Vec3f	mPos, mVel;
-		ci::Vec3f	mDeathAxis;
+		ci::vec3	mPos, mVel;
+		ci::vec3	mDeathAxis;
 		float		mRadius, mRadiusDest;
 		float		mAge, mLifespan;
 		float		mAgePer;
@@ -93,19 +93,19 @@ class Controller
 	
 	struct Decal {
 		Decal() {}
-		Decal( ci::Vec3f pos, ci::Vec3f axis, float radius, float lifespan ){
+		Decal( ci::vec3 pos, ci::vec3 axis, float radius, float lifespan ){
 			mPos	= pos;
 			mAxis	= axis;
 			mColor  = 0.0f;
 			if( mAxis.x < -0.5f || mAxis.x > 0.5f ){
-				mRight	= ci::Vec3f::zAxis();
-				mUp		= ci::Vec3f::yAxis();
+				mRight	= ci::vec3::zAxis();
+				mUp		= ci::{0, 1, 0};
 			} else if( mAxis.y < -0.5f || mAxis.y > 0.5f ){
-				mRight	= ci::Vec3f::xAxis();
-				mUp		= ci::Vec3f::zAxis();
+				mRight	= ci::vec3::xAxis();
+				mUp		= ci::vec3::zAxis();
 			} else {
-				mRight	= ci::Vec3f::xAxis();
-				mUp		= ci::Vec3f::yAxis();
+				mRight	= ci::vec3::xAxis();
+				mUp		= ci::{0, 1, 0};
 			}
 			
 			mRadiusDest	= radius;
@@ -128,12 +128,12 @@ class Controller
 		}
 		
 		void draw(){
-			ci::gl::drawBillboard( mPos, ci::Vec2f( mRadius, mRadius ), 0.0f, mRight, mUp );
+			ci::gl::drawBillboard( mPos, ci::vec2( mRadius, mRadius ), 0.0f, mRight, mUp );
 		}
 		
-		ci::Vec3f mPos;
-		ci::Vec3f mAxis;
-		ci::Vec3f mRight, mUp;
+		ci::vec3 mPos;
+		ci::vec3 mAxis;
+		ci::vec3 mRight, mUp;
 		float mRadiusDest, mRadius;
 		float mAge, mAgePer, mLifespan;
 		float mColor;
@@ -142,7 +142,7 @@ class Controller
 	
 	Controller();
 	void init( Room *room );
-	void createShards( const ci::Vec3f &spawnPos, const ci::Vec3f &spawnDir, ci::TriMesh *shardMesh );
+	void createShards( const ci::vec3 &spawnPos, const ci::vec3 &spawnDir, ci::TriMesh *shardMesh );
 	void update();
 	void updateParticles( float dt, bool tick );
 	void updateBubbles( float dt );
@@ -159,15 +159,15 @@ class Controller
 	void drawParticles( float power );
 	void drawBubbles( float power );
 	void drawDecals();
-	void drawSmokes( const ci::Vec3f &right, const ci::Vec3f &up );
+	void drawSmokes( const ci::vec3 &right, const ci::vec3 &up );
 	void drawMoths();
 	void drawGibs();
 	void drawGlowCubes( ci::gl::GlslProg *shader );
-	void addBank( const ci::Vec3f &pos, const ci::Vec3f &axis, float radius, float color );
-	void addBubble( const ci::Vec3f &pos, const ci::Vec3f &vel, float age );
-	void addParticle( int gen, const ci::Vec3f &pos, const ci::Vec3f &dir, float speed, int len );
+	void addBank( const ci::vec3 &pos, const ci::vec3 &axis, float radius, float color );
+	void addBubble( const ci::vec3 &pos, const ci::vec3 &vel, float age );
+	void addParticle( int gen, const ci::vec3 &pos, const ci::vec3 &dir, float speed, int len );
 	void addParticles( int amt, bool isShort );
-	void addMoth( const ci::Vec3f &pos );
+	void addMoth( const ci::vec3 &pos );
 	void releaseMoths();
 	void preset( int i );
 	void clearRoom();

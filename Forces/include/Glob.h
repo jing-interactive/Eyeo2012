@@ -11,12 +11,12 @@
 class Glob {
 public:
 	Glob();
-	Glob( const ci::Vec3f &pos, const ci::Vec3f &vel, float radius, float lifespan );
+	Glob( const ci::vec3 &pos, const ci::vec3 &vel, float radius, float lifespan );
 	
 	void update( float floorLevel, float dt );
-	void draw( const ci::Vec3f &right, const ci::Vec3f &up );
+	void draw( const ci::vec3 &right, const ci::vec3 &up );
 	
-	ci::Vec3f	mPos, mVel;
+	ci::vec3	mPos, mVel;
 	float		mColor;
 	float		mRadius;
 	float		mAge, mAgePer;

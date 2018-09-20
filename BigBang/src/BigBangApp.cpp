@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
@@ -24,7 +24,7 @@ using namespace std;
 #define ROOM_FBO_RES	2
 
 
-class BigBangApp : public AppBasic {
+class BigBangApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -59,7 +59,7 @@ class BigBangApp : public AppBasic {
 	Controller			mController;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	float				mMouseTimePressed;
 };
@@ -77,11 +77,11 @@ void BigBangApp::setup()
 	
 	// LOAD SHADERS
 	try {
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mBalloonsShader = gl::GlslProg( loadResource( "balloons.vert" ), loadResource( "balloons.frag" ) );
-		mConfettiShader	= gl::GlslProg( loadResource( "confetti.vert" ), loadResource( "confetti.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mBalloonsShader = gl::GlslProg::create( loadResource( "balloons.vert" ), loadResource( "balloons.frag" ) );
+		mConfettiShader	= gl::GlslProg::create( loadResource( "confetti.vert" ), loadResource( "confetti.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -92,7 +92,7 @@ void BigBangApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconBigBang.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconBigBang.png" ) ) );
 	mCubeMap		= CubeMap( GLsizei(512), GLsizei(512),
 							   Surface8u( loadImage( loadResource( RES_CUBE1_ID ) ) ),
 							   Surface8u( loadImage( loadResource( RES_CUBE2_ID ) ) ),
@@ -105,17 +105,17 @@ void BigBangApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= true;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 	mMouseTimePressed	= 0.0f;
 
@@ -127,14 +127,14 @@ void BigBangApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos		= event.getPos();
 	mMousePressed		= true;
-	mMouseOffset		= Vec2f::zero();
+	mMouseOffset		= vec2();
 	mMouseTimePressed	= getElapsedSeconds();
 }
 
 void BigBangApp::mouseUp( MouseEvent event )
 {
 	mMousePressed		= false;
-	mMouseOffset		= Vec2f::zero();
+	mMouseOffset		= vec2();
 	
 	float durationOfClick = getElapsedSeconds() - mMouseTimePressed;
 	if( durationOfClick < 0.2f ) mController.checkForBalloonPop( mMousePos );
@@ -199,33 +199,33 @@ void BigBangApp::update()
 
 void BigBangApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 
 	mCubeMap.bind();
-	mRoomShader.bind();
-	mRoomShader.uniform( "cubeMap", 0 );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "cubeMap", 0 );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -234,7 +234,7 @@ void BigBangApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -243,7 +243,7 @@ void BigBangApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM FBO
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -292,7 +292,7 @@ void BigBangApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -314,11 +314,11 @@ void BigBangApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();

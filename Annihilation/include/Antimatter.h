@@ -16,12 +16,12 @@
 class Antimatter {
   public:
 	Antimatter();
-	Antimatter( ci::Vec3f po );
+	Antimatter( ci::vec3 po );
 	void update( Room *room, float t );
 	void draw( ci::gl::VboMesh &sphereHi );
 	void drawSprings();
 	
-	ci::Vec3f	mPos;
+	ci::vec3	mPos;
 	ci::Color	mCol;
 	
 	float		mCharge;

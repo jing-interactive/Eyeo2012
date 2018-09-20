@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/TextureFont.h"
@@ -26,7 +26,7 @@ using std::sort;
 #define MAX_LIGHTS		3
 #define GRAVITY			-0.02f
 
-class RepulsionApp : public AppBasic {
+class RepulsionApp : public App {
   public:
 	
 	
@@ -35,7 +35,7 @@ class RepulsionApp : public AppBasic {
 	void			setFboPositions( gl::Fbo &fbo );
 	void			setFboVelocities( gl::Fbo &fbo );
 	void			createSphere( gl::VboMesh &mesh, int res );
-	void			drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div, Color c );
+	void			drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div, Color c );
 	virtual void	mouseDown( MouseEvent event );
 	virtual void	mouseUp( MouseEvent event );
 	virtual void	mouseMove( MouseEvent event );
@@ -70,19 +70,19 @@ class RepulsionApp : public AppBasic {
 	
 	// SPHERES
 	gl::VboMesh			mSphereVbo;
-	std::vector<Vec3f>	mPosCoords;
-	std::vector<Vec3f>	mNormals;
+	std::vector<vec3>	mPosCoords;
+	std::vector<vec3>	mNormals;
 	std::vector<Colorf>	mColors;
 	
 	// POSITION/VELOCITY FBOS
-	ci::Vec2f			mFboSize;
+	ci::vec2			mFboSize;
 	ci::Area			mFboBounds;
 	gl::Fbo				mPositionFbos[2];
 	gl::Fbo				mVelocityFbos[2];
 	int					mThisFbo, mPrevFbo;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 	bool				mSaveFrames;
@@ -109,25 +109,25 @@ void RepulsionApp::setup()
 	format.setColorInternalFormat( GL_RGBA16F_ARB );
 	format.setMinFilter( GL_NEAREST );
 	format.setMagFilter( GL_NEAREST );
-	mFboSize		= Vec2f( FBO_WIDTH, FBO_HEIGHT );
+	mFboSize		= vec2( FBO_WIDTH, FBO_HEIGHT );
 	mFboBounds		= Area( 0, 0, FBO_WIDTH, FBO_HEIGHT );
-	mPositionFbos[0]	= gl::Fbo( FBO_WIDTH, FBO_HEIGHT, format );
-	mPositionFbos[1]	= gl::Fbo( FBO_WIDTH, FBO_HEIGHT, format );
-	mVelocityFbos[0]	= gl::Fbo( FBO_WIDTH, FBO_HEIGHT, format );
-	mVelocityFbos[1]	= gl::Fbo( FBO_WIDTH, FBO_HEIGHT, format );
+	mPositionFbos[0]	= gl::Fbo::create( FBO_WIDTH, FBO_HEIGHT, format );
+	mPositionFbos[1]	= gl::Fbo::create( FBO_WIDTH, FBO_HEIGHT, format );
+	mVelocityFbos[0]	= gl::Fbo::create( FBO_WIDTH, FBO_HEIGHT, format );
+	mVelocityFbos[1]	= gl::Fbo::create( FBO_WIDTH, FBO_HEIGHT, format );
 	mThisFbo			= 0;
 	mPrevFbo			= 1;
 
 	// SHADERS
 	try {
-		mVelocityShader = gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "Velocity.frag" ) );
-		mPositionShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "Position.frag" ) );
-		mShader			= gl::GlslProg( loadResource( "VboPos.vert" ), loadResource( "VboPos.frag" ) );
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mPosInitShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "fboPosInit.frag" ) );
-		mVelInitShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "fboVelInit.frag" ) );
+		mVelocityShader = gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "Velocity.frag" ) );
+		mPositionShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "Position.frag" ) );
+		mShader			= gl::GlslProg::create( loadResource( "VboPos.vert" ), loadResource( "VboPos.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mPosInitShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "fboPosInit.frag" ) );
+		mVelInitShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "fboVelInit.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -138,21 +138,21 @@ void RepulsionApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconRepulsion.png" ) ), mipFmt );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconRepulsion.png" ) ), mipFmt );
 
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 300.0f, 200.0f, 300.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 300.0f, 200.0f, 300.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	// MOUSE
-	mMousePos		= Vec2f::zero();
-	mMouseDownPos	= Vec2f::zero();
-	mMouseOffset	= Vec2f::zero();
+	mMousePos		= vec2();
+	mMouseDownPos	= vec2();
+	mMouseOffset	= vec2();
 	mMousePressed	= false;
 
 	setFboPositions( mPositionFbos[0] );
@@ -169,10 +169,10 @@ void RepulsionApp::createSphere( gl::VboMesh &vbo, int res )
 	float X = 0.525731112119f; 
 	float Z = 0.850650808352f;
 	
-	static Vec3f verts[12] = {
-		Vec3f( -X, 0.0f, Z ), Vec3f( X, 0.0f, Z ), Vec3f( -X, 0.0f, -Z ), Vec3f( X, 0.0f, -Z ),
-		Vec3f( 0.0f, Z, X ), Vec3f( 0.0f, Z, -X ), Vec3f( 0.0f, -Z, X ), Vec3f( 0.0f, -Z, -X ),
-		Vec3f( Z, X, 0.0f ), Vec3f( -Z, X, 0.0f ), Vec3f( Z, -X, 0.0f ), Vec3f( -Z, -X, 0.0f ) };
+	static vec3 verts[12] = {
+		vec3( -X, 0.0f, Z ), vec3( X, 0.0f, Z ), vec3( -X, 0.0f, -Z ), vec3( X, 0.0f, -Z ),
+		vec3( 0.0f, Z, X ), vec3( 0.0f, Z, -X ), vec3( 0.0f, -Z, X ), vec3( 0.0f, -Z, -X ),
+		vec3( Z, X, 0.0f ), vec3( -Z, X, 0.0f ), vec3( Z, -X, 0.0f ), vec3( -Z, -X, 0.0f ) };
 	
 	static GLuint triIndices[20][3] = { 
 		{0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1}, {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
@@ -207,7 +207,7 @@ void RepulsionApp::createSphere( gl::VboMesh &vbo, int res )
 	vbo.unbindBuffers();
 }
 
-void RepulsionApp::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div, Color c )
+void RepulsionApp::drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div, Color c )
 {
 	if( div <= 0 ){
 		mColors.push_back( c );
@@ -216,14 +216,14 @@ void RepulsionApp::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div, Color c
 		mPosCoords.push_back( va );
 		mPosCoords.push_back( vb );
 		mPosCoords.push_back( vc );
-		Vec3f vn = ( va + vb + vc ) * 0.3333f;
+		vec3 vn = ( va + vb + vc ) * 0.3333f;
 		mNormals.push_back( va );
 		mNormals.push_back( vb );
 		mNormals.push_back( vc );
 	} else {
-		Vec3f vab = ( ( va + vb ) * 0.5f ).normalized();
-		Vec3f vac = ( ( va + vc ) * 0.5f ).normalized();
-		Vec3f vbc = ( ( vb + vc ) * 0.5f ).normalized();
+		vec3 vab = ( ( va + vb ) * 0.5f ).normalized();
+		vec3 vac = ( ( va + vc ) * 0.5f ).normalized();
+		vec3 vbc = ( ( vb + vc ) * 0.5f ).normalized();
 		drawSphereTri( va, vab, vac, div-1, c );
 		drawSphereTri( vb, vbc, vab, div-1, c );
 		drawSphereTri( vc, vac, vbc, div-1, c );
@@ -237,7 +237,7 @@ void RepulsionApp::setFboPositions( gl::Fbo &fbo )
 	Surface32f::Iter it = pos.getIter();
 	while( it.line() ){
 		while( it.pixel() ){
-			Vec3f r = mRoom.getRandRoomPos();
+			vec3 r = mRoom.getRandRoomPos();
 			float mass = Rand::randFloat( 20.0f, 30.0f );
 			if( Rand::randFloat() < 0.05f ) 
 				mass = Rand::randFloat( 50.0f, 60.0f );
@@ -258,7 +258,7 @@ void RepulsionApp::setFboPositions( gl::Fbo &fbo )
 	posTexture.bind();
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	fbo.bindFramebuffer();
 	mPosInitShader.bind();
@@ -274,7 +274,7 @@ void RepulsionApp::setFboVelocities( gl::Fbo &fbo )
 	Surface32f::Iter it = vel.getIter();
 	while( it.line() ){
 		while( it.pixel() ){
-			Vec3f r = Rand::randVec3f() * 0.1f;
+			vec3 r = Rand::randvec3() * 0.1f;
 			it.r() = 0.0f;//r.x;
 			it.g() = 0.0f;//r.y;
 			it.b() = 0.0f;//r.z;
@@ -286,7 +286,7 @@ void RepulsionApp::setFboVelocities( gl::Fbo &fbo )
 	velTexture.bind();
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	fbo.bindFramebuffer();
 	mVelInitShader.bind();
@@ -300,13 +300,13 @@ void RepulsionApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void RepulsionApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void RepulsionApp::mouseMove( MouseEvent event )
@@ -358,7 +358,7 @@ void RepulsionApp::update()
 void RepulsionApp::drawIntoVelocityFbo()
 {
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	gl::disableAlphaBlending();
 	
 	mVelocityFbos[ mThisFbo ].bindFramebuffer();
@@ -387,7 +387,7 @@ void RepulsionApp::drawIntoVelocityFbo()
 void RepulsionApp::drawIntoPositionFbo()
 {	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	mPositionFbos[ mThisFbo ].bindFramebuffer();
 	mPositionFbos[ mPrevFbo ].bindTexture( 0, 0 );
@@ -408,30 +408,30 @@ void RepulsionApp::drawIntoPositionFbo()
 
 void RepulsionApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.getEye() );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->bind();
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.getEye() );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -441,7 +441,7 @@ void RepulsionApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -451,7 +451,7 @@ void RepulsionApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -487,7 +487,7 @@ void RepulsionApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -509,11 +509,11 @@ void RepulsionApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();

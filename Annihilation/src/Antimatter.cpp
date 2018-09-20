@@ -9,7 +9,7 @@
 #include "Antimatter.h"
 #include "cinder/Rand.h"
 #include "cinder/gl/gl.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 
 #define SPRING_STRENGTH 0.1
 #define SPRING_DAMPING 0.2
@@ -23,7 +23,7 @@ Antimatter::Antimatter()
 {
 }
 
-Antimatter::Antimatter( Vec3f pos )
+Antimatter::Antimatter( vec3 pos )
 {
 	mPos			= pos;
 	

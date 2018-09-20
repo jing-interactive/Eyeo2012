@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "Node.h"
 
@@ -18,13 +18,13 @@ using namespace ci;
 
 Node::Node(){}
 
-Node::Node( const Vec3f &pos, const Vec3f &vel )
+Node::Node( const vec3 &pos, const vec3 &vel )
 	: mPos( pos ), mVel( vel )
 {	
 	mPosInit	= mPos;
 	mRadius		= 1.3f;
 	mColor		= Color( 0.0f, 0.0f, 0.0f );
-	mAcc		= Vec3f::zero();
+	mAcc		= vec3();
 	
 	mMatrix.setToIdentity();
 	
@@ -33,23 +33,23 @@ Node::Node( const Vec3f &pos, const Vec3f &vel )
 
 void Node::update( float dt )
 {
-//	std::cout << "acc = " << mAcc << std::endl;
+//	console() << "acc = " << mAcc << std::endl;
 	mVel += mAcc;
 	mPos += mVel * dt;
 	mVel -= mVel * 0.015 * dt;
-	mAcc = ci::Vec3f::zero();
+	mAcc = {};
 	
 	mColor.r = mVel.length();
 	
 	mMatrix.setToIdentity();
 	mMatrix.translate( mPos );
 //	mMatrix.rotate( tiltAxis, 2.0f );
-	mMatrix.scale( Vec3f( mRadius, mRadius, mRadius ) );
+	mMatrix.scale( vec3( mRadius, mRadius, mRadius ) );
 	
 	mAge += dt;
 }
 
 void Node::draw()
 {
-	gl::drawCube( Vec3f::zero(), Vec3f( 2.0f, 2.0f, 2.0f ) );
+	gl::drawCube( vec3(), vec3( 2.0f, 2.0f, 2.0f ) );
 }

@@ -1,5 +1,5 @@
 #include <boost/foreach.hpp>
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "cinder/Vector.h"
 #include "Controller.h"
@@ -32,10 +32,10 @@ void Controller::createSphere( gl::VboMesh &vbo, int res )
 	float X = 0.525731112119f; 
 	float Z = 0.850650808352f;
 	
-	static Vec3f verts[12] = {
-		Vec3f( -X, 0.0f, Z ), Vec3f( X, 0.0f, Z ), Vec3f( -X, 0.0f, -Z ), Vec3f( X, 0.0f, -Z ),
-		Vec3f( 0.0f, Z, X ), Vec3f( 0.0f, Z, -X ), Vec3f( 0.0f, -Z, X ), Vec3f( 0.0f, -Z, -X ),
-		Vec3f( Z, X, 0.0f ), Vec3f( -Z, X, 0.0f ), Vec3f( Z, -X, 0.0f ), Vec3f( -Z, -X, 0.0f ) };
+	static vec3 verts[12] = {
+		vec3( -X, 0.0f, Z ), vec3( X, 0.0f, Z ), vec3( -X, 0.0f, -Z ), vec3( X, 0.0f, -Z ),
+		vec3( 0.0f, Z, X ), vec3( 0.0f, Z, -X ), vec3( 0.0f, -Z, X ), vec3( 0.0f, -Z, -X ),
+		vec3( Z, X, 0.0f ), vec3( -Z, X, 0.0f ), vec3( Z, -X, 0.0f ), vec3( -Z, -X, 0.0f ) };
 	
 	static GLuint triIndices[20][3] = { 
 		{0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1}, {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
@@ -62,7 +62,7 @@ void Controller::createSphere( gl::VboMesh &vbo, int res )
 	vbo.bufferTexCoords2d( 0, mTexCoords );
 }
 
-void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div )
+void Controller::drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div )
 {
 	if( div <= 0 ){
 		mPosCoords.push_back( va );
@@ -71,7 +71,7 @@ void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div )
 		mIndices.push_back( mIndex++ );
 		mIndices.push_back( mIndex++ );
 		mIndices.push_back( mIndex++ );
-		Vec3f vn = ( va + vb + vc ) * 0.3333f;
+		vec3 vn = ( va + vb + vc ) * 0.3333f;
 		mNormals.push_back( va );
 		mNormals.push_back( vb );
 		mNormals.push_back( vc );
@@ -103,13 +103,13 @@ void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div )
 		float v2 = (float)acos( vb.z ) / (float)M_PI;
 		float v3 = (float)acos( vc.z ) / (float)M_PI;
 		
-		mTexCoords.push_back( Vec2f( u1, v1 ) );
-		mTexCoords.push_back( Vec2f( u2, v2 ) );
-		mTexCoords.push_back( Vec2f( u3, v3 ) );
+		mTexCoords.push_back( vec2( u1, v1 ) );
+		mTexCoords.push_back( vec2( u2, v2 ) );
+		mTexCoords.push_back( vec2( u3, v3 ) );
 	} else {
-		Vec3f vab = ( ( va + vb ) * 0.5f ).normalized();
-		Vec3f vac = ( ( va + vc ) * 0.5f ).normalized();
-		Vec3f vbc = ( ( vb + vc ) * 0.5f ).normalized();
+		vec3 vab = ( ( va + vb ) * 0.5f ).normalized();
+		vec3 vac = ( ( va + vc ) * 0.5f ).normalized();
+		vec3 vbc = ( ( vb + vc ) * 0.5f ).normalized();
 		drawSphereTri( va, vab, vac, div-1 );
 		drawSphereTri( vb, vbc, vab, div-1 );
 		drawSphereTri( vc, vac, vbc, div-1 );
@@ -121,8 +121,8 @@ void Controller::applyShockwavesToTime()
 {
 	for( vector<Shockwave>::iterator shockIt = mShockwaves.begin(); shockIt != mShockwaves.end(); ++shockIt )
 	{
-		Vec3f roomCenter = Vec3f::zero();
-		Vec3f dirToParticle = shockIt->mPos - roomCenter;
+		vec3 roomCenter = vec3();
+		vec3 dirToParticle = shockIt->mPos - roomCenter;
 		float dist = dirToParticle.length();
 		if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
 			mRoom->mTimeElapsed += ( dist - shockIt->mRadiusPrev )/( shockIt->mRadius - shockIt->mRadiusPrev ) * 10.0f;
@@ -134,24 +134,24 @@ void Controller::applyShockwavesToCam( SpringCam &cam )
 {
 	for( vector<Shockwave>::iterator shockIt = mShockwaves.begin(); shockIt != mShockwaves.end(); ++shockIt )
 	{
-		Vec3f dirToParticle = shockIt->mPos - cam.mEyeNode.mPos;
+		vec3 dirToParticle = shockIt->mPos - cam.mEyeNode.mPos;
 		float dist = dirToParticle.length();
 		if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-			Vec3f dirToParticleNorm = dirToParticle.normalized();
+			vec3 dirToParticleNorm = dirToParticle.normalized();
 			cam.mEyeNode.mAcc -= dirToParticleNorm * shockIt->mImpulse * 5.0f;
 		}
 		
 		dirToParticle = shockIt->mPos - cam.mCenNode.mPos;
 		dist = dirToParticle.length();
 		if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-			Vec3f dirToParticleNorm = dirToParticle.normalized();
+			vec3 dirToParticleNorm = dirToParticle.normalized();
 			cam.mCenNode.mAcc -= dirToParticleNorm * shockIt->mImpulse * 1.0f;
 		}
 		
 		dirToParticle = shockIt->mPos - cam.mUpNode.mPos;
 		dist = dirToParticle.length();
 		if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-			Vec3f dirToParticleNorm = dirToParticle.normalized();
+			vec3 dirToParticleNorm = dirToParticle.normalized();
 			cam.mUpNode.mAcc -= dirToParticleNorm * shockIt->mImpulse * 1.0f;
 		}
 	}
@@ -186,10 +186,10 @@ void Controller::applyForceToParticles()
 		// APPLY SHOCKWAVES TO OTHER PARTICLES
 		for( vector<Shockwave>::iterator shockIt = mShockwaves.begin(); shockIt != mShockwaves.end(); ++shockIt )
 		{
-			Vec3f dirToParticle = shockIt->mPos - it1->mPos;
+			vec3 dirToParticle = shockIt->mPos - it1->mPos;
 			float dist = dirToParticle.length();
 			if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-				Vec3f dirToParticleNorm = dirToParticle.normalized();
+				vec3 dirToParticleNorm = dirToParticle.normalized();
 				it1->mAcc -= dirToParticleNorm * shockIt->mImpulse * 2.5f;
 				it1->mFusionThresh = 1.0f;
 			}
@@ -197,7 +197,7 @@ void Controller::applyForceToParticles()
 		
 		list<Particle>::iterator it2 = it1;
 		for( std::advance( it2, 1 ); it2 != mParticles.end(); ++it2 ) {
-			Vec3f dir = it1->mPos - it2->mPos;
+			vec3 dir = it1->mPos - it2->mPos;
 			float distSqrd = dir.lengthSquared();
 			
 			if( distSqrd < zoneRadiusSqrd ){
@@ -208,8 +208,8 @@ void Controller::applyForceToParticles()
 				
 				// lit room
 				if( mRoom->getPower() < 0.5f ){
-					Vec3f moveVec		= it2->mVel - it1->mVel;
-					Vec3f dirNormal		= dir.normalized();
+					vec3 moveVec		= it2->mVel - it1->mVel;
+					vec3 dirNormal		= dir.normalized();
 					
 					float dist			= sqrt( distSqrd );
 					float invDistSqrd	= 1.0f/distSqrd;
@@ -233,7 +233,7 @@ void Controller::applyForceToParticles()
 						if( dist < 0.0f ){
 							float per1	= it1->mMass * invSumMass;
 							float per2	= 1.0f - per1;
-							Vec3f off	= dirNormal * dist;
+							vec3 off	= dirNormal * dist;
 							
 							it1->mPos -= off * per2;
 							it1->mVel -= off * per2 * 0.5f;
@@ -243,7 +243,7 @@ void Controller::applyForceToParticles()
 						}
 						
 						float collisionDecay = 0.75f;
-						Vec3f newDir = pVar * dirNormal * collisionDecay;
+						vec3 newDir = pVar * dirNormal * collisionDecay;
 						it1->mVel -= it2->mMass * newDir;
 						it2->mVel += it1->mMass * newDir;
 						
@@ -251,7 +251,7 @@ void Controller::applyForceToParticles()
 						
 
 //						float cDecay = 0.75f;
-//						Vec3f newDir = pVar * dirNormal * cDecay;
+//						vec3 newDir = pVar * dirNormal * cDecay;
 ////							it1->mPos	-= moveVec * 0.5f;
 ////							it2->mPos	+= moveVec * 0.5f;
 //						it1->mVel	-= it2->mMass * newDir;
@@ -286,11 +286,11 @@ void Controller::applyForceToParticles()
 			}
 		}
 		
-		it1->mAcc += Vec3f::yAxis() * mRoom->getGravity();
+		it1->mAcc += {0, 1, 0} * mRoom->getGravity();
 	}
 }
 
-bool Controller::didParticlesCollide( const ci::Vec3f &dir, const ci::Vec3f &dirNormal, const float dist, const float sumRadii, const float sumRadiiSqrd, ci::Vec3f *moveVec )
+bool Controller::didParticlesCollide( const ci::vec3 &dir, const ci::vec3 &dirNormal, const float dist, const float sumRadii, const float sumRadiiSqrd, ci::vec3 *moveVec )
 {
 	float moveVecLength = sqrtf( moveVec->x * moveVec->x + moveVec->y * moveVec->y + moveVec->z * moveVec->z );
 	float newDist = dist - sumRadii;
@@ -330,12 +330,12 @@ void Controller::annihilate( Particle *p1, Particle *p2 )
 {
 	p1->mIsDead = true;
 	p2->mIsDead = true;
-	Vec3f p		= ( p1->mPos + p2->mPos ) * 0.5f;
-	Vec3f v		= ( p1->mVel + p2->mVel ) * 0.5f;
-	Vec3f dir	= p1->mPos - p2->mPos;
-	Vec3f axis	= dir.normalized();
-	Vec3f right	= axis.cross( Vec3f::zAxis() ).normalized();
-	Vec3f up	= axis.cross( right ).normalized();
+	vec3 p		= ( p1->mPos + p2->mPos ) * 0.5f;
+	vec3 v		= ( p1->mVel + p2->mVel ) * 0.5f;
+	vec3 dir	= p1->mPos - p2->mPos;
+	vec3 axis	= dir.normalized();
+	vec3 right	= axis.cross( vec3::zAxis() ).normalized();
+	vec3 up	= axis.cross( right ).normalized();
 	right		= axis.cross( up ).normalized();
 	
 	float lifespan	= 25.0f;
@@ -347,15 +347,15 @@ void Controller::annihilate( Particle *p1, Particle *p2 )
 	float perSeg = 1.0f/(float)numPhotons;
 	for( int i=0; i<numPhotons; i++ ){
 		float angle = (float)i*perSeg*M_PI*2.0f;
-		Vec3f dir	= ( cos( angle ) * right + sin( angle ) * up );
-		Vec3f vel	= v + dir * 15.0f;
+		vec3 dir	= ( cos( angle ) * right + sin( angle ) * up );
+		vec3 vel	= v + dir * 15.0f;
 		
 		mPhotons.push_back( Photon( p + dir * 50.0f, vel ) );
 	}
 
 	// MAKE SMOKES
 	for( int i=0; i<3; i++ ){
-		mSmokes.push_back( Smoke( p, Vec3f::zero(), Rand::randFloat( 50.0f, 120.0f ), Rand::randFloat( 4.0f, 8.0f ) ) ); 
+		mSmokes.push_back( Smoke( p, vec3(), Rand::randFloat( 50.0f, 120.0f ), Rand::randFloat( 4.0f, 8.0f ) ) ); 
 	}
 }
 
@@ -436,7 +436,7 @@ void Controller::drawParticleShadows()
 		if( perDist < 1.0f ){
 //			float per = ( p->mPos.y - p->mRadius - y )/(yFloor * -0.25f );
 			gl::color( ColorA( 0.0f, 0.0f, 0.0f, 1.0f - perDist ) );
-			gl::drawBillboard( Vec3f( p->mPos.x, yFloor, p->mPos.z ), Vec2f( p->mRadius, p->mRadius ) * ( 4.0f + perDist * 7.0f ), 0.0f, Vec3f::xAxis(), Vec3f::zAxis() );
+			gl::drawBillboard( vec3( p->mPos.x, yFloor, p->mPos.z ), vec2( p->mRadius, p->mRadius ) * ( 4.0f + perDist * 7.0f ), 0.0f, vec3::xAxis(), vec3::zAxis() );
 		}
 	}
 }
@@ -450,36 +450,36 @@ void Controller::drawPhotons()
 	glEnd();
 }
 
-void Controller::drawShockwaves( const Vec3f &camPos )
+void Controller::drawShockwaves( const vec3 &camPos )
 {
 	for( vector<Shockwave>::iterator it = mShockwaves.begin(); it != mShockwaves.end(); ++it ){
 //		gl::color( ColorA( 1.0f, 1.0f, 1.0f, it->mAgePer ) );
-//		drawSphericalBillboard( camPos, it->mPos, Vec2f( it->mRadius, it->mRadius ), 0.0f );
+//		drawSphericalBillboard( camPos, it->mPos, vec2( it->mRadius, it->mRadius ), 0.0f );
 		
 		if( it->mAge < 1.5f ){
 			gl::color( ColorA( 1.0f, 0.05f, 0.05f, 1.0f ) );
-			drawSphericalBillboard( camPos, it->mPos, Vec2f( 800.0f, 800.0f ), it->mRot );
+			drawSphericalBillboard( camPos, it->mPos, vec2( 800.0f, 800.0f ), it->mRot );
 //		} else if( it->mAge < 2.5f ){
 //			gl::color( ColorA( 0.0f, 1.0f, 0.0f, 1.0f ) );
-//			drawSphericalBillboard( camPos, it->mPos, Vec2f( 800.0f, 800.0f ), 0.0f );
+//			drawSphericalBillboard( camPos, it->mPos, vec2( 800.0f, 800.0f ), 0.0f );
 		} else if( it->mAge < 2.5f ){
 			gl::color( ColorA( 0.05f, 0.05f, 1.0f, 1.0f ) );
-			drawSphericalBillboard( camPos, it->mPos, Vec2f( 600.0f, 600.0f ), it->mRot );
+			drawSphericalBillboard( camPos, it->mPos, vec2( 600.0f, 600.0f ), it->mRot );
 		}
 	}
 }
 
-void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPos, const Vec2f &scale, float rotInRadians )
+void Controller::drawSphericalBillboard( const vec3 &camEye, const vec3 &objPos, const vec2 &scale, float rotInRadians )
 {	
 	glPushMatrix();
 	glTranslatef( objPos.x, objPos.y, objPos.z );
 	
-	Vec3f lookAt = Vec3f::zAxis();
-	Vec3f upAux;
+	vec3 lookAt = vec3::zAxis();
+	vec3 upAux;
 	float angleCosine;
 	
-	Vec3f objToCam = ( camEye - objPos ).normalized();
-	Vec3f objToCamProj = Vec3f( objToCam.x, 0.0f, objToCam.z );
+	vec3 objToCam = ( camEye - objPos ).normalized();
+	vec3 objToCamProj = vec3( objToCam.x, 0.0f, objToCam.z );
 	objToCamProj.normalize();
 	
 	upAux = lookAt.cross( objToCamProj );
@@ -494,7 +494,7 @@ void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPo
 	else					glRotatef( toDegrees( acos(angleCosine) ),-1.0f, 0.0f, 0.0f );
 	
 	
-	Vec3f verts[4];
+	vec3 verts[4];
 	GLfloat texCoords[8] = { 0, 0, 0, 1, 1, 0, 1, 1 };
 	
 	glEnableClientState( GL_VERTEX_ARRAY );
@@ -510,10 +510,10 @@ void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPo
 	float scaleYSinA = 0.5f * scale.y * sinA;
 	float scaleYCosA = 0.5f * scale.y * cosA;
 	
-	verts[0] = Vec3f( ( -scaleXCosA - scaleYSinA ), ( -scaleXSinA + scaleYCosA ), 0.0f );
-	verts[1] = Vec3f( ( -scaleXCosA + scaleYSinA ), ( -scaleXSinA - scaleYCosA ), 0.0f );
-	verts[2] = Vec3f( (  scaleXCosA - scaleYSinA ), (  scaleXSinA + scaleYCosA ), 0.0f );
-	verts[3] = Vec3f( (  scaleXCosA + scaleYSinA ), (  scaleXSinA - scaleYCosA ), 0.0f );
+	verts[0] = vec3( ( -scaleXCosA - scaleYSinA ), ( -scaleXSinA + scaleYCosA ), 0.0f );
+	verts[1] = vec3( ( -scaleXCosA + scaleYSinA ), ( -scaleXSinA - scaleYCosA ), 0.0f );
+	verts[2] = vec3( (  scaleXCosA - scaleYSinA ), (  scaleXSinA + scaleYCosA ), 0.0f );
+	verts[3] = vec3( (  scaleXCosA + scaleYSinA ), (  scaleXSinA - scaleYCosA ), 0.0f );
 	
 	glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 	
@@ -523,7 +523,7 @@ void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPo
 	glPopMatrix();
 }
 
-void Controller::drawSmokes( const Vec3f &right, const Vec3f &up )
+void Controller::drawSmokes( const vec3 &right, const vec3 &up )
 {
 	BOOST_FOREACH( Smoke &smoke, mSmokes ){
 		smoke.draw( right, up );
@@ -556,19 +556,19 @@ void Controller::addParticles( int amt )
 {
 	for( int i=0; i<amt; i++ )
 	{
-		Vec3f bounds = mRoom->getDims();
+		vec3 bounds = mRoom->getDims();
 			
-		Vec3f pos = Vec3f( Rand::randFloat( -bounds.x, bounds.x ),
+		vec3 pos = vec3( Rand::randFloat( -bounds.x, bounds.x ),
 						   Rand::randFloat( -bounds.y, bounds.y ),
 						   Rand::randFloat( -bounds.z, bounds.z ) );
-		Vec3f vel = Vec3f::zero();
+		vec3 vel = vec3();
 		mParticles.push_back( Particle( pos, vel ) );
 	}
 }
 
-void Controller::addParticle( float charge, const Vec3f &pos )
+void Controller::addParticle( float charge, const vec3 &pos )
 {
-	mParticles.push_back( Particle( pos, Vec3f::zero(), charge ) );
+	mParticles.push_back( Particle( pos, vec3(), charge ) );
 }
 
 void Controller::preset( int i )
@@ -582,23 +582,23 @@ void Controller::preset( int i )
 	
 	if( i == 1 ){				// 2 Matter
 		float d = 5.0f;
-		addParticle( 1.0f, Vec3f( d, yFloor, 0.0f ) );
-		addParticle( 1.0f, Vec3f(-d, yFloor, 0.0f ) );
+		addParticle( 1.0f, vec3( d, yFloor, 0.0f ) );
+		addParticle( 1.0f, vec3(-d, yFloor, 0.0f ) );
 		
 	} else if( i == 2 ){		// 100 Matter
 		float dim = 12.0f;
 		for( int z=-12; z<12; z++ ){
 			for( int x=-12; x<12; x++ ){
 				float charge = 1.0f;
-				Vec3f pos = Vec3f( (float)x * dim, yFloor, (float)z * dim );
+				vec3 pos = vec3( (float)x * dim, yFloor, (float)z * dim );
 				addParticle( charge, pos );
 			}
 		}
 		
 	} else if( i == 3 ){		// 1 Matter 1 Antimatter
 		float d = 5.0f;
-		addParticle( 1.0f, Vec3f( d, yFloor, 0.0f ) );
-		addParticle(-1.0f, Vec3f(-d, yFloor, 0.0f ) );
+		addParticle( 1.0f, vec3( d, yFloor, 0.0f ) );
+		addParticle(-1.0f, vec3(-d, yFloor, 0.0f ) );
 		
 	} else if( i == 4 ){		// Segregated grid
 		float dim = 12.0f;
@@ -606,7 +606,7 @@ void Controller::preset( int i )
 			for( int x=-4; x<4; x++ ){
 				float charge = 1.0f;
 				if( x >= 0 ) charge = -1.0f;
-				Vec3f pos = Vec3f( (float)x * dim, yFloor, (float)z * dim );
+				vec3 pos = vec3( (float)x * dim, yFloor, (float)z * dim );
 				addParticle( charge, pos );
 			}
 		}
@@ -615,8 +615,8 @@ void Controller::preset( int i )
 			float x1 = -20.0f;
 			float x2 = 20.0f;
 			float z  = ( (float)i - 15.0f ) * 15.0f;
-			addParticle( 1.0, Vec3f( z, yFloor, x1 ) );
-			addParticle(-1.0, Vec3f( z, yFloor, x2 ) );
+			addParticle( 1.0, vec3( z, yFloor, x1 ) );
+			addParticle(-1.0, vec3( z, yFloor, x2 ) );
 		}
 	} else if( i == 6 ){		// 2 concentric rings, 1 of Matter, 1 of Antimatter
 		float numParticles = 100;	
@@ -631,7 +631,7 @@ void Controller::preset( int i )
 				float sinA	 = sin( angle );
 				float radius = 100.0f + k * 25.0f;
 				
-				addParticle( charge, Vec3f( cosA * radius, yFloor, sinA * radius ) );
+				addParticle( charge, vec3( cosA * radius, yFloor, sinA * radius ) );
 			}
 		}
 	} else if( i == 7 ){		// 2 concentric rings, 1 of Matter, 1 of Antimatter
@@ -647,7 +647,7 @@ void Controller::preset( int i )
 				float sinA	 = sin( angle );
 				float radius = 180.0f + k * 25.0f;
 				
-				addParticle( charge, Vec3f( cosA * radius, yFloor, sinA * radius ) );
+				addParticle( charge, vec3( cosA * radius, yFloor, sinA * radius ) );
 			}
 		}
 		
@@ -657,7 +657,7 @@ void Controller::preset( int i )
 			for( int x=-12; x<12; x++ ){
 				float charge = 1.0f;
 				if( x < 3 && x > -3 && z < 3 && z > -3 ) charge = -1.0f;
-				Vec3f pos = Vec3f( (float)x * dim, yFloor, (float)z * dim );
+				vec3 pos = vec3( (float)x * dim, yFloor, (float)z * dim );
 				addParticle( charge, pos );
 			}
 		}
@@ -667,7 +667,7 @@ void Controller::preset( int i )
 			for( int x=-12; x<12; x++ ){
 				float charge = 1.0f;
 				if( Rand::randBool() ) charge = -1.0f;
-				Vec3f pos = Vec3f( (float)x * dim, yFloor, (float)z * dim );
+				vec3 pos = vec3( (float)x * dim, yFloor, (float)z * dim );
 				addParticle( charge, pos );
 			}
 		}
@@ -678,7 +678,7 @@ void Controller::preset( int i )
 			for( int x=-12; x<12; x++ ){
 				float charge = 1.0f;
 				if( Rand::randBool() ) charge = -1.0f;
-				Vec3f pos = Vec3f( (float)x * dim, yFloor, (float)z * dim );
+				vec3 pos = vec3( (float)x * dim, yFloor, (float)z * dim );
 				addParticle( charge, pos );
 			}
 		}
@@ -688,7 +688,7 @@ void Controller::preset( int i )
 //			for( int x=-24; x<24; x++ ){
 //				float charge = 1.0f;
 //				if( Rand::randBool() ) charge = -1.0f;
-//				Vec3f pos = Vec3f( (float)x * dim, -mRoom->getBounds().y + 20.0f, (float)z * dim );
+//				vec3 pos = vec3( (float)x * dim, -mRoom->getBounds().y + 20.0f, (float)z * dim );
 //				addParticle( charge, pos );
 //			}
 //		}

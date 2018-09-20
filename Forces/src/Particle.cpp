@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "cinder/Sphere.h"
 #include "Particle.h"
@@ -15,11 +15,11 @@ using namespace ci;
 
 Particle::Particle(){}
 
-Particle::Particle( const Vec3f &pos, float charge )
+Particle::Particle( const vec3 &pos, float charge )
 	: mPos( pos ), mCharge( charge )
 {
-	mVel			= Vec3f::zero();
-	mAcc			= Vec3f::zero();
+	mVel			= vec3();
+	mAcc			= vec3();
 	mForce			= 0.0f;
 	
 	mRadius			= 1.0f;
@@ -36,7 +36,7 @@ void Particle::update( const Camera &cam, float dt )
 	
 	mVel += mAcc * dt;
 	mPos += mVel * dt;
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 	
 	mShellRadius = mRadius + fabs( mForce ) * 50000.0f;
 	
@@ -54,8 +54,8 @@ void Particle::addShards( int amt )
 {
 	int index = 0;
 	for( int i=0; i<amt; i++ ){
-		Vec3f dir		= Rand::randVec3f();
-		Vec3f pos		= mPos + dir;
+		vec3 dir		= Rand::randvec3();
+		vec3 pos		= mPos + dir;
 		dir.normalize();
 		
 		float height = Rand::randFloat( 1.0f, 3.0f );
@@ -63,7 +63,7 @@ void Particle::addShards( int amt )
 		if( Rand::randFloat() < 0.1f )
 			height *= 2.5f;
 		float radius = height * 0.1f;
-		mShards.push_back( Shard( Vec3f::zero(), dir, height, radius ) );
+		mShards.push_back( Shard( vec3(), dir, height, radius ) );
 		mShards.back().init( &mShardMesh, Color( mColor, mColor, mColor ) );
 		
 		index ++;

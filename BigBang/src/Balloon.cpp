@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "cinder/Sphere.h"
 #include "Balloon.h"
@@ -19,13 +19,13 @@ using namespace ci;
 
 Balloon::Balloon(){}
 
-Balloon::Balloon( const Vec3f &pos, int presetIndex )
+Balloon::Balloon( const vec3 &pos, int presetIndex )
 	: mPos( pos )
 {
-	mVel		= Rand::randVec3f() * Rand::randFloat( 3.0f, 13.0f );
-	mAcc		= Vec3f::zero();
+	mVel		= Rand::randvec3() * Rand::randFloat( 3.0f, 13.0f );
+	mAcc		= vec3();
 
-	mSpringPos	= mPos - Vec3f( 0.0f, 20.0f, 0.0f );
+	mSpringPos	= mPos - vec3( 0.0f, 20.0f, 0.0f );
 	mSpringVel	= mVel;
 	mSpringPos	= mAcc;
 	
@@ -58,7 +58,7 @@ Balloon::Balloon( const Vec3f &pos, int presetIndex )
 
 void Balloon::updateSpring( float dt )
 {
-	ci::Vec3f dir		= mSpringPos - ( mPos - Vec3f( 0.0f, 20.0f, 0.0f ) );
+	ci::vec3 dir		= mSpringPos - ( mPos - vec3( 0.0f, 20.0f, 0.0f ) );
 	float dist			= dir.length();
 	dir.safeNormalize();
 	float springForce	= -( dist - REST_LENGTH ) * SPRING_STRENGTH;
@@ -70,18 +70,18 @@ void Balloon::updateSpring( float dt )
 	mSpringVel += mSpringAcc * dt;
 	mSpringPos += mSpringVel * dt;
 	mSpringVel -= mSpringVel * 0.04 * dt;
-	mSpringAcc = ci::Vec3f::zero();
+	mSpringAcc = {};
 }
 
-void Balloon::update( const Camera &cam, const Vec3f &roomDims, float dt )
+void Balloon::update( const Camera &cam, const vec3 &roomDims, float dt )
 {
 	updateSpring( dt );
 	
-	mAcc += Vec3f( 0.0f, mBuoyancy, 0.0f );
+	mAcc += vec3( 0.0f, mBuoyancy, 0.0f );
 	mVel += mAcc * dt;
 	mPos += mVel * dt;
 	mVel -= mVel * 0.025f * dt;
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 	
 	mScreenPos		= cam.worldToScreen( mPos, app::getWindowWidth(), app::getWindowHeight() );
 //	mDistToCam		= -cam.worldToEyeDepth( mPos );
@@ -90,18 +90,18 @@ void Balloon::update( const Camera &cam, const Vec3f &roomDims, float dt )
 	
 	checkBounds( roomDims );
 	
-	Vec3f tiltAxis = ( mPos - mSpringPos ).normalized();
+	vec3 tiltAxis = ( mPos - mSpringPos ).normalized();
 	
 	mMatrix.setToIdentity();
 	mMatrix.translate( mPos );
 	mMatrix.rotate( tiltAxis, 2.0f );
-//	mMatrix.rotate( Vec3f( mAge * mXRot, mYRot, mAge * mZRot ) );
-	mMatrix.scale( Vec3f( mRadius, mRadius, mRadius ) );
+//	mMatrix.rotate( vec3( mAge * mXRot, mYRot, mAge * mZRot ) );
+	mMatrix.scale( vec3( mRadius, mRadius, mRadius ) );
 	
 	mAge += dt;
 }
 
-void Balloon::checkBounds( const Vec3f &roomDims )
+void Balloon::checkBounds( const vec3 &roomDims )
 {	
 	if( mPos.x - mRadius < -roomDims.x ){
 		mPos.x = -roomDims.x + mRadius;

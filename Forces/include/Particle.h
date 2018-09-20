@@ -15,23 +15,23 @@
 class Particle {
   public:
 	Particle();
-	Particle( const ci::Vec3f &pos, float charge );
+	Particle( const ci::vec3 &pos, float charge );
 	void update( const ci::Camera &cam, float dt );
 	void draw();
 	void addShards( int amt );
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
-	ci::Vec3f	mAcc;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
+	ci::vec3	mAcc;
 	float		mForce;	
 	float		mColor;
 	float		mRadius;
 	float		mShellRadius;
 	float		mCharge;
 	
-	ci::Matrix44f mMatrix;
+	ci::mat4 mMatrix;
 
-	ci::Vec2f	mScreenPos;
+	ci::vec2	mScreenPos;
 	float		mScreenRadius;
 	
 	std::vector<Shard>	mShards;

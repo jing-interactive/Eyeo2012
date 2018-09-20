@@ -6,7 +6,7 @@
 //  Copyright (c) 2011 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Rand.h"
 #include "Room.h"
@@ -20,7 +20,7 @@ Room::Room()
 {
 }
 
-Room::Room( const Vec3f &dims, bool isPowerOn, bool isGravityOn )
+Room::Room( const vec3 &dims, bool isPowerOn, bool isGravityOn )
 {	
 	// TIME
 	mTime			= (float)app::getElapsedSeconds();
@@ -37,26 +37,26 @@ Room::Room( const Vec3f &dims, bool isPowerOn, bool isGravityOn )
 	else			 mPower = 0.0f;
 	
 	mIsGravityOn	= isGravityOn;
-	mDefaultGravity = Vec3f( 0.0f, GRAVITY, 0.0f );
+	mDefaultGravity = vec3( 0.0f, GRAVITY, 0.0f );
 }
 
 void Room::init()
 {
 	int						index;
 	std::vector<uint32_t>	indices;
-	std::vector<ci::Vec3f>	posCoords;
-	std::vector<ci::Vec3f>	normals;
-	std::vector<ci::Vec2f>	texCoords;
+	std::vector<ci::vec3>	posCoords;
+	std::vector<ci::vec3>	normals;
+	std::vector<ci::vec2>	texCoords;
 	
 	float X = 1.0f;
 	float Y = 1.0f;
 	float Z = 1.0f;
 	
-	static Vec3f verts[8] = {
-		Vec3f(-X,-Y,-Z ), Vec3f(-X,-Y, Z ), 
-		Vec3f( X,-Y, Z ), Vec3f( X,-Y,-Z ),
-		Vec3f(-X, Y,-Z ), Vec3f(-X, Y, Z ), 
-		Vec3f( X, Y, Z ), Vec3f( X, Y,-Z ) };
+	static vec3 verts[8] = {
+		vec3(-X,-Y,-Z ), vec3(-X,-Y, Z ), 
+		vec3( X,-Y, Z ), vec3( X,-Y,-Z ),
+		vec3(-X, Y,-Z ), vec3(-X, Y, Z ), 
+		vec3( X, Y, Z ), vec3( X, Y,-Z ) };
 	
 	static GLuint vIndices[12][3] = { 
 		{0,1,3}, {1,2,3},	// floor
@@ -66,19 +66,19 @@ void Room::init()
 		{1,5,2}, {5,6,2},	// back
 		{3,7,0}, {7,4,0} }; // front
 	
-	static Vec3f vNormals[6] = {
-		Vec3f( 0, 1, 0 ),	// floor
-		Vec3f( 0,-1, 0 ),	// ceiling
-		Vec3f( 1, 0, 0 ),	// left	
-		Vec3f(-1, 0, 0 ),	// right
-		Vec3f( 0, 0,-1 ),	// back
-		Vec3f( 0, 0, 1 ) };	// front
+	static vec3 vNormals[6] = {
+		vec3( 0, 1, 0 ),	// floor
+		vec3( 0,-1, 0 ),	// ceiling
+		vec3( 1, 0, 0 ),	// left	
+		vec3(-1, 0, 0 ),	// right
+		vec3( 0, 0,-1 ),	// back
+		vec3( 0, 0, 1 ) };	// front
 	
-	static Vec2f vTexCoords[4] = {
-		Vec2f( 0.0f, 0.0f ),
-		Vec2f( 0.0f, 1.0f ), 
-		Vec2f( 1.0f, 1.0f ), 
-		Vec2f( 1.0f, 0.0f ) };
+	static vec2 vTexCoords[4] = {
+		vec2( 0.0f, 0.0f ),
+		vec2( 0.0f, 1.0f ), 
+		vec2( 1.0f, 1.0f ), 
+		vec2( 1.0f, 0.0f ) };
 	
 	static GLuint tIndices[12][3] = {
 		{0,1,3}, {1,2,3},	// floor
@@ -115,10 +115,10 @@ void Room::init()
 		texCoords.push_back( vTexCoords[tIndices[i][2]] );
 	}
 	
-	//	std::cout << "posCoords size = " << posCoords.size() << std::endl;
-	//	std::cout << "indices size = " << indices.size() << std::endl;
-	//	std::cout << "normals size = " << normals.size() << std::endl;
-	//	std::cout << "texCoords size = " << texCoords.size() << std::endl;	
+	//	console() << "posCoords size = " << posCoords.size() << std::endl;
+	//	console() << "indices size = " << indices.size() << std::endl;
+	//	console() << "normals size = " << normals.size() << std::endl;
+	//	console() << "texCoords size = " << texCoords.size() << std::endl;	
 	
 	mVbo = gl::VboMesh( posCoords.size(), indices.size(), layout, GL_TRIANGLES );	
 	mVbo.bufferIndices( indices );
@@ -152,7 +152,7 @@ void Room::update( bool saveFrames )
 	else				mPower -= ( mPower - 0.0f ) * 0.2f;
 	
 	if( mIsGravityOn )	mGravity -= ( mGravity - mDefaultGravity ) * 0.2f;
-	else				mGravity -= ( mGravity - Vec3f::zero() ) * 0.2f;
+	else				mGravity -= ( mGravity - vec3() ) * 0.2f;
 	
 	mDims -= ( mDims - mDimsDest ) * 0.1f;
 }
@@ -189,26 +189,26 @@ float Room::getLightPower()
 	return lightPower;
 }
 
-Vec3f Room::getRandCeilingPos()
+vec3 Room::getRandCeilingPos()
 {
-	return Vec3f( Rand::randFloat( -mDims.x * 0.8f, mDims.x * 0.8f ), 
+	return vec3( Rand::randFloat( -mDims.x * 0.8f, mDims.x * 0.8f ), 
 				 mDims.y, 
 				 Rand::randFloat( -mDims.z * 0.5f, mDims.z * 0.5f ) );
 }
 
-Vec3f Room::getCornerCeilingPos()
+vec3 Room::getCornerCeilingPos()
 {
-	return Vec3f( mDims.x, mDims.y,-mDims.z ) * 0.9f;
+	return vec3( mDims.x, mDims.y,-mDims.z ) * 0.9f;
 }
 
-Vec3f Room::getCornerFloorPos()
+vec3 Room::getCornerFloorPos()
 {
-	return Vec3f(-mDims.x,-mDims.y,-mDims.z ) * 0.9f;	
+	return vec3(-mDims.x,-mDims.y,-mDims.z ) * 0.9f;	
 }
 
-Vec3f Room::getLeftWallPos()
+vec3 Room::getLeftWallPos()
 {
-	return Vec3f( mDims.x, 0.0f, 0.0f ) * 0.9f;
+	return vec3( mDims.x, 0.0f, 0.0f ) * 0.9f;
 }
 
 float Room::getFloorLevel()

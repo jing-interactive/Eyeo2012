@@ -12,22 +12,22 @@
 class Confetti {
   public:
 	Confetti();
-	Confetti( const ci::Vec3f &pos, float speedMulti, int presetIndex );
-	void update( const ci::Vec3f &roomDims, float dt );
-	void checkBounds( const ci::Vec3f &roomDims );
+	Confetti( const ci::vec3 &pos, float speedMulti, int presetIndex );
+	void update( const ci::vec3 &roomDims, float dt );
+	void checkBounds( const ci::vec3 &roomDims );
 	void draw();
 	
-	ci::Vec3f		mPos;
-	ci::Vec3f		mVel;
-	ci::Vec3f		mDriftVel;
-	ci::Vec3f		mAcc;
+	ci::vec3		mPos;
+	ci::vec3		mVel;
+	ci::vec3		mDriftVel;
+	ci::vec3		mAcc;
 	
 	float			mRadius;
 	ci::Color		mColor;
 	float			mXRot, mYRot, mZRot;
 	float			mGravity;
 	
-	ci::Matrix44f	mMatrix;
+	ci::mat4	mMatrix;
 	
 	float			mAge;
 	float			mAgePer;

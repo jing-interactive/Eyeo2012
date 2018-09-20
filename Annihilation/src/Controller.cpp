@@ -1,5 +1,5 @@
 #include <boost/foreach.hpp>
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "cinder/Vector.h"
 #include "Controller.h"
@@ -51,21 +51,21 @@ void Controller::init( Room *room )
 void Controller::makeParticles()
 {
 	// MAKE MATTER
-	mMatter			= new Matter( Vec3f( mDistance * 0.5f, 0.0f, 0.0f ) );
+	mMatter			= new Matter( vec3( mDistance * 0.5f, 0.0f, 0.0f ) );
 	
 	// MAKE ANTIMATTER
-	mAntimatter		= new Antimatter( Vec3f( mDistance * -0.5f, 0.0f, 0.0f ) );
+	mAntimatter		= new Antimatter( vec3( mDistance * -0.5f, 0.0f, 0.0f ) );
 	
 	// MAKE PARTICLES (HAIRS)
 	mNumParticles	= mStartPositions.size();
 	for( int i=0; i<mNumParticles; i++ ){
-		Vec3f dir = mStartPositions[i];
+		vec3 dir = mStartPositions[i];
 		
 		mHairs.push_back( Hair() );
 		for( int k=0; k<NUM_SHELLS; k++ ){
 			float radius = mAntimatter->mRadius + mRadii[k];
 			float charge = k * k + 1.0f;
-			Vec3f pos = mAntimatter->mPos + dir * radius;
+			vec3 pos = mAntimatter->mPos + dir * radius;
 			mPhysics->makeParticle( 1.0f, pos, radius, charge );
 			Particle *newParticle = mPhysics->getParticle( mPhysics->numberOfParticles() - 1 );
 			newParticle->mId = (float)k + 1.0f;
@@ -88,8 +88,8 @@ void Controller::makeParticles()
 		}
 	}
 	
-	std::cout << "NUM HAIRS     = " << mHairs.size() << std::endl;
-	std::cout << "NUM PARTICLES = " << mPhysics->numberOfParticles() << std::endl;
+	console() << "NUM HAIRS     = " << mHairs.size() << std::endl;
+	console() << "NUM PARTICLES = " << mPhysics->numberOfParticles() << std::endl;
 }
 
 void Controller::createSphere( gl::VboMesh &vbo, int res, bool savePositions )
@@ -97,10 +97,10 @@ void Controller::createSphere( gl::VboMesh &vbo, int res, bool savePositions )
 	float X = 0.525731112119f; 
 	float Z = 0.850650808352f;
 	
-	static Vec3f verts[12] = {
-		Vec3f( -X, 0.0f, Z ), Vec3f( X, 0.0f, Z ), Vec3f( -X, 0.0f, -Z ), Vec3f( X, 0.0f, -Z ),
-		Vec3f( 0.0f, Z, X ), Vec3f( 0.0f, Z, -X ), Vec3f( 0.0f, -Z, X ), Vec3f( 0.0f, -Z, -X ),
-		Vec3f( Z, X, 0.0f ), Vec3f( -Z, X, 0.0f ), Vec3f( Z, -X, 0.0f ), Vec3f( -Z, -X, 0.0f ) };
+	static vec3 verts[12] = {
+		vec3( -X, 0.0f, Z ), vec3( X, 0.0f, Z ), vec3( -X, 0.0f, -Z ), vec3( X, 0.0f, -Z ),
+		vec3( 0.0f, Z, X ), vec3( 0.0f, Z, -X ), vec3( 0.0f, -Z, X ), vec3( 0.0f, -Z, -X ),
+		vec3( Z, X, 0.0f ), vec3( -Z, X, 0.0f ), vec3( Z, -X, 0.0f ), vec3( -Z, -X, 0.0f ) };
 	
 	static GLuint triIndices[20][3] = { 
 		{0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1}, {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
@@ -127,7 +127,7 @@ void Controller::createSphere( gl::VboMesh &vbo, int res, bool savePositions )
 	vbo.bufferTexCoords2d( 0, mTexCoords );
 }
 
-void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div, bool savePositions )
+void Controller::drawSphereTri( vec3 va, vec3 vb, vec3 vc, int div, bool savePositions )
 {
 	if( div <= 0 ){
 		mPosCoords.push_back( va );
@@ -136,7 +136,7 @@ void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div, bool save
 		mIndices.push_back( mIndex++ );
 		mIndices.push_back( mIndex++ );
 		mIndices.push_back( mIndex++ );
-		Vec3f vn = ( va + vb + vc ) * 0.3333f;
+		vec3 vn = ( va + vb + vc ) * 0.3333f;
 		mNormals.push_back( va );
 		mNormals.push_back( vb );
 		mNormals.push_back( vc );
@@ -171,13 +171,13 @@ void Controller::drawSphereTri( Vec3f va, Vec3f vb, Vec3f vc, int div, bool save
 		float v2 = (float)acos( vb.z ) / (float)M_PI;
 		float v3 = (float)acos( vc.z ) / (float)M_PI;
 		
-		mTexCoords.push_back( Vec2f( u1, v1 ) );
-		mTexCoords.push_back( Vec2f( u2, v2 ) );
-		mTexCoords.push_back( Vec2f( u3, v3 ) );
+		mTexCoords.push_back( vec2( u1, v1 ) );
+		mTexCoords.push_back( vec2( u2, v2 ) );
+		mTexCoords.push_back( vec2( u3, v3 ) );
 	} else {
-		Vec3f vab = ( ( va + vb ) * 0.5f ).normalized();
-		Vec3f vac = ( ( va + vc ) * 0.5f ).normalized();
-		Vec3f vbc = ( ( vb + vc ) * 0.5f ).normalized();
+		vec3 vab = ( ( va + vb ) * 0.5f ).normalized();
+		vec3 vac = ( ( va + vc ) * 0.5f ).normalized();
+		vec3 vbc = ( ( vb + vc ) * 0.5f ).normalized();
 		drawSphereTri( va, vab, vac, div-1, savePositions );
 		drawSphereTri( vb, vbc, vab, div-1, savePositions );
 		drawSphereTri( vc, vac, vbc, div-1, savePositions );
@@ -195,15 +195,15 @@ void Controller::applyForces()
 		// APPLY SHOCKWAVE FORCES
 		for( vector<Shockwave>::iterator shockIt = mShockwaves.begin(); shockIt != mShockwaves.end(); ++shockIt )
 		{
-			Vec3f dirToParticle = shockIt->mPos - (*it1)->mPos;
+			vec3 dirToParticle = shockIt->mPos - (*it1)->mPos;
 			float dist = dirToParticle.length();
 			if( dist > shockIt->mRadiusPrev && dist < shockIt->mRadius ){
-				Vec3f dirToParticleNorm = dirToParticle.normalized();
+				vec3 dirToParticleNorm = dirToParticle.normalized();
 				(*it1)->mVel -= ( dirToParticleNorm * shockIt->mImpulse )/dist * 1000.0f;
 				
 				if( mRoom->getTick() ){
 					for( int i=0; i<2; i++ ){
-						mSparks.push_back( Spark( (*it1)->mPos, Rand::randVec3f() * 2.0f ) );
+						mSparks.push_back( Spark( (*it1)->mPos, Rand::randvec3() * 2.0f ) );
 					}
 				}
 			}
@@ -213,7 +213,7 @@ void Controller::applyForces()
 		// APPLY REPULSIVE FORCES
 		vector<Particle*>::iterator it2 = it1;
 		for( std::advance( it2, 1 ); it2 != mPhysics->mParticles.end(); ++it2 ) {
-			Vec3f dir		= (*it1)->mPos - (*it2)->mPos;
+			vec3 dir		= (*it1)->mPos - (*it2)->mPos;
 			float distSqrd	= dir.lengthSquared();
 			
 			if( distSqrd < range ){
@@ -227,20 +227,20 @@ void Controller::applyForces()
 		
 		
 		// APPLY ATTRACTIVE FORCES
-		Vec3f dirToMatter	= (*it1)->mPos - mMatter->mPos;
+		vec3 dirToMatter	= (*it1)->mPos - mMatter->mPos;
 		float distToMatter	= dirToMatter.length() - mMatter->mRadius * 0.125f;
 		float q				= ( (*it1)->mCharge * mMatter->mCharge ) / (distToMatter*distToMatter);
 		(*it1)->mVel -= dirToMatter.normalized() * q * 65.0f * mRoom->getPower();
 
 		// APPLY REPULSIVE FORCE
-		Vec3f dirToAntimatter	= (*it1)->mPos - mAntimatter->mPos;
+		vec3 dirToAntimatter	= (*it1)->mPos - mAntimatter->mPos;
 		float distToAntimatter	= dirToAntimatter.length() - mAntimatter->mRadius * 0.125f;
 		q						= ( (*it1)->mCharge * mAntimatter->mCharge ) / (distToAntimatter*distToAntimatter);
 		(*it1)->mVel -= dirToAntimatter.normalized() * q * 365.0f * mRoom->getPower();
 		
 		// IF TOUCHING MATTER
 		if( distToMatter < mMatter->mRadius * 1.05f ){
-			Vec3f dir = (*it1)->mPos - mMatter->mPos;
+			vec3 dir = (*it1)->mPos - mMatter->mPos;
 			(*it1)->mPos = mMatter->mPos + dir.normalized() * mMatter->mRadius * 1.05f + dir * 0.1f;
 			(*it1)->mVel *= -0.3f;
 			if( mRoom->getPower() > 0.9f )
@@ -249,48 +249,48 @@ void Controller::applyForces()
 
 		// IF JIGGLY
 		if( mRoom->getPower() > 0.5f ){
-			(*it1)->mPos += Rand::randVec3f();
+			(*it1)->mPos += Rand::randvec3();
 		}
 		
 		// IF LOCKED
 		if( (*it1)->mIsLocked ){
-			Vec3f dir = (*it1)->mPos - mAntimatter->mPos;
+			vec3 dir = (*it1)->mPos - mAntimatter->mPos;
 			(*it1)->mPos = mAntimatter->mPos + (*it1)->mAnchorPos * (*it1)->mShellRadius;
 		}
 		
 		if( (*it1)->mId > NUM_SHELLS - 1.0f )
-			(*it1)->mVel += Vec3f::yAxis() * ( 1.0f - mRoom->getPower() ) * -0.9f;
+			(*it1)->mVel += {0, 1, 0} * ( 1.0f - mRoom->getPower() ) * -0.9f;
 	}
 }
 
 void Controller::zap( Particle *p )
 {
 	if( mRoom->getTick() ){
-		Vec3f pos	= p->mPos * 0.9f + mMatter->mPos * 0.1f;
-		Vec3f vel	= p->mVel;
-		Vec3f dir	= p->mPos - mMatter->mPos;
-		Vec3f dirNorm = dir.normalized();
-		Vec3f axis	= dir.normalized();
-		Vec3f right	= axis.cross( Vec3f::zAxis() ).normalized();
-		Vec3f up	= axis.cross( right ).normalized();
+		vec3 pos	= p->mPos * 0.9f + mMatter->mPos * 0.1f;
+		vec3 vel	= p->mVel;
+		vec3 dir	= p->mPos - mMatter->mPos;
+		vec3 dirNorm = dir.normalized();
+		vec3 axis	= dir.normalized();
+		vec3 right	= axis.cross( vec3::zAxis() ).normalized();
+		vec3 up	= axis.cross( right ).normalized();
 		right		= axis.cross( up ).normalized();
 		
 		float lifespan	= 10.0f;
 		float speed		= 15.0f;
 		mShockwaves.push_back( Shockwave( pos, up, lifespan, speed ) );
 		
-		gl::drawBillboard( pos, Vec2f( 10.0f, 10.0f ), 0.0f, right, up );
+		gl::drawBillboard( pos, vec2( 10.0f, 10.0f ), 0.0f, right, up );
 		
 		for( int i=0; i<8; i++ ){
-			mSmokes.push_back( Smoke( pos, Vec3f::zero(), Rand::randFloat( 2.0f, 4.0f ), Rand::randFloat( 3.0f, 5.0f ) ) ); 
+			mSmokes.push_back( Smoke( pos, vec3(), Rand::randFloat( 2.0f, 4.0f ), Rand::randFloat( 3.0f, 5.0f ) ) ); 
 		}
 		
-		mGlows.push_back( Glow( mMatter->mPos + dirNorm * mMatter->mRadius, Vec3f::zero(), 20.0f, 10.0f, right, up ) );
+		mGlows.push_back( Glow( mMatter->mPos + dirNorm * mMatter->mRadius, vec3(), 20.0f, 10.0f, right, up ) );
 		
-		Vec3f sparkPos = mMatter->mPos + dirNorm * mMatter->mRadius;
+		vec3 sparkPos = mMatter->mPos + dirNorm * mMatter->mRadius;
 		for( int i=0; i<50; i++ ){
-			Vec3f d	= dirNorm + Rand::randVec3f();
-			Vec3f v	= d * Rand::randFloat( 0.5f, 3.5f );
+			vec3 d	= dirNorm + Rand::randvec3();
+			vec3 v	= d * Rand::randFloat( 0.5f, 3.5f );
 			mSparks.push_back( Spark( sparkPos, v ) );
 		}
 	}
@@ -463,24 +463,24 @@ void Controller::drawMatterShadow( Room *room )
 		
 	if( perDist < 1.0f ){
 		gl::color( ColorA( 0.0f, 0.0f, 0.0f, 1.0f - perDist ) );
-		gl::drawBillboard( Vec3f( -xWall, mMatter->mPos.y, mMatter->mPos.z ), Vec2f( mMatter->mRadius, mMatter->mRadius ) * ( 4.0f + perDist * 15.0f ), 0.0f, Vec3f::yAxis(), Vec3f::zAxis() );
+		gl::drawBillboard( vec3( -xWall, mMatter->mPos.y, mMatter->mPos.z ), vec2( mMatter->mRadius, mMatter->mRadius ) * ( 4.0f + perDist * 15.0f ), 0.0f, {0, 1, 0}, vec3::zAxis() );
 	}
 }
 
-void Controller::drawShockwaves( const Vec3f &camPos )
+void Controller::drawShockwaves( const vec3 &camPos )
 {
 	for( vector<Shockwave>::iterator it = mShockwaves.begin(); it != mShockwaves.end(); ++it ){
 		if( it->mAge < 1.5f ){
 			gl::color( ColorA( 1.0f, 0.0f, 0.0f, 1.0f ) );
-			drawSphericalBillboard( camPos, it->mPos, Vec2f( 1000.0f, 1000.0f ), 0.0f );
+			drawSphericalBillboard( camPos, it->mPos, vec2( 1000.0f, 1000.0f ), 0.0f );
 			gl::color( ColorA( 0.0f, 0.0f, 1.0f, 1.0f ) );
-			drawSphericalBillboard( camPos, it->mPos, Vec2f( 400.0f, 400.0f ), 0.0f );
+			drawSphericalBillboard( camPos, it->mPos, vec2( 400.0f, 400.0f ), 0.0f );
 		} else if( it->mAge < 3.5f ){
 			gl::color( ColorA( 1.0f, 0.6f, 0.05f, 1.0f ) );
-			drawSphericalBillboard( camPos, it->mPos, Vec2f( 245.0f, 42.0f ), 0.0f );
+			drawSphericalBillboard( camPos, it->mPos, vec2( 245.0f, 42.0f ), 0.0f );
 		} else if( it->mAge < 5.5f ){
 			gl::color( ColorA( 0.05f, 0.05f, 1.0f, 1.0f ) );
-			drawSphericalBillboard( camPos, it->mPos, Vec2f( 825.0f, 125.0f ), 0.0f );
+			drawSphericalBillboard( camPos, it->mPos, vec2( 825.0f, 125.0f ), 0.0f );
 		}
 	}
 }
@@ -501,7 +501,7 @@ void Controller::drawSparks()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 }
 
-void Controller::drawSmokes( const Vec3f &right, const Vec3f &up )
+void Controller::drawSmokes( const vec3 &right, const vec3 &up )
 {
 	BOOST_FOREACH( Smoke &smoke, mSmokes ){
 		smoke.draw( right, up );
@@ -528,14 +528,14 @@ void Controller::drawHairs()
 		for( int s=0; s<numSegments; s++ ){
 			float sPer	= (float)s * invNumSegments;
 			
-			Vec3f p0 = hair.getPos(s);
-			Vec3f p1 = hair.getPos(s+1);
+			vec3 p0 = hair.getPos(s);
+			vec3 p1 = hair.getPos(s+1);
 			
-			Vec3f dir = p1 - p0;
+			vec3 dir = p1 - p0;
 			dir.normalize();
-			Vec3f perp1 = dir.cross( Vec3f::zAxis() );
+			vec3 perp1 = dir.cross( vec3::zAxis() );
 			perp1.normalize();
-			Vec3f perp2 = dir.cross( perp1 );
+			vec3 perp2 = dir.cross( perp1 );
 			perp2.normalize();
 			
 			for( int f=0; f<numFacets; f++ ){
@@ -543,16 +543,16 @@ void Controller::drawHairs()
 				float angle = hair.mInitRot + per * TWO_PI;
 				float cosa	= cos( angle );
 				float sina	= sin( angle );
-				Vec3f offset  = ( perp1 * cosa + perp2 * sina );
+				vec3 offset  = ( perp1 * cosa + perp2 * sina );
 				
 				mHairMesh.appendVertex( p0 + offset * 14.0f * hair.getRadii(s) );
 				mHairMesh.appendNormal( offset );
-				mHairMesh.appendTexCoord( Vec2f( per, sPer ) );
+				mHairMesh.appendTexCoord( vec2( per, sPer ) );
 			}
 		}
 		mHairMesh.appendVertex( hair.getTipPos() );
 		mHairMesh.appendNormal( hair.getTipDir() );
-		mHairMesh.appendTexCoord( Vec2f( 1.0f, 1.0f ) );
+		mHairMesh.appendTexCoord( vec2( 1.0f, 1.0f ) );
 	}
 	
 	
@@ -585,17 +585,17 @@ void Controller::drawHairs()
 	}
 }
 
-void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPos, const Vec2f &scale, float rotInRadians )
+void Controller::drawSphericalBillboard( const vec3 &camEye, const vec3 &objPos, const vec2 &scale, float rotInRadians )
 {	
 	glPushMatrix();
 	glTranslatef( objPos.x, objPos.y, objPos.z );
 	
-	Vec3f lookAt = Vec3f::zAxis();
-	Vec3f upAux;
+	vec3 lookAt = vec3::zAxis();
+	vec3 upAux;
 	float angleCosine;
 	
-	Vec3f objToCam = ( camEye - objPos ).normalized();
-	Vec3f objToCamProj = Vec3f( objToCam.x, 0.0f, objToCam.z );
+	vec3 objToCam = ( camEye - objPos ).normalized();
+	vec3 objToCamProj = vec3( objToCam.x, 0.0f, objToCam.z );
 	objToCamProj.normalize();
 	
 	upAux = lookAt.cross( objToCamProj );
@@ -610,7 +610,7 @@ void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPo
 	else					glRotatef( toDegrees( acos(angleCosine) ),-1.0f, 0.0f, 0.0f );
 	
 	
-	Vec3f verts[4];
+	vec3 verts[4];
 	GLfloat texCoords[8] = { 0, 0, 0, 1, 1, 0, 1, 1 };
 	
 	glEnableClientState( GL_VERTEX_ARRAY );
@@ -626,10 +626,10 @@ void Controller::drawSphericalBillboard( const Vec3f &camEye, const Vec3f &objPo
 	float scaleYSinA = 0.5f * scale.y * sinA;
 	float scaleYCosA = 0.5f * scale.y * cosA;
 	
-	verts[0] = Vec3f( ( -scaleXCosA - scaleYSinA ), ( -scaleXSinA + scaleYCosA ), 0.0f );
-	verts[1] = Vec3f( ( -scaleXCosA + scaleYSinA ), ( -scaleXSinA - scaleYCosA ), 0.0f );
-	verts[2] = Vec3f( (  scaleXCosA - scaleYSinA ), (  scaleXSinA + scaleYCosA ), 0.0f );
-	verts[3] = Vec3f( (  scaleXCosA + scaleYSinA ), (  scaleXSinA - scaleYCosA ), 0.0f );
+	verts[0] = vec3( ( -scaleXCosA - scaleYSinA ), ( -scaleXSinA + scaleYCosA ), 0.0f );
+	verts[1] = vec3( ( -scaleXCosA + scaleYSinA ), ( -scaleXSinA - scaleYCosA ), 0.0f );
+	verts[2] = vec3( (  scaleXCosA - scaleYSinA ), (  scaleXSinA + scaleYCosA ), 0.0f );
+	verts[3] = vec3( (  scaleXCosA + scaleYSinA ), (  scaleXSinA - scaleYCosA ), 0.0f );
 	
 	glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
 	

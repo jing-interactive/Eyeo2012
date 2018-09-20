@@ -18,9 +18,9 @@ SpringCam::SpringCam( float camDist, float aspectRatio )
 {
 	mCamDist		= camDist;
 	
-	mEye			= Vec3f( 0.0f, 0.0f, mCamDist );
-	mCenter			= Vec3f( 0.0f, 0.0f, 0.0f );
-	mUp				= Vec3f::yAxis();
+	mEye			= vec3( 0.0f, 0.0f, mCamDist );
+	mCenter			= vec3( 0.0f, 0.0f, 0.0f );
+	mUp				= {0, 1, 0};
 	
 	mEyeNode		= SpringNode( mEye );
 	mCenNode		= SpringNode( mCenter );
@@ -44,34 +44,34 @@ void SpringCam::update( float power, float dt )
 	mCenNode.update( dt );
 	
 	mCam.lookAt( mEyeNode.mPos, mCenNode.mPos, mUpNode.mPos );
-	mMvpMatrix = mCam.getProjectionMatrix() * mCam.getModelViewMatrix();
+	mMvpMatrix = mCam.getProjectionMatrix() * mCam.getViewMatrix();
 }
 
-void SpringCam::dragCam( const Vec2f &posOffset, float distFromCenter )
+void SpringCam::dragCam( const vec2 &posOffset, float distFromCenter )
 {
-	mEyeNode.mAcc += Vec3f( posOffset.xy(), distFromCenter );
+	mEyeNode.mAcc += vec3( posOffset.xy(), distFromCenter );
 }
 
-void SpringCam::setEye( const ci::Vec3f &eye )
+void SpringCam::setEye( const ci::vec3 &eye )
 {
 	mEyeNode.setPos( eye );
 }
 
 void SpringCam::resetEye()
 {
-	mEyeNode.setPos( Vec3f( 0.0f, 0.0f, mCamDist ) );
+	mEyeNode.setPos( vec3( 0.0f, 0.0f, mCamDist ) );
 }
 
 void SpringCam::setPreset( int i )
 {
 	if( i == 0 ){
-		mEyeNode.setPos( Vec3f( 0.0f, 0.0f, mCamDist ) );
-		mCenNode.setPos( Vec3f( 0.0f, -100.0f, 0.0f ) );
+		mEyeNode.setPos( vec3( 0.0f, 0.0f, mCamDist ) );
+		mCenNode.setPos( vec3( 0.0f, -100.0f, 0.0f ) );
 	} else if( i == 1 ){
-		mEyeNode.setPos( Vec3f( mCamDist * 0.4f, -175.0f, -100.0f ) );
-		mCenNode.setPos( Vec3f( 0.0f, -190.0f, 0.0f ) );
+		mEyeNode.setPos( vec3( mCamDist * 0.4f, -175.0f, -100.0f ) );
+		mCenNode.setPos( vec3( 0.0f, -190.0f, 0.0f ) );
 	} else if( i == 2 ){
-		mEyeNode.setPos( Vec3f( -174.0f, -97.8f, -20.0f ) );
-		mCenNode.setPos( Vec3f( 0.0f, -190.0f, 0.0f ) );
+		mEyeNode.setPos( vec3( -174.0f, -97.8f, -20.0f ) );
+		mCenNode.setPos( vec3( 0.0f, -190.0f, 0.0f ) );
 	}
 }

@@ -7,7 +7,7 @@
 //
 
 #include "Shockwave.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 
@@ -17,9 +17,9 @@ Shockwave::Shockwave()
 {
 }
 
-Shockwave::Shockwave( const Vec3f &pos, float lifespan, float speed )
+Shockwave::Shockwave( const vec3 &pos, float lifespan, float speed )
 {
-	mPos			= pos + Vec3f( 0.1f, 0.1f, 0.1f );
+	mPos			= pos + vec3( 0.1f, 0.1f, 0.1f );
 	mRadius			= 1.0f;
 	mRadiusPrev		= 0.0f;
 	mLifespan		= lifespan;
@@ -44,7 +44,7 @@ void Shockwave::update( float dt ){
 	
 	mMatrix.setToIdentity();
 	mMatrix.translate( mPos );
-	mMatrix.scale( Vec3f( mRadius, mRadius, mRadius ) );
+	mMatrix.scale( vec3( mRadius, mRadius, mRadius ) );
 	
 	mAge		+= dt;
 	mAgePer		= 1.0f - mAge/mLifespan;

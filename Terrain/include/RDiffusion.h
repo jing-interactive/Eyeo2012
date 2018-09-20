@@ -20,21 +20,21 @@ class RDiffusion {
 	void			update( float dt, ci::gl::GlslProg *shader,
 							const ci::gl::Texture &glowTex, 
 						    const bool &isPressed, 
-						    const ci::Vec2f &mousePos,
+						    const ci::vec2 &mousePos,
 						    float zoom );
-	void			drawIntoHeightsFbo( ci::gl::GlslProg *shader, ci::Vec3f scale );
+	void			drawIntoHeightsFbo( ci::gl::GlslProg *shader, ci::vec3 scale );
 	void			drawIntoNormalsFbo( ci::gl::GlslProg *shader );
 	void			draw();
 	void			setMode( int index );
-	ci::Vec2i		toFboVec( const ci::Vec3f &pos, float scale, float res );
+	ci::Vec2i		toFboVec( const ci::vec3 &pos, float scale, float res );
 	ci::gl::Texture getTexture();
 	ci::gl::Texture getHeightsTexture();
 	ci::gl::Texture getNormalsTexture();
 	
 	int					mFboWidth, mFboHeight;
-	ci::Vec2f			mFboSize;
+	ci::vec2			mFboSize;
 	ci::Area			mFboBounds;
-	ci::Vec2f			mWindowSize;
+	ci::vec2			mWindowSize;
 	ci::Area			mWindowBounds;
 	
 	float				mXOffset, mYOffset;
@@ -46,7 +46,7 @@ class RDiffusion {
 	ci::gl::Fbo			mNormalsFbo;
 
 	float				mKernel[9];	
-	ci::Vec2f			mOffset[9];
+	ci::vec2			mOffset[9];
 
 	float				mParamU;
 	float				mParamV;

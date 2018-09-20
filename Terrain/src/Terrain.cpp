@@ -30,9 +30,9 @@ Terrain::Terrain( int vboWidth, int vboHeight )
 	mVboMesh = gl::VboMesh( totalVertices, totalQuads * 4, layout, GL_QUADS );
 	
 	// buffer our static data - the texcoords and the indices
-	vector<Vec3f>		positions;
+	vector<vec3>		positions;
 	vector<uint32_t>	indices;
-	vector<Vec2f>		texCoords;
+	vector<vec2>		texCoords;
 	for( int x = 0; x < mVboWidth; ++x ) {
 		for( int z = 0; z < mVboHeight; ++z ) {
 			// create a quad for each vertex, except for along the bottom and right edges
@@ -43,10 +43,10 @@ Terrain::Terrain( int vboWidth, int vboHeight )
 				indices.push_back( (x+0) * mVboHeight + (z+1) );
 			}
 			// the texture coordinates are mapped to [0,1.0)
-			texCoords.push_back( Vec2f( x / (float)mVboWidth, z / (float)mVboHeight ) );
+			texCoords.push_back( vec2( x / (float)mVboWidth, z / (float)mVboHeight ) );
 			float xp = ( x - mVboWidth * 0.5f );
 			float zp = ( z - mVboHeight * 0.5f );
-			positions.push_back( Vec3f( xp, 0.0f, zp ) );
+			positions.push_back( vec3( xp, 0.0f, zp ) );
 		}
 	}
 	
@@ -70,7 +70,7 @@ void Terrain::draw()
 	gl::draw( mVboMesh );
 }
 
-float Terrain::getAltitude( const ci::Vec3f &pos )
+float Terrain::getAltitude( const ci::vec3 &pos )
 {
 	return 0.0f;
 }

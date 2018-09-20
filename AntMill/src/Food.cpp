@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "Food.h"
 
 using namespace ci;
@@ -15,20 +15,20 @@ Food::Food()
 {
 }
 
-Food::Food( const Vec3f &pos, float charge )
+Food::Food( const vec3 &pos, float charge )
 	: mPos( pos ), mCharge( charge )
 {
-	mVel		= Vec3f::zero();
+	mVel		= vec3();
 	mGrabbed	= false;
 	float c		= mCharge * 0.5f + 0.5f;
 	mColor		= Color( c, c, c );
 	mIsGone		= false;
 }
 
-void Food::update( float dt, const Vec3f &roomDims )
+void Food::update( float dt, const vec3 &roomDims )
 {
 	if( mIsGone ){
-		mVel += Vec3f( 0.0f, -0.2f, 0.0f );
+		mVel += vec3( 0.0f, -0.2f, 0.0f );
 	}
 	
 	mPos += mVel * dt;
@@ -42,7 +42,7 @@ void Food::draw()
 	gl::drawSphere( mPos, 2.0f, 4 );
 }
 
-void Food::stayInBounds( Vec3f *v, const Vec3f &roomDims )
+void Food::stayInBounds( vec3 *v, const vec3 &roomDims )
 {
 //	float boundsOffset = 1.0f;
 	if( v->x < -roomDims.x ){

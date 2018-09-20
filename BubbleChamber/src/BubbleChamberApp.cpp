@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Text.h"
 #include "cinder/gl/Texture.h"
@@ -22,7 +22,7 @@ using namespace std;
 #define APP_HEIGHT		720
 #define ROOM_FBO_RES	2
 
-class BubbleChamberApp : public AppBasic {
+class BubbleChamberApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -54,7 +54,7 @@ class BubbleChamberApp : public AppBasic {
 	gl::Fbo				mRoomFbo;
 
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 	// CONTROLLER
@@ -78,10 +78,10 @@ void BubbleChamberApp::setup()
 
 	// LOAD SHADERS
 	try {
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mGlowCubeShader	= gl::GlslProg( loadResource( "glowCube.vert" ), loadResource( "glowCube.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mGlowCubeShader	= gl::GlslProg::create( loadResource( "glowCube.vert" ), loadResource( "glowCube.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -92,23 +92,23 @@ void BubbleChamberApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mSmokeTex		= gl::Texture( loadImage( loadResource( "smoke.png" ) ) );
-	mDecalTex		= gl::Texture( loadImage( loadResource( "decal.png" ) ) );
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconBubbleChamber.png" ) ), mipFmt );
+	mSmokeTex		= gl::Texture::create( loadImage( loadResource( "smoke.png" ) ) );
+	mDecalTex		= gl::Texture::create( loadImage( loadResource( "decal.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconBubbleChamber.png" ) ), mipFmt );
 	
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= true;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	// MOUSE
-	mMousePos		= Vec2f::zero();
-	mMouseDownPos	= Vec2f::zero();
-	mMouseOffset	= Vec2f::zero();
+	mMousePos		= vec2();
+	mMouseDownPos	= vec2();
+	mMouseOffset	= vec2();
 	mMousePressed	= false;
 
 	// CONTROLLER
@@ -123,13 +123,13 @@ void BubbleChamberApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void BubbleChamberApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void BubbleChamberApp::mouseMove( MouseEvent event )
@@ -189,31 +189,31 @@ void BubbleChamberApp::update()
 
 void BubbleChamberApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mCam.getEyePoint() );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -225,7 +225,7 @@ void BubbleChamberApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -234,7 +234,7 @@ void BubbleChamberApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -266,7 +266,7 @@ void BubbleChamberApp::draw()
 	mController.drawDecals();
 	
 	// SMOKES
-	Vec3f right, up;
+	vec3 right, up;
 	mSpringCam.getCam().getBillboardVectors( &right, &up );
 	mSmokeTex.bind( 0 );
 	mController.drawSmokes( right, up );
@@ -296,7 +296,7 @@ void BubbleChamberApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -318,11 +318,11 @@ void BubbleChamberApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();

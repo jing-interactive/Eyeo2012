@@ -12,18 +12,18 @@
 class Streamer {
   public:
 	Streamer();
-	Streamer( const ci::Vec3f &pos, int presetIndex );
-	void update( const ci::Vec3f &roomDims, float dt, bool tick );
-	void checkBounds( const ci::Vec3f &roomDims );
+	Streamer( const ci::vec3 &pos, int presetIndex );
+	void update( const ci::vec3 &roomDims, float dt, bool tick );
+	void checkBounds( const ci::vec3 &roomDims );
 	void draw();
 	
-	ci::Vec3f	mPos;
+	ci::vec3	mPos;
 	int			mLen;
-	std::vector<ci::Vec3f>	mPositions;
-	std::vector<ci::Vec3f>	mVelocities;
-	std::vector<ci::Vec3f>	mAccels;
-	ci::Vec3f	mVel;
-	ci::Vec3f	mAcc;
+	std::vector<ci::vec3>	mPositions;
+	std::vector<ci::vec3>	mVelocities;
+	std::vector<ci::vec3>	mAccels;
+	ci::vec3	mVel;
+	ci::vec3	mAcc;
 	
 	float		mGravity;
 	

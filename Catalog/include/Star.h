@@ -10,7 +10,7 @@
 
 class Star {
 public:
-	Star( ci::Vec3f pos, 
+	Star( ci::vec3 pos, 
 		  float apparentMag,
 		  float absoluteMag, 
 		  float color, 
@@ -19,14 +19,14 @@ public:
 		  const ci::Font &fontS, 
 		  const ci::Font &fontM );
 	void update( const ci::Camera &cam, float scale );
-	void drawName( const ci::Vec2f &mousePos, float power, float alpha );
+	void drawName( const ci::vec2 &mousePos, float power, float alpha );
 
-	ci::Vec3f	mInitPos;
-	ci::Vec3f	mPos;
+	ci::vec3	mInitPos;
+	ci::vec3	mPos;
 	ci::Sphere	mSphere;
 	float		mColor;
 	
-	ci::Vec2f	mScreenPos;
+	ci::vec2	mScreenPos;
 	float		mScreenRadius;
 	float		mDistToCam;
 	float		mDistToCamPer;

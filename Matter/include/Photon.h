@@ -6,16 +6,16 @@
 class Photon {
 public:
 	Photon();
-	Photon( ci::Vec3f pos, ci::Vec3f vel );
+	Photon( ci::vec3 pos, ci::vec3 vel );
 	void update( float t );
 	void draw();
 	void drawTail();
 	
 	int			mLen;
-	std::vector<ci::Vec3f> mPs;
+	std::vector<ci::vec3> mPs;
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
 	
 	float		mRadius;
 	

@@ -13,18 +13,18 @@
 class Controller {
 public:
 	struct AnchorVertex {
-        ci::Vec3f vertex;
+        ci::vec3 vertex;
         ci::Vec4f color;
     };
 	
 	Controller();
 	void init( Room *room );
 	void createSphere( ci::gl::VboMesh &mesh, int res );
-	void drawSphereTri( ci::Vec3f va, ci::Vec3f vb, ci::Vec3f vc, int div );
+	void drawSphereTri( ci::vec3 va, ci::vec3 vb, ci::vec3 vc, int div );
 	void applyShockwavesToCam( SpringCam &cam );
 	void applyShockwavesToTime();
 	void applyForceToParticles();
-	bool didParticlesCollide( const ci::Vec3f &dir, const ci::Vec3f &dirNormal, const float dist, const float sumRadii, const float sumRadiiSqrd, ci::Vec3f *moveVec );
+	bool didParticlesCollide( const ci::vec3 &dir, const ci::vec3 &dirNormal, const float dist, const float sumRadii, const float sumRadiiSqrd, ci::vec3 *moveVec );
 	void annihilate( Particle *p1, Particle *p2 );
 	void update();
 	void reset();
@@ -32,12 +32,12 @@ public:
 	void draw( ci::gl::GlslProg *shader );
 	void drawParticleShadows();
 	void drawPhotons();
-	void drawShockwaves( const ci::Vec3f &camPos );
-	void drawSmokes( const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawSphericalBillboard( const ci::Vec3f &camEye, const ci::Vec3f &objPos, const ci::Vec2f &scale, float rotInRadians );
+	void drawShockwaves( const ci::vec3 &camPos );
+	void drawSmokes( const ci::vec3 &right, const ci::vec3 &up );
+	void drawSphericalBillboard( const ci::vec3 &camEye, const ci::vec3 &objPos, const ci::vec2 &scale, float rotInRadians );
 	void finish();
 	void addParticles( int amt );
-	void addParticle( float charge, const ci::Vec3f &pos );
+	void addParticle( float charge, const ci::vec3 &pos );
 	void removeParticles( int amt );
 	void preset( int i );
 
@@ -54,9 +54,9 @@ public:
 	ci::gl::VboMesh			mSphereLo, mSphereHi;
 	int						mIndex;
 	std::vector<uint32_t>	mIndices;
-	std::vector<ci::Vec3f>	mPosCoords;
-	std::vector<ci::Vec3f>	mNormals;
-	std::vector<ci::Vec2f>	mTexCoords;
+	std::vector<ci::vec3>	mPosCoords;
+	std::vector<ci::vec3>	mNormals;
+	std::vector<ci::vec2>	mTexCoords;
 	
 	int mPreset;
 	bool mRecycle;

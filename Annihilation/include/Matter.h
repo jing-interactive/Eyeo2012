@@ -15,11 +15,11 @@
 class Matter {
 public:
 	Matter();
-	Matter( ci::Vec3f po );
+	Matter( ci::vec3 po );
 	void update( Room *room, float t );
 	void draw( ci::gl::VboMesh &sphereHi );
 
-	ci::Vec3f	mPos;
+	ci::vec3	mPos;
 
 	ci::Color	mCol;
 	

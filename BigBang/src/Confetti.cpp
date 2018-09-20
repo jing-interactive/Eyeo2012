@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "cinder/Quaternion.h"
 #include "Confetti.h"
@@ -15,13 +15,13 @@ using namespace ci;
 
 Confetti::Confetti(){}
 
-Confetti::Confetti( const Vec3f &pos, float speedMulti, int presetIndex )
+Confetti::Confetti( const vec3 &pos, float speedMulti, int presetIndex )
 	: mPos( pos )
 {
-	mVel		= Rand::randVec3f() * Rand::randFloat( 25.0f, 50.0f ) * speedMulti;
-	mDriftVel	= Rand::randVec3f() * 0.3f;
+	mVel		= Rand::randvec3() * Rand::randFloat( 25.0f, 50.0f ) * speedMulti;
+	mDriftVel	= Rand::randvec3() * 0.3f;
 	mDriftVel.y = 0.0f;
-	mAcc		= Vec3f::zero();
+	mAcc		= vec3();
 	
 	mRadius		= 2.0f;
 	
@@ -31,7 +31,7 @@ Confetti::Confetti( const Vec3f &pos, float speedMulti, int presetIndex )
 	mYRot		= Rand::randFloat( 90.0f );
 	mZRot		= Rand::randFloat( 10.0f, 25.0f );
 	
-	Vec3f axis	= Rand::randVec3f();
+	vec3 axis	= Rand::randvec3();
 	axis.y = 0.0f;
 	mMatrix.setToIdentity();
 	
@@ -43,7 +43,7 @@ Confetti::Confetti( const Vec3f &pos, float speedMulti, int presetIndex )
 	mHasLanded	= false;
 }
 
-void Confetti::update( const Vec3f &roomDims, float dt )
+void Confetti::update( const vec3 &roomDims, float dt )
 {
 //	if( mPos.y <= -roomDims.y ){
 //		mPos.y = -roomDims.y;
@@ -56,12 +56,12 @@ void Confetti::update( const Vec3f &roomDims, float dt )
 	
 	
 	if( mPos.y > -roomDims.y ){
-		mAcc += Vec3f( 0.0f, mGravity, 0.0f );
+		mAcc += vec3( 0.0f, mGravity, 0.0f );
 		mVel += mAcc * dt;
 		mPos += mVel * dt;
 		mPos += mDriftVel * dt;
 		mVel -= mVel * 0.15f * dt;
-		mAcc = Vec3f::zero();
+		mAcc = vec3();
 		
 		checkBounds( roomDims );
 	} else {
@@ -76,11 +76,11 @@ void Confetti::update( const Vec3f &roomDims, float dt )
 	
 	mMatrix.setToIdentity();
 	mMatrix.translate( mPos );
-	mMatrix.rotate( Vec3f( mAge * mXRot, mYRot, mAge * mZRot ) );
-	mMatrix.scale( Vec3f( mRadius, 0.1f, mRadius ) * mAgePer );
+	mMatrix.rotate( vec3( mAge * mXRot, mYRot, mAge * mZRot ) );
+	mMatrix.scale( vec3( mRadius, 0.1f, mRadius ) * mAgePer );
 }
 
-void Confetti::checkBounds( const Vec3f &roomDims )
+void Confetti::checkBounds( const vec3 &roomDims )
 {	
 	if( mPos.x - mRadius < -roomDims.x ){
 		mPos.x = -roomDims.x + mRadius;
@@ -107,7 +107,7 @@ void Confetti::checkBounds( const Vec3f &roomDims )
 void Confetti::draw()
 {
 	gl::color( mColor );
-	gl::drawCube( Vec3f::zero(), Vec3f( 1.0f, 1.0f, 1.0f ) );
+	gl::drawCube( vec3(), vec3( 1.0f, 1.0f, 1.0f ) );
 }
 
 

@@ -1,7 +1,7 @@
 #include "Photon.h"
 #include "cinder/Rand.h"
 #include "cinder/gl/gl.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 
 using namespace ci;
 
@@ -9,7 +9,7 @@ Photon::Photon()
 {
 }
 
-Photon::Photon( Vec3f pos, Vec3f vel )
+Photon::Photon( vec3 pos, vec3 vel )
 {
 	mPos			= pos;
 	mVel			= vel;

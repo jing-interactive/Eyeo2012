@@ -15,13 +15,13 @@
 class Shockwave {
   public:
 	Shockwave();
-	Shockwave( const ci::Vec3f &pos, float lifespan, float speed );
+	Shockwave( const ci::vec3 &pos, float lifespan, float speed );
 	void update( float timeDelta );
 	void draw();
 	
-	ci::Matrix44f	mMatrix;
+	ci::mat4	mMatrix;
 	
-	ci::Vec3f	mPos;
+	ci::vec3	mPos;
 	float		mRadius, mRadiusPrev;
 	float		mStrength;
 	float		mImpulse;

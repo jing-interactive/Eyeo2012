@@ -13,19 +13,19 @@
 class GlowCube {
 public:
 	GlowCube();
-	GlowCube( const ci::Vec3f &pos );
+	GlowCube( const ci::vec3 &pos );
 	void update( float dt );
 	void draw();
 	
-	ci::Vec3f		mPos;
-	ci::Vec3f		mVel;
-	ci::Vec3f		mAcc;
+	ci::vec3		mPos;
+	ci::vec3		mVel;
+	ci::vec3		mAcc;
 	
-	ci::Vec3f		mAxis;
+	ci::vec3		mAxis;
 	float			mAngle, mAngleVel;
 	float			mRadius;
 	
-	ci::Matrix44f	mMatrix;
+	ci::mat4	mMatrix;
 	
 	float			mAge;
 	float			mAgePer;

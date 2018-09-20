@@ -7,7 +7,7 @@
 //
 
 #include "Shockwave.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 
@@ -17,7 +17,7 @@ Shockwave::Shockwave()
 {
 }
 
-Shockwave::Shockwave( const Vec3f &pos, const Vec3f &axis, float lifespan, float speed )
+Shockwave::Shockwave( const vec3 &pos, const vec3 &axis, float lifespan, float speed )
 {
 	mPos			= pos;
 	mAxis			= axis;

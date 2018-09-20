@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Glob.h"
@@ -17,7 +17,7 @@ Glob::Glob()
 {
 }
 
-Glob::Glob( const Vec3f &pos, const Vec3f &vel, float radius, float lifespan )
+Glob::Glob( const vec3 &pos, const vec3 &vel, float radius, float lifespan )
 {
 	mPos			= pos;
 	mVel			= vel;
@@ -33,7 +33,7 @@ Glob::Glob( const Vec3f &pos, const Vec3f &vel, float radius, float lifespan )
 
 void Glob::update( float floorLevel, float dt )
 {
-	mVel	+= Vec3f( 0.0f, -0.12f, 0.0f );
+	mVel	+= vec3( 0.0f, -0.12f, 0.0f );
 	mPos	+= mVel * dt;
 	mVel	-= mVel * 0.01 * dt;
 	
@@ -51,7 +51,7 @@ void Glob::update( float floorLevel, float dt )
 	}
 }
 
-void Glob::draw( const Vec3f &right, const Vec3f &up )
+void Glob::draw( const vec3 &right, const vec3 &up )
 {
-	gl::drawBillboard( mPos, Vec2f( mRadius, mRadius ), 0.0f, right, up );
+	gl::drawBillboard( mPos, vec2( mRadius, mRadius ), 0.0f, right, up );
 }

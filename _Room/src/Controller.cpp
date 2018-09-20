@@ -2,7 +2,7 @@
 //  Controller.cpp
 //  PROTOTYPE
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Controller.h"

@@ -12,14 +12,14 @@ class Food
 {
   public:
 	Food();
-	Food( const ci::Vec3f &pos, float charge );
-	void update( float dt, const ci::Vec3f &roomDims );
+	Food( const ci::vec3 &pos, float charge );
+	void update( float dt, const ci::vec3 &roomDims );
 	void draw();
-	void stayInBounds( ci::Vec3f *v, const ci::Vec3f &roomDims );
+	void stayInBounds( ci::vec3 *v, const ci::vec3 &roomDims );
 	
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
 	float		mCharge;
 	ci::Color	mColor;
 	bool		mGrabbed;

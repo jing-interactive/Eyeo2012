@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "Nebula.h"
@@ -17,7 +17,7 @@ Nebula::Nebula()
 {
 }
 
-Nebula::Nebula( const Vec3f &pos, const Vec3f &vel, float radius, float lifespan )
+Nebula::Nebula( const vec3 &pos, const vec3 &vel, float radius, float lifespan )
 {
 	mPos			= pos;
 	mVel			= vel;
@@ -48,7 +48,7 @@ void Nebula::update( float dt )
 	}
 }
 
-void Nebula::draw( const Vec3f &right, const Vec3f &up )
+void Nebula::draw( const vec3 &right, const vec3 &up )
 {
-	gl::drawBillboard( mPos, Vec2f( mRadius, mRadius ), mRot, right, up );
+	gl::drawBillboard( mPos, vec2( mRadius, mRadius ), mRot, right, up );
 }

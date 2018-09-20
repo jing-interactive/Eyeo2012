@@ -18,7 +18,7 @@ Particle::Particle()
 {
 }
 
-Particle::Particle( Controller *controller, int gen, const Vec3f &pos, const Vec3f &dir, float speed, int len )
+Particle::Particle( Controller *controller, int gen, const vec3 &pos, const vec3 &dir, float speed, int len )
 	: mController( controller ), mGen( gen ), mPos( pos ), mSpeed( speed ), mLen( len )
 {
 	mVel				= dir * mSpeed;
@@ -32,9 +32,9 @@ Particle::Particle( Controller *controller, int gen, const Vec3f &pos, const Vec
 	
 	mRay				= Ray( mPos, mVel.normalized() );
 	
-	mAxis				= dir.cross( Rand::randVec3f() );
+	mAxis				= dir.cross( Rand::randvec3() );
 	mAxis.normalize();
-	mPerp1				= mAxis.cross( Vec3f::yAxis() );
+	mPerp1				= mAxis.cross( {0, 1, 0} );
 	mPerp1.normalize();
 	mPerp2				= mAxis.cross( mPerp1 );
 	mPerp2.normalize();
@@ -52,8 +52,8 @@ Particle::Particle( Controller *controller, int gen, const Vec3f &pos, const Vec
 	mIsDying			= false;
 	mDyingCount			= 0.0f;
 	
-//	Vec3f origin		= Vec3f( 0.0f, -room->getDimensions().y, 0.0f );
-//	Vec3f normal		= Vec3f( 0.0f, 1.0f, 0.0f );
+//	vec3 origin		= vec3( 0.0f, -room->getDimensions().y, 0.0f );
+//	vec3 normal		= vec3( 0.0f, 1.0f, 0.0f );
 //	float distance;
 //	mIntersectsFloor	= mRay.calcPlaneIntersection( origin, normal, &distance );
 //	mDeathPos			= mRay.getOrigin() + mRay.getDirection() * distance;
@@ -66,7 +66,7 @@ void Particle::update( Room *room, float dt, bool tick )
 			mVel		-= mVel * 0.025f * dt;
 			mAngleDelta += mAngleDeltaDelta * dt;
 			mAngle		+= mCharge * mAngleDelta * dt;
-			Vec3f dir	 = ( cos( mAngle ) * mPerp1 + sin( mAngle ) * mPerp2 );
+			vec3 dir	 = ( cos( mAngle ) * mPerp1 + sin( mAngle ) * mPerp2 );
 			mVel		+= dir * dt;
 		}
 		
@@ -103,18 +103,18 @@ void Particle::update( Room *room, float dt, bool tick )
 bool Particle::isOutOfBounds( Room *room )
 {	
 	bool b		= false;
-	Vec3f dim	= room->getDims();
+	vec3 dim	= room->getDims();
 	if( mPos.x < -dim.x || mPos.x > dim.x ){
 		b = true;
 		
-		Vec3f origin;
-		Vec3f normal;
+		vec3 origin;
+		vec3 normal;
 		if( mPos.x < 0.0f ){
-			origin = Vec3f(-dim.x, 0.0f, 0.0f );
-			normal = Vec3f( 1.0f, 0.0f, 0.0f );
+			origin = vec3(-dim.x, 0.0f, 0.0f );
+			normal = vec3( 1.0f, 0.0f, 0.0f );
 		} else {
-			origin = Vec3f( dim.x, 0.0f, 0.0f );
-			normal = Vec3f(-1.0f, 0.0f, 0.0f );
+			origin = vec3( dim.x, 0.0f, 0.0f );
+			normal = vec3(-1.0f, 0.0f, 0.0f );
 		}
 		float distance = 0.0f;
 		bool intersects = mRay.calcPlaneIntersection( origin, normal, &distance );
@@ -126,14 +126,14 @@ bool Particle::isOutOfBounds( Room *room )
 	} else if( mPos.y < -dim.y || mPos.y > dim.y ){
 		b = true;
 		
-		Vec3f origin;
-		Vec3f normal;
+		vec3 origin;
+		vec3 normal;
 		if( mPos.y < 0.0f ){
-			origin = Vec3f( 0.0f,-dim.y, 0.0f );
-			normal = Vec3f( 0.0f, 1.0f, 0.0f );
+			origin = vec3( 0.0f,-dim.y, 0.0f );
+			normal = vec3( 0.0f, 1.0f, 0.0f );
 		} else {
-			origin = Vec3f( 0.0f, dim.y, 0.0f );
-			normal = Vec3f( 0.0f,-1.0f, 0.0f );
+			origin = vec3( 0.0f, dim.y, 0.0f );
+			normal = vec3( 0.0f,-1.0f, 0.0f );
 		}
 		float distance = 0.0f;
 		bool intersects = mRay.calcPlaneIntersection( origin, normal, &distance );
@@ -145,14 +145,14 @@ bool Particle::isOutOfBounds( Room *room )
 	} else if( mPos.z < -dim.z || mPos.z > dim.z ){
 		b = true;
 		
-		Vec3f origin;
-		Vec3f normal;
+		vec3 origin;
+		vec3 normal;
 		if( mPos.z < 0.0f ){
-			origin = Vec3f( 0.0f, 0.0f,-dim.z );
-			normal = Vec3f( 0.0f, 0.0f, 1.0f );
+			origin = vec3( 0.0f, 0.0f,-dim.z );
+			normal = vec3( 0.0f, 0.0f, 1.0f );
 		} else {
-			origin = Vec3f( 0.0f, 0.0f, dim.z );
-			normal = Vec3f( 0.0f, 0.0f,-1.0f );
+			origin = vec3( 0.0f, 0.0f, dim.z );
+			normal = vec3( 0.0f, 0.0f,-1.0f );
 		}
 		float distance = 0.0f;
 		bool intersects = mRay.calcPlaneIntersection( origin, normal, &distance );

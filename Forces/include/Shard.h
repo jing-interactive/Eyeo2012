@@ -15,20 +15,20 @@
 
 class Shard {
 public:
-	Shard( ci::Vec3f pos, ci::Vec3f dir, float height, float radius );
+	Shard( ci::vec3 pos, ci::vec3 dir, float height, float radius );
 	void init( ci::TriMesh *mesh, const ci::Color &c );
-	ci::Vec3f calcSurfaceNormal( const ci::Vec3f &p1, const ci::Vec3f &p2, const ci::Vec3f &p3 );
+	ci::vec3 calcSurfaceNormal( const ci::vec3 &p1, const ci::vec3 &p2, const ci::vec3 &p3 );
 	void update();
 	void draw();
 
-	ci::Vec3f	mPos;
-	ci::Vec3f	mDir;
-	ci::Vec3f	mTip;	// tip of shard
-	ci::Vec3f	mMid;	// where tapering facets begin
+	ci::vec3	mPos;
+	ci::vec3	mDir;
+	ci::vec3	mTip;	// tip of shard
+	ci::vec3	mMid;	// where tapering facets begin
 
-	std::vector<ci::Vec3f> mBasePs;
-	std::vector<ci::Vec3f> mMidPs;
-	std::vector<ci::Vec3f> mTipPs;
+	std::vector<ci::vec3> mBasePs;
+	std::vector<ci::vec3> mMidPs;
+	std::vector<ci::vec3> mTipPs;
 
 	float		mHeight;
 	float		mRadius;

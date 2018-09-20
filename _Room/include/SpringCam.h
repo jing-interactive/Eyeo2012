@@ -15,17 +15,17 @@ class SpringCam {
   public:
 	struct SpringNode {
 		SpringNode() {}
-		SpringNode( ci::Vec3f pos ){
+		SpringNode( ci::vec3 pos ){
 			mRestPos	= pos;
 			mPos		= pos;
-			mVel		= ci::Vec3f::zero();
-			mAcc		= ci::Vec3f::zero();
+			mVel		= {};
+			mAcc		= {};
 		}
 		
 		void update( float dt ){
-			ci::Vec3f dir		= mPos - mRestPos;
+			ci::vec3 dir		= mPos - mRestPos;
 			float dist			= dir.length();
-			dir.safeNormalize();
+			glm::normalize(dir);
 			float springForce	= -( dist - REST_LENGTH ) * SPRING_STRENGTH;
 			float dampingForce	= -SPRING_DAMPING * ( dir.x*mVel.x + dir.y*mVel.y + dir.z*mVel.z );
 			float r				= springForce + dampingForce;
@@ -34,14 +34,14 @@ class SpringCam {
 			
 			mVel += mAcc * dt;
 			mPos += mVel * dt;
-			mVel -= mVel * 0.04 * dt;
-			mAcc = ci::Vec3f::zero();
+			mVel -= mVel * 0.04f * dt;
+			mAcc = {};
 		}
 		
-		void setPos( const ci::Vec3f &v ){ mRestPos = v; }
+		void setPos( const ci::vec3 &v ){ mRestPos = v; }
 
-		ci::Vec3f mRestPos;
-		ci::Vec3f mPos, mVel, mAcc;
+		ci::vec3 mRestPos;
+		ci::vec3 mPos, mVel, mAcc;
 	};
 	
 	
@@ -49,18 +49,18 @@ class SpringCam {
 	SpringCam();
 	SpringCam( float camDist, float aspectRatio );
 	void update( float dt );
-	void dragCam( const ci::Vec2f &posOffset, float distFromCenter );
+	void dragCam( const ci::vec2 &posOffset, float distFromCenter );
 	void draw();
 	ci::CameraPersp getCam(){ return mCam; }
-	ci::Vec3f getEye(){ return mCam.getEyePoint(); }
-	void setEye( const ci::Vec3f &eye );
+	ci::vec3 getEye(){ return mCam.getEyePoint(); }
+	void setEye( const ci::vec3 &eye );
 	void resetEye();
 	
 	ci::CameraPersp		mCam;
 	float				mCamDist;
-	ci::Vec3f			mEye, mCenter, mUp;
+	ci::vec3			mEye, mCenter, mUp;
 	
-	ci::Matrix44f		mMvpMatrix;
+	ci::mat4		mMvpMatrix;
 	
 	SpringNode			mEyeNode;
 	SpringNode			mCenNode;

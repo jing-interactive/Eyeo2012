@@ -16,7 +16,7 @@ Glow::Glow()
 {
 }
 
-Glow::Glow( const Vec3f &pos, const Vec3f &vel, float radius, float lifespan, const Vec3f &right, const Vec3f &up )
+Glow::Glow( const vec3 &pos, const vec3 &vel, float radius, float lifespan, const vec3 &right, const vec3 &up )
 {
 	mPos		= pos;
 	mVel		= vel;
@@ -46,5 +46,5 @@ void Glow::update( float timeDelta )
 
 void Glow::draw()
 {
-	gl::drawBillboard( mPos, ci::Vec2f( mRadius, mRadius ), 0.0f, mRight, mUp );
+	gl::drawBillboard( mPos, ci::vec2( mRadius, mRadius ), 0.0f, mRight, mUp );
 }

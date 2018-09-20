@@ -12,16 +12,16 @@
 
 using namespace ci;
 
-Vec3f Bubble::mBuoyancy = Vec3f( 0.0f, 0.01f, 0.0f );
+vec3 Bubble::mBuoyancy = vec3( 0.0f, 0.01f, 0.0f );
 
 Bubble::Bubble()
 {
 }
 
-Bubble::Bubble( const Vec3f &pos, const Vec3f &vel, float age )
+Bubble::Bubble( const vec3 &pos, const vec3 &vel, float age )
 : mPos( pos ), mVel( vel ), mAge( age )
 {
-	mAcc		= Vec3f::zero();
+	mAcc		= vec3();
 	mVel += mBuoyancy * mAge;
 	mPos += mVel * mAge;
 	
@@ -37,10 +37,10 @@ void Bubble::update( Room *room, float dt )
 	mVel += mAcc * dt;
 	mPos += mVel * dt;
 	mVel -= mVel * 0.01f * dt;
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 	
 	// TEST BOUNDARY
-	Vec3f dims = room->getDims();
+	vec3 dims = room->getDims();
 	
 	if( mPos.x > dims.x )		mIsDead = true;
 	else if( mPos.x < -dims.x ) mIsDead = true;

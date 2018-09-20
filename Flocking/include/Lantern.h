@@ -13,11 +13,11 @@
 class Lantern {
   public:
 	Lantern();
-	Lantern( const ci::Vec3f &pos );
+	Lantern( const ci::vec3 &pos );
 	void update( float dt, float yFloor );
 	void draw();
 	
-	ci::Vec3f	mPos;
+	ci::vec3	mPos;
 	float		mRadius;
 	float		mRadiusDest;
 	float		mFallSpeed;

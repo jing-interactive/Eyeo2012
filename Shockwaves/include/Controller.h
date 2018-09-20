@@ -24,7 +24,7 @@ public:
 	void init( Room *room, int gridDim );
 	void createNodes( int gridDim );
 	void createSphere( ci::gl::VboMesh &mesh, int res );
-	void drawSphereTri( ci::Vec3f va, ci::Vec3f vb, ci::Vec3f vc, int div );
+	void drawSphereTri( ci::vec3 va, ci::vec3 vb, ci::vec3 vc, int div );
 	void update( float dt, bool tick );
 	void explode();
 	void draw();
@@ -32,10 +32,10 @@ public:
 	void drawShockwaves( ci::gl::GlslProg *shader );
 	void drawShockwaveCenters();
 	void drawConnections();
-	void drawSmokes( const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawGlows( const ci::Vec3f &right, const ci::Vec3f &up );
-	void addSmokes( const ci::Vec3f &vec, int amt );
-	void addGlows( const ci::Vec3f &vec, int amt );
+	void drawSmokes( const ci::vec3 &right, const ci::vec3 &up );
+	void drawGlows( const ci::vec3 &right, const ci::vec3 &up );
+	void addSmokes( const ci::vec3 &vec, int amt );
+	void addGlows( const ci::vec3 &vec, int amt );
 	void clear();
 	void preset( int index );
 	int mPresetIndex;
@@ -51,7 +51,7 @@ public:
 	std::vector<Glow>		mGlows;
 	
 	ci::gl::VboMesh			mSphereVbo;
-	std::vector<ci::Vec3f>	mPosCoords;
-	std::vector<ci::Vec3f>	mNormals;
+	std::vector<ci::vec3>	mPosCoords;
+	std::vector<ci::vec3>	mNormals;
 };
 bool depthSortFunc( Shockwave a, Shockwave b );

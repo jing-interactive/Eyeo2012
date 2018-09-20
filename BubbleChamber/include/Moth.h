@@ -14,16 +14,16 @@
 class Moth {
 public:
 	Moth();
-	Moth( const ci::Vec3f &pos );
+	Moth( const ci::vec3 &pos );
 	void update( Room *room, float dt );
 	void checkBoundary( Room *room );
 	void draw();
 	
-	ci::Vec3f		mPos;
-	ci::Vec3f		mVel;
-	ci::Vec3f		mAcc;
+	ci::vec3		mPos;
+	ci::vec3		mVel;
+	ci::vec3		mAcc;
 	
-	ci::Vec3f		mAxis;
+	ci::vec3		mAxis;
 
 	float			mColorf;
 	

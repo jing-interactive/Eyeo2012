@@ -7,7 +7,7 @@
 //
 
 #include "Spark.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 
@@ -17,7 +17,7 @@ Spark::Spark()
 {
 }
 
-Spark::Spark( Vec3f pos, Vec3f vel )
+Spark::Spark( vec3 pos, vec3 vel )
 : mPos( pos ), mVel( vel )
 {
 	mLifespan	= Rand::randFloat( 23.0f, 30.0f );

@@ -7,7 +7,7 @@
 //
 
 #include "RDiffusion.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/Fbo.h"
 
 using namespace ci;
@@ -20,7 +20,7 @@ RDiffusion::RDiffusion( int w, int h )
 {
 	mFboWidth		= w;
 	mFboHeight		= h;
-	mFboSize		= Vec2f( w, h );
+	mFboSize		= vec2( w, h );
 	mFboBounds		= Area( 0, 0, w, h );
 	
 	mWindowSize		= app::getWindowSize();
@@ -43,24 +43,24 @@ RDiffusion::RDiffusion( int w, int h )
 	format.setColorInternalFormat( GL_RGBA32F_ARB );
 	format.setWrap( GL_REPEAT, GL_REPEAT );
 	
-	mFbo			= gl::Fbo( mFboWidth, mFboHeight, format );
-	mFbos[0]		= gl::Fbo( mFboWidth, mFboHeight, format );
-	mFbos[1]		= gl::Fbo( mFboWidth, mFboHeight, format );
-	mHeightsFbo		= gl::Fbo( mFboWidth, mFboHeight, format );
-	mNormalsFbo		= gl::Fbo( mFboWidth, mFboHeight, format );
+	mFbo			= gl::Fbo::create( mFboWidth, mFboHeight, format );
+	mFbos[0]		= gl::Fbo::create( mFboWidth, mFboHeight, format );
+	mFbos[1]		= gl::Fbo::create( mFboWidth, mFboHeight, format );
+	mHeightsFbo		= gl::Fbo::create( mFboWidth, mFboHeight, format );
+	mNormalsFbo		= gl::Fbo::create( mFboWidth, mFboHeight, format );
 	
 	
 	float W			= 1.0f/(float)app::getWindowWidth();
 	float H			= 1.0f/(float)app::getWindowHeight();
-	mOffset[0] 		= Vec2f( -W, -H);
-	mOffset[1] 		= Vec2f(0.0, -H);
-	mOffset[2] 		= Vec2f(  W, -H);
-	mOffset[3] 		= Vec2f( -W, 0.0);
-	mOffset[4] 		= Vec2f(0.0, 0.0);
-	mOffset[5] 		= Vec2f(  W, 0.0);
-	mOffset[6]		= Vec2f( -W, H);
-	mOffset[7]		= Vec2f(0.0, H);
-	mOffset[8]		= Vec2f(  W, H);
+	mOffset[0] 		= vec2( -W, -H);
+	mOffset[1] 		= vec2(0.0, -H);
+	mOffset[2] 		= vec2(  W, -H);
+	mOffset[3] 		= vec2( -W, 0.0);
+	mOffset[4] 		= vec2(0.0, 0.0);
+	mOffset[5] 		= vec2(  W, 0.0);
+	mOffset[6]		= vec2( -W, H);
+	mOffset[7]		= vec2(0.0, H);
+	mOffset[8]		= vec2(  W, H);
 	
 	float diag		= 0.707106781186f;
 	float side		= 1.0f;
@@ -113,16 +113,16 @@ void RDiffusion::reset()
 	mHeightsFbo.unbindFramebuffer();
 }
 
-void RDiffusion::update( float dt, gl::GlslProg *shader, const gl::Texture &glowTex, const bool &isPressed, const ci::Vec2f &spherePos, float zoom )
+void RDiffusion::update( float dt, gl::GlslProg *shader, const gl::Texture &glowTex, const bool &isPressed, const ci::vec2 &spherePos, float zoom )
 {	
 	float xo	= 0.0f;
 	float yo	= 0.0f;
-	Vec2f sphereNorm = ( spherePos + Vec2f( 300.0f, 300.0f ) )/Vec2f( 600.0f, 600.0f );
+	vec2 sphereNorm = ( spherePos + vec2( 300.0f, 300.0f ) )/vec2( 600.0f, 600.0f );
 	xo			= ( sphereNorm.x - 0.5 ) * 2.0;
 	yo			= ( ( 1.0f - sphereNorm.y ) - 0.5 ) * 2.0;
 
-	sphereNorm	= ( sphereNorm - Vec2f( 0.5f, 0.5f ) ) * ( zoom * 0.96 + 0.04 ) + Vec2f( 0.5f, 0.5f );
-	Vec2f newSpherePos = sphereNorm * mFboSize;
+	sphereNorm	= ( sphereNorm - vec2( 0.5f, 0.5f ) ) * ( zoom * 0.96 + 0.04 ) + vec2( 0.5f, 0.5f );
+	vec2 newSpherePos = sphereNorm * mFboSize;
 	
 	float diag	= 0.707106781186f;
 	float side	= 1.0f;
@@ -141,7 +141,7 @@ void RDiffusion::update( float dt, gl::GlslProg *shader, const gl::Texture &glow
 	const int ITERATIONS = 7;
 
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	for( int i = 0; i < ITERATIONS; i++ ) {
 		mThisFbo	= ( mThisFbo + 1 ) % 2;
 		mPrevFbo	= ( mThisFbo + 1 ) % 2;
@@ -187,7 +187,7 @@ void RDiffusion::update( float dt, gl::GlslProg *shader, const gl::Texture &glow
 	mFbo.unbindFramebuffer();
 }
 
-void RDiffusion::drawIntoHeightsFbo( gl::GlslProg *shader, Vec3f scale )
+void RDiffusion::drawIntoHeightsFbo( gl::GlslProg *shader, vec3 scale )
 {
 	gl::Texture tmp = mHeightsFbo.getTexture();
 	
@@ -200,7 +200,7 @@ void RDiffusion::drawIntoHeightsFbo( gl::GlslProg *shader, Vec3f scale )
 	shader->uniform( "heightTex", 1 );
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	gl::drawSolidRect( mFboBounds );
 	
 	shader->unbind();
@@ -220,7 +220,7 @@ void RDiffusion::drawIntoNormalsFbo( gl::GlslProg *shader )
 	shader->uniform( "yOffset", mYOffset );
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	gl::drawSolidRect( mFboBounds );
 	shader->unbind();
 	
@@ -253,7 +253,7 @@ void RDiffusion::setMode( int index )
 	}
 }
 
-Vec2i RDiffusion::toFboVec( const ci::Vec3f &pos, float scale, float res )
+Vec2i RDiffusion::toFboVec( const ci::vec3 &pos, float scale, float res )
 {
 	int xi = (int)( pos.x/(scale*res) ) + mFboSize.x/2;
 	int zi = (int)( pos.z/(scale*res) ) + mFboSize.x/2;

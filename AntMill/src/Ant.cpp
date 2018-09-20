@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/Gl.h"
 #include "cinder/Rand.h"
 #include "Controller.h"
@@ -28,7 +28,7 @@ Ant::Ant()
 {
 }
 
-Ant::Ant( Controller *controller, const Vec3f &pos )
+Ant::Ant( Controller *controller, const vec3 &pos )
 	: mController( controller ), mPos( pos )
 {
 	mId				= sNextUniqueId;
@@ -36,20 +36,20 @@ Ant::Ant( Controller *controller, const Vec3f &pos )
 	
 	mIsSpecial		= false;
 
-	mAcc			= Vec3f::zero();
-	mVel			= Rand::randVec3f();
+	mAcc			= vec3();
+	mVel			= Rand::randvec3();
 	mVel.y			= 0.0f;
 	mVel.normalize();
 
-	mAnchorPos		= mPos + Vec3f( 0.0f, 100.0f, 0.0f );
-	mSpringPos		= mPos + Vec3f( 0.0f, 100.0f, 0.0f );
+	mAnchorPos		= mPos + vec3( 0.0f, 100.0f, 0.0f );
+	mSpringPos		= mPos + vec3( 0.0f, 100.0f, 0.0f );
 	mSpringVel		= mVel;
 	mSpringPos		= mAcc;
 	
 	mDir			= mVel;
-	mDirPerp		= Vec3f( -mDir.z, mDir.y, mDir.x );
-	mLeftSensorPos	= Vec3f::zero();
-	mRightSensorPos = Vec3f::zero();
+	mDirPerp		= vec3( -mDir.z, mDir.y, mDir.x );
+	mLeftSensorPos	= vec3();
+	mRightSensorPos = vec3();
 	mLength			= 3.0f;
 	mRadius			= 3.0f;
 	mMaxSpeed		= 1.0f;// Rand::randFloat( 0.5f, 1.0f );
@@ -66,7 +66,7 @@ Ant::Ant( Controller *controller, const Vec3f &pos )
 
 void Ant::checkForHome()
 {
-	Vec3f dirToHome = mPos - mController->mHomePos;
+	vec3 dirToHome = mPos - mController->mHomePos;
 	float distToHome = dirToHome.length();
 	if( distToHome < mController->mHomeRadius && Rand::randFloat() < 0.05f ){
 		mHasFood = false;
@@ -83,14 +83,14 @@ void Ant::foundFood( Food *food )
 	mPos += mVel;
 }
 
-void Ant::update( float dt, const Vec3f &roomDims )
+void Ant::update( float dt, const vec3 &roomDims )
 {
 	if( !mIsDead ){
 		mVel += mAcc * dt;
 		applySpeedLimit();
 		applyJitter();
 	} else {
-		mVel += Vec3f( 0.0f, -0.2f, 0.0f );
+		mVel += vec3( 0.0f, -0.2f, 0.0f );
 	}
 	mPos += mVel * dt;
 	
@@ -98,7 +98,7 @@ void Ant::update( float dt, const Vec3f &roomDims )
 		mVel -= mVel * 0.03f * dt;
 	}
 	
-	mAnchorPos = mPos + Vec3f( 0.0f, 100.0f, 0.0f );
+	mAnchorPos = mPos + vec3( 0.0f, 100.0f, 0.0f );
 	
 	if( mGrabbedFood != NULL ){
 		mGrabbedFood->mPos = mPos;
@@ -114,7 +114,7 @@ void Ant::update( float dt, const Vec3f &roomDims )
 	stayInBounds( &mPos, roomDims );
 	
 	mDir		= mVel.safeNormalized();
-	mDirPerp	= Vec3f( -mDir.z, mDir.y, mDir.x );
+	mDirPerp	= vec3( -mDir.z, mDir.y, mDir.x );
 	
 	updateSensors();
 	
@@ -128,7 +128,7 @@ void Ant::update( float dt, const Vec3f &roomDims )
 	}
 	
 	mAge += dt;
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 }
 
 void Ant::applySpeedLimit()
@@ -142,13 +142,13 @@ void Ant::applySpeedLimit()
 void Ant::applyJitter()
 {
 	if( !mHasFood ){
-		Vec3f jitterOffset = Rand::randVec3f() * 0.2f;
+		vec3 jitterOffset = Rand::randvec3() * 0.2f;
 		jitterOffset.y = 0.0f;
 		mVel += jitterOffset;
 	}
 }
 
-void Ant::stayInBounds( Vec3f *v, const Vec3f &roomDims )
+void Ant::stayInBounds( vec3 *v, const vec3 &roomDims )
 {
 	float boundsOffset = 1.0f;
 	if( v->x < -roomDims.x ){
@@ -190,7 +190,7 @@ void Ant::updateSensors()
 
 void Ant::updateSpring( float dt )
 {
-	ci::Vec3f dir		= mSpringPos - mAnchorPos;
+	ci::vec3 dir		= mSpringPos - mAnchorPos;
 	float dist			= dir.length();
 	dir.safeNormalize();
 	float springForce	= -( dist - REST_LENGTH ) * SPRING_STRENGTH;
@@ -202,7 +202,7 @@ void Ant::updateSpring( float dt )
 	mSpringVel += mSpringAcc;
 	mSpringPos += mSpringVel;
 	mSpringVel -= mSpringVel * 0.04;
-	mSpringAcc = ci::Vec3f::zero();
+	mSpringAcc = {};
 	
 	mPinUp = mSpringPos - mPos;
 	mPinUp.normalize();
@@ -218,11 +218,11 @@ void Ant::findAntsInZone()
 	float hitAreaRadius			= mLength * 5.0f;
 	float hitAreaRadiusSqrd		= hitAreaRadius * hitAreaRadius;
 	float hitAreaDistFromHead	= mLength * 5.0f;
-	Vec3f hitAreaCenter			= mPos + mDir * hitAreaDistFromHead;
+	vec3 hitAreaCenter			= mPos + mDir * hitAreaDistFromHead;
 	
 	for( vector<Ant>::iterator it = mController->mAnts.begin(); it != mController->mAnts.end(); ++it ){
 		if( mId != it->mId ){		// IF IT ISNT ME
-			Vec3f dirFromAntToCenter = it->mPos - hitAreaCenter;
+			vec3 dirFromAntToCenter = it->mPos - hitAreaCenter;
 			float distSqrd = dirFromAntToCenter.lengthSquared();
 			
 			if( distSqrd < hitAreaRadiusSqrd ){
@@ -237,7 +237,7 @@ void Ant::followAntsInZone()
 	for( vector<Ant*>::iterator it = mVisibleAnts.begin(); it != mVisibleAnts.end(); ++it ){
 		Ant *ant = *it;
 		
-		Vec3f dirToAntTail = mPos - ant->mTailPos;
+		vec3 dirToAntTail = mPos - ant->mTailPos;
 		float invDist = 1.0f/( dirToAntTail.length() + 1.0f );
 		mAcc -= dirToAntTail.normalized() * invDist * 0.001f;
 		mAcc += ant->mVel * 0.0015f;

@@ -12,15 +12,15 @@
 class Node {
   public:
 	Node();
-	Node( const ci::Vec3f &pos, const ci::Vec3f &vel );
+	Node( const ci::vec3 &pos, const ci::vec3 &vel );
 	void update( float dt );
 	void draw();
 	
-	ci::Matrix44f	mMatrix;
-	ci::Vec3f		mPosInit;
-	ci::Vec3f		mPos;
-	ci::Vec3f		mVel;
-	ci::Vec3f		mAcc;
+	ci::mat4	mMatrix;
+	ci::vec3		mPosInit;
+	ci::vec3		mPos;
+	ci::vec3		mVel;
+	ci::vec3		mAcc;
 	
 	float			mRadius;
 	ci::Color		mColor;

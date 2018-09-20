@@ -18,7 +18,7 @@ class Terrain {
 	void setup( float scale );
 	void update();
 	void draw();
-	float getAltitude( const ci::Vec3f &pos );
+	float getAltitude( const ci::vec3 &pos );
 	
 	int					mVboWidth, mVboHeight;
 	ci::gl::VboMesh		mVboMesh;

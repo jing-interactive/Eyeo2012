@@ -14,17 +14,17 @@ class Glow {
 public:
 	
 	Glow();
-	Glow( const ci::Vec3f &pos, const ci::Vec3f &vel, float radius, float lifespan, const ci::Vec3f &right, const ci::Vec3f &up );
+	Glow( const ci::vec3 &pos, const ci::vec3 &vel, float radius, float lifespan, const ci::vec3 &right, const ci::vec3 &up );
 	void update( float timeDelta );
 	void draw();
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
 	float		mRot;
 	float		mRadius;
 	float		mAge, mAgePer, mLifespan;
 	bool		mIsDead;
 	
-	ci::Vec3f	mRight;
-	ci::Vec3f	mUp;
+	ci::vec3	mRight;
+	ci::vec3	mUp;
 };

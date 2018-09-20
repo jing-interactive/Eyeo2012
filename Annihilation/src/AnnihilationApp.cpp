@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/Texture.h"
@@ -26,7 +26,7 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-class AnnihilationApp : public AppBasic {
+class AnnihilationApp : public App {
   public:
 	void			prepareSettings( Settings *settings );
 	void			setup();
@@ -93,7 +93,7 @@ class AnnihilationApp : public AppBasic {
 	Controller			mController;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 	// CONDITIONS
@@ -119,21 +119,21 @@ void AnnihilationApp::setup()
 	mInvNumLights		= 1.0f/(float)mNumLights;
 	gl::Texture::Format hdTexFormat;
 	hdTexFormat.setInternalFormat( GL_RGBA32F_ARB );
-	mLightsTex			= gl::Texture( mNumLights, 2, hdTexFormat );
+	mLightsTex			= gl::Texture::create( mNumLights, 2, hdTexFormat );
 	mLightsSurface		= Surface32f( mNumLights, 2, false );
 	
 	// SHADERS
 	try {
-		mRoomShader			= gl::GlslProg( loadResource( "room.vert"	),		loadResource( "room.frag" ) );
-		mParticleShader		= gl::GlslProg( loadResource( "particle.vert" ),	loadResource( "particle.frag" ) );
-		mBlurShader			= gl::GlslProg( loadResource( "passThru.vert" ),	loadResource( "blur.frag" ) );
-		mContrastShader		= gl::GlslProg( loadResource( "passThru.vert" ),	loadResource( "contrast.frag" ) );
-		mMatterShader		= gl::GlslProg( loadResource( "matter.vert" ),		loadResource( "matter.frag" ) );
-		mHairShader			= gl::GlslProg( loadResource( "hair.vert"	),		loadResource( "hair.frag" ) );
-		mAntimatterShader	= gl::GlslProg( loadResource( "antimatter.vert" ),	loadResource( "antimatter.frag" ) );
-		mNodesShader		= gl::GlslProg( loadResource( "nodes.vert" ),		loadResource( "nodes.frag" ) );
+		mRoomShader			= gl::GlslProg::create( loadResource( "room.vert"	),		loadResource( "room.frag" ) );
+		mParticleShader		= gl::GlslProg::create( loadResource( "particle.vert" ),	loadResource( "particle.frag" ) );
+		mBlurShader			= gl::GlslProg::create( loadResource( "passThru.vert" ),	loadResource( "blur.frag" ) );
+		mContrastShader		= gl::GlslProg::create( loadResource( "passThru.vert" ),	loadResource( "contrast.frag" ) );
+		mMatterShader		= gl::GlslProg::create( loadResource( "matter.vert" ),		loadResource( "matter.frag" ) );
+		mHairShader			= gl::GlslProg::create( loadResource( "hair.vert"	),		loadResource( "hair.frag" ) );
+		mAntimatterShader	= gl::GlslProg::create( loadResource( "antimatter.vert" ),	loadResource( "antimatter.frag" ) );
+		mNodesShader		= gl::GlslProg::create( loadResource( "nodes.vert" ),		loadResource( "nodes.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -144,13 +144,13 @@ void AnnihilationApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// TEXTURES
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconAttraction.png" ) ), mipFmt );
-	mGlowTex		= gl::Texture( loadImage( loadResource( "glow.png" ) ) );
-	mSmokeTex		= gl::Texture( loadImage( loadResource( "smoke.png" ) ) );
-	mKernelTex		= gl::Texture( loadImage( loadResource( "kernel.png" ) ) );
-	mShadowTex		= gl::Texture( loadImage( loadResource( "shadow.png" ) ) );
-	mSpectrumTex	= gl::Texture( loadImage( loadResource( "spectrum.png" ) ) );
-	mWarningTex		= gl::Texture( loadImage( loadResource( "warning.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconAttraction.png" ) ), mipFmt );
+	mGlowTex		= gl::Texture::create( loadImage( loadResource( "glow.png" ) ) );
+	mSmokeTex		= gl::Texture::create( loadImage( loadResource( "smoke.png" ) ) );
+	mKernelTex		= gl::Texture::create( loadImage( loadResource( "kernel.png" ) ) );
+	mShadowTex		= gl::Texture::create( loadImage( loadResource( "shadow.png" ) ) );
+	mSpectrumTex	= gl::Texture::create( loadImage( loadResource( "spectrum.png" ) ) );
+	mWarningTex		= gl::Texture::create( loadImage( loadResource( "warning.png" ) ) );
 	mCubeMap = CubeMap( GLsizei(512), GLsizei(512),
 					   Surface8u( loadImage( loadResource( RES_CUBE1_ID ) ) ),
 					   Surface8u( loadImage( loadResource( RES_CUBE2_ID ) ) ),
@@ -163,10 +163,10 @@ void AnnihilationApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 500.0f, 280.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 500.0f, 280.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 
 	// FBO
@@ -182,25 +182,25 @@ void AnnihilationApp::setup()
 	mFboRect		= Rectf( 0.0f, 0.0f, (float)fboXRes, (float)fboYRes );
 	mFboArea		= Area( 0, 0, fboXRes, fboYRes );
 	
-	mParticlesFbo	= gl::Fbo( APP_WIDTH, APP_HEIGHT, formatAlpha );
+	mParticlesFbo	= gl::Fbo::create( APP_WIDTH, APP_HEIGHT, formatAlpha );
 	mParticlesFbo.bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	mParticlesFbo.unbindFramebuffer();
 	
-	mRoomFbo		= gl::Fbo( fboXRes, fboYRes, format );
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo		= gl::Fbo::create( fboXRes, fboYRes, format );
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0, 0, 0, 0 ) );
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	
 	mThisFbo = 0;
 	mNextFbo = 1;
-	mBloomFbo[0] = gl::Fbo( fboXRes, fboYRes, format );
-	mBloomFbo[1] = gl::Fbo( fboXRes, fboYRes, format );
+	mBloomFbo[0] = gl::Fbo::create( fboXRes, fboYRes, format );
+	mBloomFbo[1] = gl::Fbo::create( fboXRes, fboYRes, format );
 	
 	// MOUSE
-	mMousePos		= Vec2f::zero();
-	mMouseDownPos	= Vec2f::zero();
-	mMouseOffset	= Vec2f::zero();
+	mMousePos		= vec2();
+	mMouseDownPos	= vec2();
+	mMouseOffset	= vec2();
 	mMousePressed	= false;
 
 	// CONTROLLER
@@ -216,13 +216,13 @@ void AnnihilationApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void AnnihilationApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void AnnihilationApp::mouseMove( MouseEvent event )
@@ -306,38 +306,38 @@ void AnnihilationApp::update()
 
 void AnnihilationApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboArea );
+	gl::viewport( mFboArea );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
 	mLightsTex.bind( 0 );
-	mRoomShader.bind();
-	mRoomShader.uniform( "lightsTex", 0 );
-	mRoomShader.uniform( "numLights", (float)mNumLights );
-	mRoomShader.uniform( "invNumLights", mInvNumLights );
-	mRoomShader.uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
-	mRoomShader.uniform( "att", 1.075f );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.getEye() );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "mainPower", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "antimatter", Vec4f( mController.mAntimatter->mPos.xyz(), mController.mAntimatter->mRadius ) );
-	mRoomShader.uniform( "matter", Vec4f( mController.mMatter->mPos.xyz(), mController.mMatter->mRadius ) );
+	mRoomShader->bind();
+	mRoomShader->uniform( "lightsTex", 0 );
+	mRoomShader->uniform( "numLights", (float)mNumLights );
+	mRoomShader->uniform( "invNumLights", mInvNumLights );
+	mRoomShader->uniform( "invNumLightsHalf", mInvNumLights * 0.5f );
+	mRoomShader->uniform( "att", 1.075f );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.getEye() );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "mainPower", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "antimatter", Vec4f( mController.mAntimatter->mPos.xyz(), mController.mAntimatter->mRadius ) );
+	mRoomShader->uniform( "matter", Vec4f( mController.mMatter->mPos.xyz(), mController.mMatter->mRadius ) );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -351,7 +351,7 @@ void AnnihilationApp::drawIntoParticlesFbo()
 	gl::enableDepthWrite();
 	//	gl::setMatricesWindow( getWindowSize(), false );
 	gl::setMatrices( mSpringCam.getCam() );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ANTIMATTER SHADOW
@@ -381,7 +381,7 @@ void AnnihilationApp::draw()
 	gl::clear( ColorA( 0, 0, 0, 0 ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 	
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -391,7 +391,7 @@ void AnnihilationApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.mCam );
@@ -491,7 +491,7 @@ void AnnihilationApp::draw()
 	gl::enableDepthRead();
 	
 	// DRAW SMOKES
-	Vec3f right, up;
+	vec3 right, up;
 	mSpringCam.mCam.getBillboardVectors( &right, &up );
 	mSmokeTex.bind();
 	mController.drawSmokes( right, up );
@@ -499,7 +499,7 @@ void AnnihilationApp::draw()
 	// MORE ANTIMATTER GLOW
 //	mGlowTex.enableAndBind();
 //	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 0.5f ) );
-//	Vec2f rad = Vec2f( 250.0f, 250.0f ) * mMainPower;
+//	vec2 rad = vec2( 250.0f, 250.0f ) * mMainPower;
 //	drawSphericalBillboard( mSpringCam.mEye, mController.mAntimatter.mPos, rad, 0.0f );
 	
 	gl::disable( GL_TEXTURE_2D );
@@ -513,7 +513,7 @@ void AnnihilationApp::draw()
 	}
 	
 	if( getElapsedFrames()%60 == 0 ){
-		std::cout << "FPS = " << getAverageFps() << std::endl;
+		console() << "FPS = " << getAverageFps() << std::endl;
 	}
 	
 //	params::InterfaceGl::draw();
@@ -534,7 +534,7 @@ void AnnihilationApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -556,11 +556,11 @@ void AnnihilationApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();
@@ -571,7 +571,7 @@ void AnnihilationApp::resizeParticlesFbo()
 	mBloomFbo[mThisFbo].bindFramebuffer();
 	gl::clear( Color( 0, 0, 0 ) );
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboArea );
+	gl::viewport( mFboArea );
 	mParticlesFbo.bindTexture();
 	mContrastShader.bind();
 	mContrastShader.uniform( "tex", 0 );
@@ -598,14 +598,14 @@ void AnnihilationApp::blurParticlesFbo()
 		mBlurShader.uniform( "fboTex", 0 );
 		mBlurShader.uniform( "kernelTex", 1 );
 		if( i%2 == 0 ){
-			mBlurShader.uniform( "orientationVector", Vec2f( 1.0f, 0.0f ) );
+			mBlurShader.uniform( "orientationVector", vec2( 1.0f, 0.0f ) );
 		} else {
-			mBlurShader.uniform( "orientationVector", Vec2f( 0.0f, getWindowAspectRatio() ) );
+			mBlurShader.uniform( "orientationVector", vec2( 0.0f, getWindowAspectRatio() ) );
 		}
 		
 		mBlurShader.uniform( "blurAmt", 0.025f );
 		gl::setMatricesWindow( mFboSize );
-		gl::setViewport( mFboArea );
+		gl::viewport( mFboArea );
 		gl::drawSolidRect( mFboRect );
 		mBlurShader.unbind();
 		mBloomFbo[mThisFbo].unbindFramebuffer();
@@ -649,7 +649,7 @@ void AnnihilationApp::drawToLightsSurface()
 		}
 	}
 	
-	mLightsTex = gl::Texture( mLightsSurface );
+	mLightsTex = gl::Texture::create( mLightsSurface );
 }
 
 

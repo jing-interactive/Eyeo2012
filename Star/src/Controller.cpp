@@ -75,7 +75,7 @@ void Controller::updateDusts( float dt )
 	}
 }
 
-void Controller::drawGlows( gl::GlslProg *shader, const Vec3f &right, const Vec3f &up )
+void Controller::drawGlows( gl::GlslProg *shader, const vec3 &right, const vec3 &up )
 {
 	for( vector<Glow>::iterator it = mGlows.begin(); it != mGlows.end(); ++it ){
 		shader->uniform( "alpha", it->mAgePer );
@@ -83,7 +83,7 @@ void Controller::drawGlows( gl::GlslProg *shader, const Vec3f &right, const Vec3
 	}
 }
 
-void Controller::drawNebulas( gl::GlslProg *shader, const Vec3f &right, const Vec3f &up )
+void Controller::drawNebulas( gl::GlslProg *shader, const vec3 &right, const vec3 &up )
 {
 	for( vector<Nebula>::iterator it = mNebulas.begin(); it != mNebulas.end(); ++it ){
 		shader->uniform( "alpha", it->mAgePer );
@@ -111,9 +111,9 @@ void Controller::addGlows( const Star &star, float power, int amt )
 {
 	for( int i=0; i<amt; i++ ){
 		float radius	= Rand::randFloat( 15.0f, 20.0f ) * star.mRadiusMulti;
-		Vec3f dir		= Rand::randVec3f();
-		Vec3f pos		= star.mPos + dir * ( star.mRadius - radius * 0.25 );
-		Vec3f vel		= dir * Rand::randFloat( 1.3f, 2.0f );
+		vec3 dir		= Rand::randvec3();
+		vec3 pos		= star.mPos + dir * ( star.mRadius - radius * 0.25 );
+		vec3 vel		= dir * Rand::randFloat( 1.3f, 2.0f );
 		
 		float lifespan	= Rand::randFloat( 15.0f, 30.0f ) * star.mRadiusMulti;
 		
@@ -125,9 +125,9 @@ void Controller::addNebulas( const Star &star, int amt )
 {
 	for( int i=0; i<amt; i++ ){
 		float radius		= Rand::randFloat( 15.0f, 25.0f ) * star.mRadiusMulti;
-		Vec3f dir			= Rand::randVec3f();
-		Vec3f pos			= star.mPos + dir * ( star.mRadius - radius * 0.25f );
-		Vec3f vel			= dir * Rand::randFloat( 0.2f, 1.0f ) * star.mRadiusMulti;
+		vec3 dir			= Rand::randvec3();
+		vec3 pos			= star.mPos + dir * ( star.mRadius - radius * 0.25f );
+		vec3 vel			= dir * Rand::randFloat( 0.2f, 1.0f ) * star.mRadiusMulti;
 //		if( Rand::randFloat() < 0.05f ) vel = dir * Rand::randFloat( 1.2f, 1.75f ) * star.mRadiusMulti;
 //		float radius		= star.mRadius * Rand::randFloat( 2.25f, 3.0f );
 		float lifespan		= Rand::randFloat( 35.0f, 55.0f ) * star.mRadiusMulti;
@@ -144,40 +144,40 @@ void Controller::addDusts( const Star &star, int amt )
 	
 	if( dustsToMake > 0 ){
 		for( int i=0; i<dustsToMake; i++ ){
-			Vec3f dir   = Rand::randVec3f();
-			Vec3f pos	= star.mPos + dir * star.mRadius;
-			Vec3f vel	= star.mVel + Rand::randVec3f() + dir * Rand::randFloat( 0.85f, 1.5f );
+			vec3 dir   = Rand::randvec3();
+			vec3 pos	= star.mPos + dir * star.mRadius;
+			vec3 vel	= star.mVel + Rand::randvec3() + dir * Rand::randFloat( 0.85f, 1.5f );
 			mDusts.push_back( Dust( pos, vel ) );
 		}
 	}
 }
 		
-void Controller::addCMNebulas( const Vec3f &cmPos, float cmRadius, float radiusMulti, int amt )
+void Controller::addCMNebulas( const vec3 &cmPos, float cmRadius, float radiusMulti, int amt )
 {
 	for( int i=0; i<amt; i++ ){
 		float angle		= Rand::randFloat( -0.25f, 0.25f );
 		float cosA		= cos( angle );
 		float sinA		= sin( angle );
-		Vec3f dir		= Vec3f( cosA, sinA, 0.0f );
-		Vec3f pos		= -cmPos + dir * cmRadius;
+		vec3 dir		= vec3( cosA, sinA, 0.0f );
+		vec3 pos		= -cmPos + dir * cmRadius;
 		
-		Vec3f vel		= dir * Rand::randFloat( 1.2f, 3.0f );
+		vec3 vel		= dir * Rand::randFloat( 1.2f, 3.0f );
 		float radius	= Rand::randFloat( 35.0f, 50.0f ) * radiusMulti;
 		float lifespan	= Rand::randFloat( 35.0f, 55.0f );
 		mNebulas.push_back( Nebula( pos, vel, radius, lifespan ) );
 	}
 }
 
-void Controller::addCMGlows( const Vec3f &cmPos, float cmRadius, int amt )
+void Controller::addCMGlows( const vec3 &cmPos, float cmRadius, int amt )
 {
 	for( int i=0; i<amt; i++ ){
 		float angle		= Rand::randFloat( -0.25f, 0.25f );
 		float cosA		= cos( angle );
 		float sinA		= sin( angle );
-		Vec3f dir		= Vec3f( cosA, sinA, 0.0f );
-		Vec3f pos		= -cmPos + dir * cmRadius;
+		vec3 dir		= vec3( cosA, sinA, 0.0f );
+		vec3 pos		= -cmPos + dir * cmRadius;
 		
-		Vec3f vel		= dir * Rand::randFloat( 4.5f, 8.0f );
+		vec3 vel		= dir * Rand::randFloat( 4.5f, 8.0f );
 		float radius	= Rand::randFloat( 75.0f, 150.0f ) * 2.0f;
 		float lifespan	= Rand::randFloat( 35.0f, 55.0f );
 		mGlows.push_back( Glow( pos, vel, radius, lifespan ) );

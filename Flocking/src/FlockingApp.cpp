@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/TextureFont.h"
@@ -31,7 +31,7 @@ using namespace std;
 #define P_FBO_DIM		5
 #define MAX_LANTERNS	5
 
-class FlockingApp : public AppBasic {
+class FlockingApp : public App {
 public:
 	virtual void		prepareSettings( Settings *settings );
 	virtual void		setup();
@@ -99,19 +99,19 @@ public:
 	// POSITION/VELOCITY FBOS
 	gl::Fbo::Format		mRgba16Format;
 	int					mFboDim;
-	ci::Vec2f			mFboSize;
+	ci::vec2			mFboSize;
 	ci::Area			mFboBounds;
 	gl::Fbo				mPositionFbos[2];
 	gl::Fbo				mVelocityFbos[2];
 	int					mP_FboDim;
-	ci::Vec2f			mP_FboSize;
+	ci::vec2			mP_FboSize;
 	ci::Area			mP_FboBounds;
 	gl::Fbo				mP_PositionFbos[2];
 	gl::Fbo				mP_VelocityFbos[2];
 	int					mThisFbo, mPrevFbo;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 	bool				mSaveFrames;
@@ -139,7 +139,7 @@ void FlockingApp::setup()
 	mPrevFbo			= 1;
 	
 	// LANTERNS
-	mLanternsFbo		= gl::Fbo( MAX_LANTERNS, 2, mRgba16Format );
+	mLanternsFbo		= gl::Fbo::create( MAX_LANTERNS, 2, mRgba16Format );
 	
 	// TEXTURE FORMAT
 	gl::Texture::Format mipFmt;
@@ -148,44 +148,44 @@ void FlockingApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// TEXTURES
-	mLanternGlowTex		= gl::Texture( loadImage( loadResource( RES_LANTERNGLOW_PNG ) ) );
-	mGlowTex			= gl::Texture( loadImage( loadResource( RES_GLOW_PNG ) ) );
-	mNebulaTex			= gl::Texture( loadImage( loadResource( RES_NEBULA_PNG ) ) );
-	mIconTex			= gl::Texture( loadImage( loadResource( "iconFlocking.png" ) ), mipFmt );
+	mLanternGlowTex		= gl::Texture::create( loadImage( loadResource( RES_LANTERNGLOW_PNG ) ) );
+	mGlowTex			= gl::Texture::create( loadImage( loadResource( RES_GLOW_PNG ) ) );
+	mNebulaTex			= gl::Texture::create( loadImage( loadResource( RES_NEBULA_PNG ) ) );
+	mIconTex			= gl::Texture::create( loadImage( loadResource( "iconFlocking.png" ) ), mipFmt );
 	
 	// LOAD SHADERS
 	try {
-		mVelocityShader		= gl::GlslProg( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_VELOCITY_FRAG ) );
-		mPositionShader		= gl::GlslProg( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_POSITION_FRAG ) );
-		mP_VelocityShader	= gl::GlslProg( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_P_VELOCITY_FRAG ) );
-		mP_PositionShader	= gl::GlslProg( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_P_POSITION_FRAG ) );
-		mLanternShader		= gl::GlslProg( loadResource( RES_LANTERN_VERT ),	loadResource( RES_LANTERN_FRAG ) );
-		mRoomShader			= gl::GlslProg( loadResource( RES_ROOM_VERT ),		loadResource( RES_ROOM_FRAG ) );
-		mShader				= gl::GlslProg( loadResource( RES_VBOPOS_VERT ),	loadResource( RES_VBOPOS_FRAG ) );
-		mP_Shader			= gl::GlslProg( loadResource( RES_P_VBOPOS_VERT ),	loadResource( RES_P_VBOPOS_FRAG ) );
-		mGlowShader			= gl::GlslProg( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_GLOW_FRAG ) );
-		mNebulaShader		= gl::GlslProg( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_NEBULA_FRAG ) );
+		mVelocityShader		= gl::GlslProg::create( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_VELOCITY_FRAG ) );
+		mPositionShader		= gl::GlslProg::create( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_POSITION_FRAG ) );
+		mP_VelocityShader	= gl::GlslProg::create( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_P_VELOCITY_FRAG ) );
+		mP_PositionShader	= gl::GlslProg::create( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_P_POSITION_FRAG ) );
+		mLanternShader		= gl::GlslProg::create( loadResource( RES_LANTERN_VERT ),	loadResource( RES_LANTERN_FRAG ) );
+		mRoomShader			= gl::GlslProg::create( loadResource( RES_ROOM_VERT ),		loadResource( RES_ROOM_FRAG ) );
+		mShader				= gl::GlslProg::create( loadResource( RES_VBOPOS_VERT ),	loadResource( RES_VBOPOS_FRAG ) );
+		mP_Shader			= gl::GlslProg::create( loadResource( RES_P_VBOPOS_VERT ),	loadResource( RES_P_VBOPOS_FRAG ) );
+		mGlowShader			= gl::GlslProg::create( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_GLOW_FRAG ) );
+		mNebulaShader		= gl::GlslProg::create( loadResource( RES_PASSTHRU_VERT ),	loadResource( RES_NEBULA_FRAG ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	// CONTROLLER
 	mController			= Controller( &mRoom, MAX_LANTERNS );
 	
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 	
 	mSaveFrames			= false;
@@ -203,12 +203,12 @@ void FlockingApp::initialize()
 	gl::disableDepthRead();
 	
 	mFboDim				= FBO_DIM;
-	mFboSize			= Vec2f( mFboDim, mFboDim );
+	mFboSize			= vec2( mFboDim, mFboDim );
 	mFboBounds			= Area( 0, 0, mFboDim, mFboDim );
-	mPositionFbos[0]	= gl::Fbo( mFboDim, mFboDim, mRgba16Format );
-	mPositionFbos[1]	= gl::Fbo( mFboDim, mFboDim, mRgba16Format );
-	mVelocityFbos[0]	= gl::Fbo( mFboDim, mFboDim, mRgba16Format );
-	mVelocityFbos[1]	= gl::Fbo( mFboDim, mFboDim, mRgba16Format );
+	mPositionFbos[0]	= gl::Fbo::create( mFboDim, mFboDim, mRgba16Format );
+	mPositionFbos[1]	= gl::Fbo::create( mFboDim, mFboDim, mRgba16Format );
+	mVelocityFbos[0]	= gl::Fbo::create( mFboDim, mFboDim, mRgba16Format );
+	mVelocityFbos[1]	= gl::Fbo::create( mFboDim, mFboDim, mRgba16Format );
 	
 	setFboPositions( mPositionFbos[0] );
 	setFboPositions( mPositionFbos[1] );
@@ -217,12 +217,12 @@ void FlockingApp::initialize()
 	
 	
 	mP_FboDim			= P_FBO_DIM;
-	mP_FboSize			= Vec2f( mP_FboDim, mP_FboDim );
+	mP_FboSize			= vec2( mP_FboDim, mP_FboDim );
 	mP_FboBounds		= Area( 0, 0, mP_FboDim, mP_FboDim );
-	mP_PositionFbos[0]	= gl::Fbo( mP_FboDim, mP_FboDim, mRgba16Format );
-	mP_PositionFbos[1]	= gl::Fbo( mP_FboDim, mP_FboDim, mRgba16Format );
-	mP_VelocityFbos[0]	= gl::Fbo( mP_FboDim, mP_FboDim, mRgba16Format );
-	mP_VelocityFbos[1]	= gl::Fbo( mP_FboDim, mP_FboDim, mRgba16Format );
+	mP_PositionFbos[0]	= gl::Fbo::create( mP_FboDim, mP_FboDim, mRgba16Format );
+	mP_PositionFbos[1]	= gl::Fbo::create( mP_FboDim, mP_FboDim, mRgba16Format );
+	mP_VelocityFbos[0]	= gl::Fbo::create( mP_FboDim, mP_FboDim, mRgba16Format );
+	mP_VelocityFbos[1]	= gl::Fbo::create( mP_FboDim, mP_FboDim, mRgba16Format );
 	
 	setPredatorFboPositions( mP_PositionFbos[0] );
 	setPredatorFboPositions( mP_PositionFbos[1] );
@@ -246,7 +246,7 @@ void FlockingApp::setFboPositions( gl::Fbo fbo )
 			float radius	= 100.0f;
 			float cosA		= cos( angle );
 			float sinA		= sin( angle );
-			Vec3f p			= Vec3f( cosA, y, sinA ) * radius;
+			vec3 p			= vec3( cosA, y, sinA ) * radius;
 			
 			it.r() = p.x;
 			it.g() = p.y;
@@ -258,7 +258,7 @@ void FlockingApp::setFboPositions( gl::Fbo fbo )
 	gl::Texture posTexture( posSurface );
 	fbo.bindFramebuffer();
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	gl::draw( posTexture );
 	fbo.unbindFramebuffer();
 }
@@ -274,7 +274,7 @@ void FlockingApp::setFboVelocities( gl::Fbo fbo )
 			float angle		= per * M_PI * 2.0f;
 			float cosA		= cos( angle );
 			float sinA		= sin( angle );
-			Vec3f p			= Vec3f( cosA, 0.0f, sinA );
+			vec3 p			= vec3( cosA, 0.0f, sinA );
 			it.r() = p.x;
 			it.g() = p.y;
 			it.b() = p.z;
@@ -285,7 +285,7 @@ void FlockingApp::setFboVelocities( gl::Fbo fbo )
 	gl::Texture velTexture( velSurface );
 	fbo.bindFramebuffer();
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	gl::draw( velTexture );
 	fbo.unbindFramebuffer();
 }
@@ -297,7 +297,7 @@ void FlockingApp::setPredatorFboPositions( gl::Fbo fbo )
 	Surface32f::Iter it = posSurface.getIter();
 	while( it.line() ){
 		while( it.pixel() ){
-			Vec3f r = Rand::randVec3f() * 50.0f;
+			vec3 r = Rand::randvec3() * 50.0f;
 			it.r() = r.x;
 			it.g() = r.y;
 			it.b() = r.z;
@@ -308,7 +308,7 @@ void FlockingApp::setPredatorFboPositions( gl::Fbo fbo )
 	gl::Texture posTexture( posSurface );
 	fbo.bindFramebuffer();
 	gl::setMatricesWindow( mP_FboSize, false );
-	gl::setViewport( mP_FboBounds );
+	gl::viewport( mP_FboBounds );
 	gl::draw( posTexture );
 	fbo.unbindFramebuffer();
 }
@@ -320,7 +320,7 @@ void FlockingApp::setPredatorFboVelocities( gl::Fbo fbo )
 	Surface32f::Iter it = velSurface.getIter();
 	while( it.line() ){
 		while( it.pixel() ){
-			Vec3f r = Rand::randVec3f() * 3.0f;
+			vec3 r = Rand::randvec3() * 3.0f;
 			it.r() = r.x;
 			it.g() = r.y;
 			it.b() = r.z;
@@ -331,7 +331,7 @@ void FlockingApp::setPredatorFboVelocities( gl::Fbo fbo )
 	gl::Texture velTexture( velSurface );
 	fbo.bindFramebuffer();
 	gl::setMatricesWindow( mP_FboSize, false );
-	gl::setViewport( mP_FboBounds );
+	gl::viewport( mP_FboBounds );
 	gl::draw( velTexture );
 	fbo.unbindFramebuffer();
 }
@@ -351,30 +351,30 @@ void FlockingApp::initVbo()
 	mVboMesh		= gl::VboMesh( numVertices * 8 * 3, 0, layout, GL_TRIANGLES );
 	
 	float s = 1.5f;
-	Vec3f p0( 0.0f, 0.0f, 2.0f );
-	Vec3f p1( -s, -s, 0.0f );
-	Vec3f p2( -s,  s, 0.0f );
-	Vec3f p3(  s,  s, 0.0f );
-	Vec3f p4(  s, -s, 0.0f );
-	Vec3f p5( 0.0f, 0.0f, -5.0f );
+	vec3 p0( 0.0f, 0.0f, 2.0f );
+	vec3 p1( -s, -s, 0.0f );
+	vec3 p2( -s,  s, 0.0f );
+	vec3 p3(  s,  s, 0.0f );
+	vec3 p4(  s, -s, 0.0f );
+	vec3 p5( 0.0f, 0.0f, -5.0f );
 	
-	Vec3f n;
-	Vec3f n0 = Vec3f( 0.0f, 0.0f, 1.0f );
-	Vec3f n1 = Vec3f(-1.0f,-1.0f, 0.0f ).normalized();
-	Vec3f n2 = Vec3f(-1.0f, 1.0f, 0.0f ).normalized();
-	Vec3f n3 = Vec3f( 1.0f, 1.0f, 0.0f ).normalized();
-	Vec3f n4 = Vec3f( 1.0f,-1.0f, 0.0f ).normalized();
-	Vec3f n5 = Vec3f( 0.0f, 0.0f,-1.0f );
+	vec3 n;
+	vec3 n0 = vec3( 0.0f, 0.0f, 1.0f );
+	vec3 n1 = vec3(-1.0f,-1.0f, 0.0f ).normalized();
+	vec3 n2 = vec3(-1.0f, 1.0f, 0.0f ).normalized();
+	vec3 n3 = vec3( 1.0f, 1.0f, 0.0f ).normalized();
+	vec3 n4 = vec3( 1.0f,-1.0f, 0.0f ).normalized();
+	vec3 n5 = vec3( 0.0f, 0.0f,-1.0f );
 	
-	vector<Vec3f>		positions;
-	vector<Vec3f>		normals;
-	vector<Vec2f>		texCoords;
+	vector<vec3>		positions;
+	vector<vec3>		normals;
+	vector<vec2>		texCoords;
 	
 	for( int x = 0; x < mFboDim; ++x ) {
 		for( int y = 0; y < mFboDim; ++y ) {
 			float u = (float)x/(float)mFboDim;
 			float v = (float)y/(float)mFboDim;
-			Vec2f t = Vec2f( u, v );
+			vec2 t = vec2( u, v );
 			
 			positions.push_back( p0 );
 			positions.push_back( p1 );
@@ -492,32 +492,32 @@ void FlockingApp::initPredatorVbo()
 	mP_VboMesh		= gl::VboMesh( numVertices * 8 * 3, 0, layout, GL_TRIANGLES );
 	
 	float s = 5.0f;
-	Vec3f p0( 0.0f, 0.0f, 3.0f );
-	Vec3f p1( -s*1.3f, 0.0f, 0.0f );
-	Vec3f p2( 0.0f, s * 0.5f, 0.0f );
-	Vec3f p3( s*1.3f, 0.0f, 0.0f );
-	Vec3f p4( 0.0f, -s * 0.5f, 0.0f );
-	Vec3f p5( 0.0f, 0.0f, -12.0f );
+	vec3 p0( 0.0f, 0.0f, 3.0f );
+	vec3 p1( -s*1.3f, 0.0f, 0.0f );
+	vec3 p2( 0.0f, s * 0.5f, 0.0f );
+	vec3 p3( s*1.3f, 0.0f, 0.0f );
+	vec3 p4( 0.0f, -s * 0.5f, 0.0f );
+	vec3 p5( 0.0f, 0.0f, -12.0f );
 	
 
 	
-	Vec3f n;
-	Vec3f n0 = Vec3f( 0.0f, 0.0f, 1.0f );
-	Vec3f n1 = Vec3f(-1.0f, 0.0f, 0.0f ).normalized();
-	Vec3f n2 = Vec3f( 0.0f, 1.0f, 0.0f ).normalized();
-	Vec3f n3 = Vec3f( 1.0f, 0.0f, 0.0f ).normalized();
-	Vec3f n4 = Vec3f( 0.0f,-1.0f, 0.0f ).normalized();
-	Vec3f n5 = Vec3f( 0.0f, 0.0f,-1.0f );
+	vec3 n;
+	vec3 n0 = vec3( 0.0f, 0.0f, 1.0f );
+	vec3 n1 = vec3(-1.0f, 0.0f, 0.0f ).normalized();
+	vec3 n2 = vec3( 0.0f, 1.0f, 0.0f ).normalized();
+	vec3 n3 = vec3( 1.0f, 0.0f, 0.0f ).normalized();
+	vec3 n4 = vec3( 0.0f,-1.0f, 0.0f ).normalized();
+	vec3 n5 = vec3( 0.0f, 0.0f,-1.0f );
 	
-	vector<Vec3f>		positions;
-	vector<Vec3f>		normals;
-	vector<Vec2f>		texCoords;
+	vector<vec3>		positions;
+	vector<vec3>		normals;
+	vector<vec2>		texCoords;
 	
 	for( int x = 0; x < mP_FboDim; ++x ) {
 		for( int y = 0; y < mP_FboDim; ++y ) {
 			float u = (float)x/(float)mP_FboDim;
 			float v = (float)y/(float)mP_FboDim;
-			Vec2f t = Vec2f( u, v );
+			vec2 t = vec2( u, v );
 			
 			positions.push_back( p0 );
 			positions.push_back( p1 );
@@ -625,13 +625,13 @@ void FlockingApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void FlockingApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void FlockingApp::mouseMove( MouseEvent event )
@@ -696,7 +696,7 @@ void FlockingApp::update()
 void FlockingApp::drawIntoVelocityFbo()
 {
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	mVelocityFbos[ mThisFbo ].bindFramebuffer();
 	gl::clear( ColorA( 0, 0, 0, 0 ) );
@@ -732,7 +732,7 @@ void FlockingApp::drawIntoVelocityFbo()
 void FlockingApp::drawIntoPositionFbo()
 {	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	mPositionFbos[ mThisFbo ].bindFramebuffer();
 	mPositionFbos[ mPrevFbo ].bindTexture( 0 );
@@ -752,7 +752,7 @@ void FlockingApp::drawIntoPositionFbo()
 void FlockingApp::drawIntoPredatorVelocityFbo()
 {
 	gl::setMatricesWindow( mP_FboSize, false );
-	gl::setViewport( mP_FboBounds );
+	gl::viewport( mP_FboBounds );
 	
 	mP_VelocityFbos[ mThisFbo ].bindFramebuffer();
 	gl::clear( ColorA( 0, 0, 0, 0 ) );
@@ -788,7 +788,7 @@ void FlockingApp::drawIntoPredatorVelocityFbo()
 void FlockingApp::drawIntoPredatorPositionFbo()
 {
 	gl::setMatricesWindow( mP_FboSize, false );
-	gl::setViewport( mP_FboBounds );
+	gl::viewport( mP_FboBounds );
 	
 	mP_PositionFbos[ mThisFbo ].bindFramebuffer();
 	mP_PositionFbos[ mPrevFbo ].bindTexture( 0 );
@@ -806,10 +806,10 @@ void FlockingApp::drawIntoPredatorPositionFbo()
 
 void FlockingApp::drawIntoRoomFbo()
 {
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
 	
@@ -817,28 +817,28 @@ void FlockingApp::drawIntoRoomFbo()
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
 	mLanternsFbo.bindTexture();
-	mRoomShader.bind();
-	mRoomShader.uniform( "lanternsTex", 0 );
-	mRoomShader.uniform( "numLights", (float)mController.mNumLanterns );
-	mRoomShader.uniform( "invNumLights", 1.0f/(float)MAX_LANTERNS );
-	mRoomShader.uniform( "invNumLightsHalf", 1.0f/(float)MAX_LANTERNS * 0.5f );
-	mRoomShader.uniform( "att", 1.25f );
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "lanternsTex", 0 );
+	mRoomShader->uniform( "numLights", (float)mController.mNumLanterns );
+	mRoomShader->uniform( "invNumLights", 1.0f/(float)MAX_LANTERNS );
+	mRoomShader->uniform( "invNumLightsHalf", 1.0f/(float)MAX_LANTERNS * 0.5f );
+	mRoomShader->uniform( "att", 1.25f );
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -851,7 +851,7 @@ void FlockingApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 	
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -859,11 +859,11 @@ void FlockingApp::draw()
 	gl::enableAlphaBlending();
 	
 	// DRAW ROOM
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 	
 	gl::enableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
@@ -996,7 +996,7 @@ void FlockingApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -1018,11 +1018,11 @@ void FlockingApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();
@@ -1068,8 +1068,8 @@ void FlockingApp::drawIntoLanternsFbo()
 
 	mLanternsFbo.bindFramebuffer();
 	gl::setMatricesWindow( mLanternsFbo.getSize(), false );
-	gl::setViewport( mLanternsFbo.getBounds() );
-	gl::draw( gl::Texture( lanternsSurface ) );
+	gl::viewport( mLanternsFbo.getBounds() );
+	gl::draw( gl::Texture::create( lanternsSurface ) );
 	mLanternsFbo.unbindFramebuffer();
 }
 

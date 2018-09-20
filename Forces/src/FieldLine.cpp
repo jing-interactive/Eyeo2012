@@ -21,13 +21,13 @@ FieldLine::FieldLine()
 {
 }
 
-FieldLine::FieldLine( const Vec3f &pos, const Vec3f &vel, float charge, float lifespan )
+FieldLine::FieldLine( const vec3 &pos, const vec3 &vel, float charge, float lifespan )
 {
 	mPos		= pos;
 	for( int i=0; i<sLen; i++ ){
 		mPositions.push_back( mPos );
-//		mNormals.push_back( Vec3f::yAxis() );
-//		mPerps.push_back( Vec3f::xAxis() );
+//		mNormals.push_back( {0, 1, 0} );
+//		mPerps.push_back( vec3::xAxis() );
 	}
 	
 	mVel		= vel;
@@ -42,7 +42,7 @@ FieldLine::FieldLine( const Vec3f &pos, const Vec3f &vel, float charge, float li
 void FieldLine::update( float dt, bool tick )
 {	
 	mColor		= mCharge * 0.5f + 0.5f;
-	Vec3f dir	= mVel.normalized();
+	vec3 dir	= mVel.normalized();
 	mVel		= dir * mMaxSpeed;
 	mPos		+= mVel * dt;
 	
@@ -54,8 +54,8 @@ void FieldLine::update( float dt, bool tick )
 		}
 	}
 	
-//	Vec3f perp = dir.cross( Vec3f::zAxis() ).normalized();
-//	Vec3f perp2 = dir.cross( perp ).normalized();
+//	vec3 perp = dir.cross( vec3::zAxis() ).normalized();
+//	vec3 perp2 = dir.cross( perp ).normalized();
 //	perp = dir.cross( perp2 ).normalized();
 	
 //	mPerps[0]		= perp;

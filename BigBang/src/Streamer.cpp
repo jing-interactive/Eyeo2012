@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "Streamer.h"
 
@@ -14,17 +14,17 @@ using namespace ci;
 
 Streamer::Streamer(){}
 
-Streamer::Streamer( const Vec3f &pos, int presetIndex )
+Streamer::Streamer( const vec3 &pos, int presetIndex )
 	: mPos( pos )
 {
-	mVel = Rand::randVec3f() * Rand::randFloat( 15.0f, 30.0f );
-	mAcc = Vec3f::zero();
+	mVel = Rand::randvec3() * Rand::randFloat( 15.0f, 30.0f );
+	mAcc = vec3();
 	
 	mLen = Rand::randInt( 60, 80 );
 	for( int i=0; i<mLen; i++ ){
 		mPositions.push_back( mPos );
-		mVelocities.push_back( Vec3f::zero() );
-		mAccels.push_back( Vec3f::zero() );
+		mVelocities.push_back( vec3() );
+		mAccels.push_back( vec3() );
 	}
 	
 	mRadius		= Rand::randFloat( 3.0f, 5.0f );
@@ -46,13 +46,13 @@ Streamer::Streamer( const Vec3f &pos, int presetIndex )
 	mIsDead		= false;
 }
 
-void Streamer::update( const Vec3f &roomDims, float dt, bool tick )
+void Streamer::update( const vec3 &roomDims, float dt, bool tick )
 {
-	mAcc += Vec3f( 0.0f, mGravity, 0.0f ) * dt;
+	mAcc += vec3( 0.0f, mGravity, 0.0f ) * dt;
 	mVel += mAcc * dt;
 	mPos += mVel * dt;
 	mVel -= mVel * 0.05f * dt;
-	mAcc = Vec3f::zero();
+	mAcc = vec3();
 	
 	checkBounds( roomDims );
 	
@@ -85,7 +85,7 @@ void Streamer::update( const Vec3f &roomDims, float dt, bool tick )
 	if( mAge > mLifespan ) mIsDead = true;
 }
 
-void Streamer::checkBounds( const Vec3f &roomDims )
+void Streamer::checkBounds( const vec3 &roomDims )
 {	
 	if( mPos.x - mRadius < -roomDims.x ){
 		mPos.x = -roomDims.x + mRadius;
@@ -108,11 +108,11 @@ void Streamer::draw()
 {
 	glBegin( GL_TRIANGLE_STRIP );
 	for( int i=0; i<mLen-1; i++ ){
-		Vec3f p1 = mPositions[i];
-		Vec3f p2 = mPositions[i+1];
-		Vec3f dir = p2 - p1;
+		vec3 p1 = mPositions[i];
+		vec3 p2 = mPositions[i+1];
+		vec3 dir = p2 - p1;
 		dir.normalize();
-		Vec3f perp1 = dir.cross( Vec3f::yAxis() );
+		vec3 perp1 = dir.cross( {0, 1, 0} );
 		perp1.normalize();
 		gl::vertex( p1 - perp1 * 2.0f * mAgePer );
 		gl::vertex( p1 + perp1 * 2.0f * mAgePer );

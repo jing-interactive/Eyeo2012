@@ -6,13 +6,13 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "Lantern.h"
 
 using namespace ci;
 
-Lantern::Lantern( const Vec3f &pos )
+Lantern::Lantern( const vec3 &pos )
 {
 	mPos		= pos;
 	mRadius		= 0.0f;
@@ -28,7 +28,7 @@ Lantern::Lantern( const Vec3f &pos )
 }
 
 void Lantern::update( float dt, float yFloor ){
-	mPos += Vec3f( 0.0f, mFallSpeed * dt, 0.0f );
+	mPos += vec3( 0.0f, mFallSpeed * dt, 0.0f );
 	if( ( mPos.y + mRadiusDest ) < yFloor ){
 		mIsSinking = true;
 		mIsDying = true;

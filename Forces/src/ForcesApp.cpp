@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
@@ -25,7 +25,7 @@ using namespace std;
 #define ROOM_FBO_RES	2
 #define MAX_PARTICLES	8
 
-class ForcesApp : public AppBasic {
+class ForcesApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -68,7 +68,7 @@ class ForcesApp : public AppBasic {
 
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 	bool				mSaveFrames;
@@ -91,16 +91,16 @@ void ForcesApp::setup()
 	mRgba16Format.setColorInternalFormat( GL_RGBA16F_ARB );
 	mRgba16Format.setMinFilter( GL_NEAREST );
 	mRgba16Format.setMagFilter( GL_NEAREST );
-	mLightsFbo			= gl::Fbo( MAX_PARTICLES, 2, mRgba16Format );
+	mLightsFbo			= gl::Fbo::create( MAX_PARTICLES, 2, mRgba16Format );
 	
 	
 	// LOAD SHADERS
 	try {
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mShardShader	= gl::GlslProg( loadResource( "shard.vert" ), loadResource( "shard.frag" ) );
-		mFieldShader	= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "field.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mShardShader	= gl::GlslProg::create( loadResource( "shard.vert" ), loadResource( "shard.frag" ) );
+		mFieldShader	= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "field.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -111,10 +111,10 @@ void ForcesApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mGlowTex		= gl::Texture( loadImage( loadResource( "glow.png" ) ), mipFmt );
-	mNebulaTex		= gl::Texture( loadImage( loadResource( "nebula.png" ) ), mipFmt );
-	mCoronaTex		= gl::Texture( loadImage( loadResource( "corona.png" ) ), mipFmt );
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconForces.png" ) ), mipFmt );
+	mGlowTex		= gl::Texture::create( loadImage( loadResource( "glow.png" ) ), mipFmt );
+	mNebulaTex		= gl::Texture::create( loadImage( loadResource( "nebula.png" ) ), mipFmt );
+	mCoronaTex		= gl::Texture::create( loadImage( loadResource( "corona.png" ) ), mipFmt );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconForces.png" ) ), mipFmt );
 	mCubeMap		= CubeMap( GLsizei(512), GLsizei(512),
 							   Surface8u( loadImage( loadResource( RES_CUBE1_ID ) ) ),
 							   Surface8u( loadImage( loadResource( RES_CUBE2_ID ) ) ),
@@ -127,16 +127,16 @@ void ForcesApp::setup()
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 	
 	// CONTROLLER
@@ -155,14 +155,14 @@ void ForcesApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 //	mController.checkForParticleTouch( mMouseDownPos );
 }
 
 void ForcesApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 //	mController.releaseDraggedParticles();
 }
 
@@ -224,31 +224,31 @@ void ForcesApp::update()
 
 void ForcesApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "matrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "matrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -257,7 +257,7 @@ void ForcesApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -266,7 +266,7 @@ void ForcesApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM FBO
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::disable( GL_TEXTURE_2D );
@@ -341,7 +341,7 @@ void ForcesApp::draw()
 	}
 	
 	if( getElapsedFrames()%60 == 59 ){
-		std::cout << "FPS: " << getAverageFps() << std::endl;
+		console() << "FPS: " << getAverageFps() << std::endl;
 	}
 }
 
@@ -349,7 +349,7 @@ void ForcesApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -371,11 +371,11 @@ void ForcesApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();
@@ -420,8 +420,8 @@ void ForcesApp::drawIntoLightsFbo()
 	
 	mLightsFbo.bindFramebuffer();
 	gl::setMatricesWindow( mLightsFbo.getSize(), false );
-	gl::setViewport( mLightsFbo.getBounds() );
-	gl::draw( gl::Texture( lightsSurface ) );
+	gl::viewport( mLightsFbo.getBounds() );
+	gl::draw( gl::Texture::create( lightsSurface ) );
 	mLightsFbo.unbindFramebuffer();
 }
 

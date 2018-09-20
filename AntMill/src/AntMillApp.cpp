@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
@@ -29,7 +29,7 @@ using namespace std;
 #define FBO_WIDTH			700
 #define FBO_HEIGHT			700
 
-class AntMillApp : public AppBasic {
+class AntMillApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -45,7 +45,7 @@ class AntMillApp : public AppBasic {
 	void			drawIntoBlurFbo();
 	void			blurFbo();
 	void			readFboPixels();
-	Vec2i			toFboVec( const Vec2f &pos );
+	Vec2i			toFboVec( const vec2 &pos );
 	void			drawIntoRoomFbo();
 	virtual void	draw();
 	void			drawInfoPanel();
@@ -69,7 +69,7 @@ class AntMillApp : public AppBasic {
 	gl::Fbo				mRoomFbo;
 	
 	// FBOS
-	ci::Vec2f			mFboSize;
+	ci::vec2			mFboSize;
 	ci::Area			mFboBounds;
 	gl::Fbo				mFbos[2];
 	gl::Fbo				mBlurFbos[2];
@@ -79,7 +79,7 @@ class AntMillApp : public AppBasic {
 	Controller			mController;
 	
 	// MOUSE
-	Vec2f				mMousePos, mMouseDownPos, mMouseOffset;
+	vec2				mMousePos, mMouseDownPos, mMouseOffset;
 	bool				mMousePressed;
 	
 	// SAVEFRAMES
@@ -105,10 +105,10 @@ void AntMillApp::setup()
 	format.setColorInternalFormat( GL_RGB );
 	format.setWrap( GL_REPEAT, GL_REPEAT );
 	mFboBounds = Area( 0.0f, 0.0f, FBO_WIDTH, FBO_HEIGHT );
-	mFboSize   = Vec2f( FBO_WIDTH, FBO_HEIGHT );
+	mFboSize   = vec2( FBO_WIDTH, FBO_HEIGHT );
 	for( int i=0; i<2; i++ ){
-		mFbos[i]	 = gl::Fbo( FBO_HEIGHT, FBO_HEIGHT, format );	
-		mBlurFbos[i] = gl::Fbo( FBO_HEIGHT, FBO_HEIGHT, format );
+		mFbos[i]	 = gl::Fbo::create( FBO_HEIGHT, FBO_HEIGHT, format );	
+		mBlurFbos[i] = gl::Fbo::create( FBO_HEIGHT, FBO_HEIGHT, format );
 	}
 	clearPheromoneFbos();
 
@@ -117,11 +117,11 @@ void AntMillApp::setup()
 	
 	// LOAD SHADERS
 	try {
-		mRoomShader		= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
-		mBlurShader		= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "blur.frag" ) );
-		mPheromoneShader= gl::GlslProg( loadResource( "passThru.vert" ), loadResource( "pheromone.frag" ) );
+		mRoomShader		= gl::GlslProg::create( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mBlurShader		= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "blur.frag" ) );
+		mPheromoneShader= gl::GlslProg::create( loadResource( "passThru.vert" ), loadResource( "pheromone.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -132,24 +132,24 @@ void AntMillApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mPinTex			= gl::Texture( loadImage( loadResource( "pin.png" ) ), mipFmt );
-	mKernelTex		= gl::Texture( loadImage( loadResource( "kernel.png" ) ) );
-	mHomeTex		= gl::Texture( loadImage( loadResource( "home.png" ) ) );
-	mIconTex		= gl::Texture( loadImage( loadResource( "iconAntMill.png" ) ), mipFmt );
+	mPinTex			= gl::Texture::create( loadImage( loadResource( "pin.png" ) ), mipFmt );
+	mKernelTex		= gl::Texture::create( loadImage( loadResource( "kernel.png" ) ) );
+	mHomeTex		= gl::Texture::create( loadImage( loadResource( "home.png" ) ) );
+	mIconTex		= gl::Texture::create( loadImage( loadResource( "iconAntMill.png" ) ), mipFmt );
 	
 	// ROOM
 	gl::Fbo::Format roomFormat;
 	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= false;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 	
 	// CONTROLLER
@@ -165,13 +165,13 @@ void AntMillApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void AntMillApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void AntMillApp::mouseMove( MouseEvent event )
@@ -245,14 +245,14 @@ void AntMillApp::update()
 
 void AntMillApp::drawIntoPheromoneFbo()
 {	
-	Vec3f dims = mRoom.getDims();
+	vec3 dims = mRoom.getDims();
 	CameraOrtho orthoCam = CameraOrtho( dims.x, -dims.x, dims.z, -dims.z, -dims.y-1.0f, dims.y+1.0f );
 	
 	mFbos[ mThisFbo ].bindFramebuffer();
 	gl::clear( Color( 0, 0, 0 ), false );
 	
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -270,7 +270,7 @@ void AntMillApp::drawIntoPheromoneFbo()
 	mPheromoneShader.uniform( "homeRadius", mController.mHomeRadius );
 	mPheromoneShader.uniform( "foodPos", mController.mFoodPos );
 	mPheromoneShader.uniform( "foodRadius", mController.mFoodRadius );
-	mPheromoneShader.uniform( "fboSize", Vec2f( FBO_WIDTH, FBO_HEIGHT ) );
+	mPheromoneShader.uniform( "fboSize", vec2( FBO_WIDTH, FBO_HEIGHT ) );
 	gl::drawSolidRect( mFbos[ mPrevFbo ].getBounds() );
 	mPheromoneShader.unbind();
 		
@@ -279,7 +279,7 @@ void AntMillApp::drawIntoPheromoneFbo()
 	
 	gl::setMatrices( orthoCam );
 	gl::pushMatrices();
-	gl::rotate( Vec3f( 90.0f, 0.0f, 0.0f ) );
+	gl::rotate( vec3( 90.0f, 0.0f, 0.0f ) );
 	
 	// DRAW THE ANT TAIL POSITIONS
 	Color outBound = Color( 0.2f, 0.0f, 0.0f );
@@ -296,7 +296,7 @@ void AntMillApp::drawIntoBlurFbo()
 	gl::clear( Color( 0.0f, 0.0f, 0.0f ), true );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) );
 	gl::setMatricesWindow( mFboSize, false );
-	gl::setViewport( mFboBounds );
+	gl::viewport( mFboBounds );
 	
 	gl::enable( GL_TEXTURE_2D );
 	mFbos[ mThisFbo ].bindTexture();
@@ -322,14 +322,14 @@ void AntMillApp::blurFbo()
 		mBlurShader.uniform( "fboTex", 0 );
 		mBlurShader.uniform( "kernelTex", 1 );
 		if( i%2 == 0 ){
-			mBlurShader.uniform( "orientationVector", Vec2f( 1.0f, 0.0f ) );
+			mBlurShader.uniform( "orientationVector", vec2( 1.0f, 0.0f ) );
 		} else {
-			mBlurShader.uniform( "orientationVector", Vec2f( 0.0f, getWindowAspectRatio() ) );
+			mBlurShader.uniform( "orientationVector", vec2( 0.0f, getWindowAspectRatio() ) );
 		}
 		
 		// BLUR AMOUNT
 		gl::setMatricesWindow( mFboSize, false );
-		gl::setViewport( mFboBounds );
+		gl::viewport( mFboBounds );
 		gl::drawSolidRect( mFboBounds );
 		mBlurShader.unbind();
 		
@@ -345,14 +345,14 @@ void AntMillApp::readFboPixels()
 			GLfloat pixel[4];
 			Ant *ant = &mController.mAnts[i];
 			
-			Vec3f p1   = ant->mLeftSensorPos;
+			vec3 p1   = ant->mLeftSensorPos;
 			Vec2i pos1 = toFboVec( p1.xz() );
 			glReadPixels( pos1.x, pos1.y, 1, 1, GL_RGB, GL_FLOAT, (void *)pixel );
 			float r1 = pixel[0];
 			float g1 = pixel[1];
 			float b1 = pixel[2];
 			
-			Vec3f p2   = ant->mRightSensorPos;
+			vec3 p2   = ant->mRightSensorPos;
 			Vec2i pos2 = toFboVec( p2.xz() );
 			glReadPixels( pos2.x, pos2.y, 1, 1, GL_RGB, GL_FLOAT, (void *)pixel );
 			float r2 = pixel[0];// * 0.99f;
@@ -372,7 +372,7 @@ void AntMillApp::readFboPixels()
 	mBlurFbos[mThisFbo].unbindFramebuffer();
 }
 
-Vec2i AntMillApp::toFboVec( const Vec2f &pos )
+Vec2i AntMillApp::toFboVec( const vec2 &pos )
 {
 	int xi = FBO_WIDTH - (int)( pos.x + mRoom.getDims().x );
 	int zi = (int)( pos.y + mRoom.getDims().z );
@@ -382,31 +382,31 @@ Vec2i AntMillApp::toFboVec( const Vec2f &pos )
 
 void AntMillApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getBounds() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
+	mat4 m;
 	m.setToIdentity();
 	m.scale( mRoom.getDims() );
 	
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+	mRoomShader->bind();
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
+	mRoomShader->unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -417,7 +417,7 @@ void AntMillApp::draw()
 	gl::clear( ColorA( 0.1f, 0.1f, 0.1f, 0.0f ), true );
 	
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport( getWindowBounds() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -426,7 +426,7 @@ void AntMillApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM FBO
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	gl::setMatrices( mSpringCam.getCam() );
@@ -435,7 +435,7 @@ void AntMillApp::draw()
 	gl::color( Color( c, c, c ) );
 	gl::enableAdditiveBlending();
 	mBlurFbos[mThisFbo].bindTexture();
-	gl::drawBillboard( Vec3f( 0.0f, mRoom.getFloorLevel(), 0.0f ), Vec2f( mRoom.getDims().x, mRoom.getDims().z ) * 2.0, 180.0f, Vec3f::xAxis(), Vec3f::zAxis() );
+	gl::drawBillboard( vec3( 0.0f, mRoom.getFloorLevel(), 0.0f ), vec2( mRoom.getDims().x, mRoom.getDims().z ) * 2.0, 180.0f, vec3::xAxis(), vec3::zAxis() );
 	
 	gl::disable( GL_TEXTURE_2D );
 	gl::enableAlphaBlending();
@@ -464,9 +464,9 @@ void AntMillApp::draw()
 		for( int i=0; i<mController.mSpecialAnts.size(); i++ ){
 			Ant *ant	= mController.mSpecialAnts[i];
 			gl::color( Color( CM_HSV, ant->mColor, 1.0f, 1.0f ) );
-			Vec3f pos	= ant->mPos;
-			gl::drawBillboard( pos, Vec2f( 30.0f, 60.0f ), 0.0f, ant->mPinPerp, ant->mPinUp );			// HEAVY LOAD MOD
-//			gl::drawBillboard( ant->mPos, Vec2f( 50.0f, 100.0f ), 0.0f, Vec3f::xAxis(), Vec3f::yAxis() );	// NORMAL
+			vec3 pos	= ant->mPos;
+			gl::drawBillboard( pos, vec2( 30.0f, 60.0f ), 0.0f, ant->mPinPerp, ant->mPinUp );			// HEAVY LOAD MOD
+//			gl::drawBillboard( ant->mPos, vec2( 50.0f, 100.0f ), 0.0f, vec3::xAxis(), {0, 1, 0} );	// NORMAL
 		}
 	}
 	
@@ -479,9 +479,9 @@ void AntMillApp::draw()
 	mPrevFbo	= ( mThisFbo + 1 ) % 2;
 	
 	if( getElapsedFrames()%60 == 59 ){
-		std::cout << "FPS: " << getAverageFps() << std::endl;
-		std::cout << "num special ants = " << mController.mSpecialAnts.size() << std::endl;
-		std::cout << "num regular ants = " << mController.mAnts.size() << std::endl;
+		console() << "FPS: " << getAverageFps() << std::endl;
+		console() << "num special ants = " << mController.mSpecialAnts.size() << std::endl;
+		console() << "num regular ants = " << mController.mAnts.size() << std::endl;
 	}
 	
 	if( mSaveFrames ){
@@ -494,7 +494,7 @@ void AntMillApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -516,11 +516,11 @@ void AntMillApp::drawInfoPanel()
 	
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 	
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	
 	gl::popMatrices();

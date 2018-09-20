@@ -12,24 +12,24 @@
 class Balloon {
   public:
 	Balloon();
-	Balloon( const ci::Vec3f &pos, int presetIndex );
-	void update( const ci::Camera &cam, const ci::Vec3f &roomDims, float dt );
+	Balloon( const ci::vec3 &pos, int presetIndex );
+	void update( const ci::Camera &cam, const ci::vec3 &roomDims, float dt );
 	void updateSpring( float dt );
-	void checkBounds( const ci::Vec3f &roomDims );
+	void checkBounds( const ci::vec3 &roomDims );
 	void draw();
 	
-	ci::Vec3f	mPos;
-	ci::Vec3f	mVel;
-	ci::Vec3f	mAcc;
+	ci::vec3	mPos;
+	ci::vec3	mVel;
+	ci::vec3	mAcc;
 	
-	ci::Vec3f	mSpringPos;
-	ci::Vec3f	mSpringVel;
-	ci::Vec3f	mSpringAcc;
+	ci::vec3	mSpringPos;
+	ci::vec3	mSpringVel;
+	ci::vec3	mSpringAcc;
 	
-	ci::Vec2f	mScreenPos;
+	ci::vec2	mScreenPos;
 	float		mScreenRadius;
 	
-	ci::Matrix44f	mMatrix;
+	ci::mat4	mMatrix;
 	
 	float		mBuoyancy;
 	float		mRadius;

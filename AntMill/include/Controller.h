@@ -44,10 +44,10 @@ public:
 	
 	std::vector<Food>		mFoods;
 	
-	ci::Vec3f				mHomePos;
+	ci::vec3				mHomePos;
 	float					mHomeRadius, mHomeRadiusSqrd;
 	
-	ci::Vec3f				mFoodPos;
+	ci::vec3				mFoodPos;
 	float					mFoodRadius, mFoodRadiusSqrd;
 };
 

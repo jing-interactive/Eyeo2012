@@ -10,7 +10,7 @@
 #include "cinder/CinderMath.h"
 #include "cinder/Rand.h"
 #include "cinder/gl/gl.h"
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include <boost/foreach.hpp>
 
 #define TWO_PI 6.28318531
@@ -18,7 +18,7 @@
 using namespace ci;
 using std::vector;
 
-Shard::Shard( Vec3f pos, Vec3f dir, float height, float radius )
+Shard::Shard( vec3 pos, vec3 dir, float height, float radius )
 : mPos( pos ), mDir( dir ), mHeight( height ), mRadius( radius )
 {
 }
@@ -47,26 +47,26 @@ void Shard::init( TriMesh *mesh, const Color &c )
 	mMid	= mPos + mDir * ( mHeight - Rand::randFloat( mRadius * 0.75f, mRadius * 1.25f ) * ( 1.0f - facetPer ) * 2.0f );
 	mTip	= mPos + mDir * mHeight;
 	
-	Vec3f perp1 = mDir.cross( Vec3f::yAxis() );
+	vec3 perp1 = mDir.cross( {0, 1, 0} );
 	perp1.normalize();
-	Vec3f perp2 = perp1.cross( mDir );
+	vec3 perp2 = perp1.cross( mDir );
 	perp2.normalize();
 	perp1		= perp2.cross( mDir );
 	perp1.normalize();
 	
 	float numSides = 6.0f;
 	float invNumSides = 1.0f/numSides;
-	vector<Vec3f> tipPositions;
+	vector<vec3> tipPositions;
 	for( int i=0; i<numSides; i++ ){
-		Vec3f tempV1, tempV2, tempV3, tempV4;
-		Vec3f v1, v2, v3, v4;
-		Vec2f t1, t2, t3, t4;
+		vec3 tempV1, tempV2, tempV3, tempV4;
+		vec3 v1, v2, v3, v4;
+		vec2 t1, t2, t3, t4;
 
 		for( int k=0; k<2; k++ ){
 			float angle = initAngle + ( i + k ) * invNumSides * TWO_PI;
 			float cosa	= cos( angle );
 			float sina	= sin( angle );
-			Vec3f offset = ( perp1 * cosa + perp2 * sina ) * mRadius;
+			vec3 offset = ( perp1 * cosa + perp2 * sina ) * mRadius;
 			
 			v1 = mPos + offset;
 			v2 = mMid + offset;
@@ -86,15 +86,15 @@ void Shard::init( TriMesh *mesh, const Color &c )
 			mesh->appendVertex( v4 );
 			
 			if( k == 0 ){
-				t1	= Vec2f( uc1, vc1 );
-				t2	= Vec2f( uc1, vc2 );
-				t3	= Vec2f( uc1, vc3 );
-				t4	= Vec2f( uc1, vc4 );
+				t1	= vec2( uc1, vc1 );
+				t2	= vec2( uc1, vc2 );
+				t3	= vec2( uc1, vc3 );
+				t4	= vec2( uc1, vc4 );
 			} else {
-				t1	= Vec2f( uc2, vc1 );
-				t2	= Vec2f( uc2, vc2 );
-				t3	= Vec2f( uc2, vc3 );
-				t4	= Vec2f( uc2, vc4 );
+				t1	= vec2( uc2, vc1 );
+				t2	= vec2( uc2, vc2 );
+				t3	= vec2( uc2, vc3 );
+				t4	= vec2( uc2, vc4 );
 			}
 			
 			
@@ -110,8 +110,8 @@ void Shard::init( TriMesh *mesh, const Color &c )
 			mesh->appendColorRGB( c );
 		}
 		
-		Vec3f n1 = calcSurfaceNormal( tempV1, tempV2, v1 );
-		Vec3f n2 = calcSurfaceNormal( tempV3, tempV4, v3 );
+		vec3 n1 = calcSurfaceNormal( tempV1, tempV2, v1 );
+		vec3 n2 = calcSurfaceNormal( tempV3, tempV4, v3 );
 		
 		
 		mesh->appendNormal( n1 );
@@ -127,9 +127,9 @@ void Shard::init( TriMesh *mesh, const Color &c )
 		tipPositions.push_back( v4 );
 	}
 	
-	BOOST_FOREACH( Vec3f &v, tipPositions ){
+	BOOST_FOREACH( vec3 &v, tipPositions ){
 		mesh->appendVertex( v );
-		mesh->appendTexCoord( Vec2f( uc2, vc4 ) );
+		mesh->appendTexCoord( vec2( uc2, vc4 ) );
 		mesh->appendColorRGB( c );
 		mesh->appendNormal( mDir.normalized() );
 	}
@@ -157,11 +157,11 @@ void Shard::init( TriMesh *mesh, const Color &c )
 	mesh->appendTriangle( numVerts - 1, numVerts - 6, numVerts - 5 );
 }
 
-Vec3f Shard::calcSurfaceNormal( const ci::Vec3f &p1, const ci::Vec3f &p2, const ci::Vec3f &p3 )
+vec3 Shard::calcSurfaceNormal( const ci::vec3 &p1, const ci::vec3 &p2, const ci::vec3 &p3 )
 {
-	ci::Vec3f normal;
-	ci::Vec3f u = p1 - p3;
-	ci::Vec3f v = p1 - p2;
+	ci::vec3 normal;
+	ci::vec3 u = p1 - p3;
+	ci::vec3 v = p1 - p2;
 	
 	normal.x = u.y * v.z - u.z * v.y;
 	normal.y = u.z * v.x - u.x * v.z;

@@ -23,8 +23,8 @@ class Controller
 {
   public:
 	struct VboVertex {
-        ci::Vec3f vertex;
-//		ci::Vec3f normal;
+        ci::vec3 vertex;
+//		ci::vec3 normal;
         ci::Vec4f color;
     };
 	
@@ -36,20 +36,20 @@ class Controller
 	void updateFieldLines( float dt, bool tick );
 	void draw();
 	void drawFieldLines( ci::gl::GlslProg *shader );
-	void drawGlows( const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawNebulas( const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawCoronas( const ci::Vec3f &right, const ci::Vec3f &up );
-	void drawGlobs( const ci::Vec3f &right, const ci::Vec3f &up );
+	void drawGlows( const ci::vec3 &right, const ci::vec3 &up );
+	void drawNebulas( const ci::vec3 &right, const ci::vec3 &up );
+	void drawCoronas( const ci::vec3 &right, const ci::vec3 &up );
+	void drawGlobs( const ci::vec3 &right, const ci::vec3 &up );
 	void drawShards( ci::gl::GlslProg *shader );
 	void clear();
-	void addParticle( const ci::Vec3f &pos, float charge );
+	void addParticle( const ci::vec3 &pos, float charge );
 	void addFieldLines( Particle *p, int amt );
 	void addGlows( Particle *p, int amt );
 	void addNebulas( Particle *p, int amt );
-	void addGlobs( const ci::Vec3f &pos, int amt );
-	void checkForParticleTouch( const ci::Vec2f &mousePos );
+	void addGlobs( const ci::vec3 &pos, int amt );
+	void checkForParticleTouch( const ci::vec2 &mousePos );
 	void releaseDraggedParticles();
-	void dragParticle( const ci::Vec2f &mousePos );
+	void dragParticle( const ci::vec2 &mousePos );
 	
 	Room					*mRoom;
 	int						mMaxParticles;

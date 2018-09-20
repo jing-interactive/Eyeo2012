@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/Rand.h"
 #include "GlowCube.h"
@@ -17,12 +17,12 @@ GlowCube::GlowCube()
 {
 }
 
-GlowCube::GlowCube( const Vec3f &pos )
+GlowCube::GlowCube( const vec3 &pos )
 : mPos( pos )
 {
-	mAcc		= Vec3f::zero();
-	mVel		= Vec3f::zero();
-	mAxis		= Rand::randVec3f();
+	mAcc		= vec3();
+	mVel		= vec3();
+	mAxis		= Rand::randvec3();
 	mAngle		= Rand::randFloat( M_PI * 2.0f );
 	mAngleVel	= Rand::randFloat( -0.1f, 0.1f );
 	mIsDead		= false;
@@ -38,13 +38,13 @@ void GlowCube::update( float dt )
 //	mVel += mAcc * dt;
 //	mPos += mVel * dt;
 //	mVel -= mVel * 0.01f * dt;
-//	mAcc = Vec3f::zero();
+//	mAcc = vec3();
 	
 	mAngle += dt * mAngleVel;
 	
 	mMatrix.setToIdentity();
 	mMatrix.translate( mPos );
-	mMatrix.scale( Vec3f( mRadius, mRadius, mRadius ) );
+	mMatrix.scale( vec3( mRadius, mRadius, mRadius ) );
 	mMatrix.rotate( mAxis * mAngle );
 	
 	mAge += dt;
@@ -56,5 +56,5 @@ void GlowCube::update( float dt )
 
 void GlowCube::draw()
 {
-	gl::drawCube( Vec3f::zero(), Vec3f( 1.0f, 1.0f, 1.0f ) * mAgePer );
+	gl::drawCube( vec3(), vec3( 1.0f, 1.0f, 1.0f ) * mAgePer );
 }

@@ -1,4 +1,4 @@
-#include "cinder/app/AppBasic.h"
+#include "cinder/app/App.h"
 #include "cinder/gl/gl.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/Text.h"
@@ -10,6 +10,7 @@
 #include "cinder/Camera.h"
 #include "cinder/Rand.h"
 #include "Resources.h"
+#include "cinder/app/RendererGl.h"
 #include "Controller.h"
 #include "Room.h"
 #include "SpringCam.h"
@@ -25,7 +26,7 @@ using namespace std;
 #define ROOM_FBO_RES	2
 
 
-class ProtoApp : public AppBasic {
+class ProtoApp : public App {
   public:
 	virtual void	prepareSettings( Settings *settings );
 	virtual void	setup();
@@ -44,20 +45,20 @@ class ProtoApp : public AppBasic {
 	SpringCam		mSpringCam;
 	
 	// SHADERS
-	gl::GlslProg	mRoomShader;
+	gl::GlslProgRef	mRoomShader;
 	
 	// TEXTURES
-	gl::Texture		mIconTex;
+	gl::TextureRef		mIconTex;
 	
 	// ROOM
 	Room			mRoom;
-	gl::Fbo			mRoomFbo;
+	gl::FboRef			mRoomFbo;
 	
 	// CONTROLLER
 	Controller		mController;
 
 	// MOUSE
-	Vec2f			mMousePos, mMouseDownPos, mMouseOffset;
+	vec2			mMousePos, mMouseDownPos, mMouseOffset;
 	bool			mMousePressed;
 	
 	bool			mSaveFrames;
@@ -76,14 +77,15 @@ void ProtoApp::prepareSettings( Settings *settings )
 
 void ProtoApp::setup()
 {	
+    addAssetDirectory("../_Room/assets");
 	// CAMERA	
 	mSpringCam		= SpringCam( -450.0f, getWindowAspectRatio() );
 	
 	// LOAD SHADERS
 	try {
-		mRoomShader	= gl::GlslProg( loadResource( "room.vert" ), loadResource( "room.frag" ) );
+		mRoomShader	= gl::GlslProg::create( loadAsset( "room.vert" ), loadAsset( "room.frag" ) );
 	} catch( gl::GlslProgCompileExc e ) {
-		std::cout << e.what() << std::endl;
+		console() << e.what() << std::endl;
 		quit();
 	}
 	
@@ -94,21 +96,21 @@ void ProtoApp::setup()
     mipFmt.setMagFilter( GL_LINEAR );
 	
 	// LOAD TEXTURES
-	mIconTex			= gl::Texture( loadImage( loadResource( "iconRoom.png" ) ), mipFmt );
+	mIconTex			= gl::Texture::create( loadImage( loadAsset( "iconRoom.png" ) ), mipFmt );
 	
 	// ROOM
 	gl::Fbo::Format roomFormat;
-	roomFormat.setColorInternalFormat( GL_RGB );
-	mRoomFbo			= gl::Fbo( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
+	//roomFormat.setColorInternalFormat( GL_RGB );
+	mRoomFbo			= gl::Fbo::create( APP_WIDTH/ROOM_FBO_RES, APP_HEIGHT/ROOM_FBO_RES, roomFormat );
 	bool isPowerOn		= true;
 	bool isGravityOn	= true;
-	mRoom				= Room( Vec3f( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
+	mRoom				= Room( vec3( 350.0f, 200.0f, 350.0f ), isPowerOn, isGravityOn );	
 	mRoom.init();
 	
 	// MOUSE
-	mMousePos			= Vec2f::zero();
-	mMouseDownPos		= Vec2f::zero();
-	mMouseOffset		= Vec2f::zero();
+	mMousePos			= vec2();
+	mMouseDownPos		= vec2();
+	mMouseOffset		= vec2();
 	mMousePressed		= false;
 
 	// CONTROLLER
@@ -127,13 +129,13 @@ void ProtoApp::mouseDown( MouseEvent event )
 {
 	mMouseDownPos = event.getPos();
 	mMousePressed = true;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void ProtoApp::mouseUp( MouseEvent event )
 {
 	mMousePressed = false;
-	mMouseOffset = Vec2f::zero();
+	mMouseOffset = vec2();
 }
 
 void ProtoApp::mouseMove( MouseEvent event )
@@ -172,7 +174,6 @@ void ProtoApp::keyDown( KeyEvent event )
 }
 
 
-
 void ProtoApp::update()
 {	
 	// ROOM
@@ -188,31 +189,28 @@ void ProtoApp::update()
 
 void ProtoApp::drawIntoRoomFbo()
 {
-	mRoomFbo.bindFramebuffer();
+	mRoomFbo->bindFramebuffer();
 	gl::clear( ColorA( 0.0f, 0.0f, 0.0f, 0.0f ), true );
 	
-	gl::setMatricesWindow( mRoomFbo.getSize(), false );
-	gl::setViewport( mRoomFbo.getBounds() );
+	gl::setMatricesWindow( mRoomFbo->getSize(), false );
+	gl::viewport( mRoomFbo->getSize() );
 	gl::disableAlphaBlending();
 	gl::enable( GL_TEXTURE_2D );
 	glEnable( GL_CULL_FACE );
 	glCullFace( GL_BACK );
-	Matrix44f m;
-	m.setToIdentity();
-	m.scale( mRoom.getDims() );
+    mat4 m = glm::scale(mRoom.getDims());
 	
-	mRoomShader.bind();
-	mRoomShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader.uniform( "mMatrix", m );
-	mRoomShader.uniform( "eyePos", mSpringCam.mEye );
-	mRoomShader.uniform( "roomDims", mRoom.getDims() );
-	mRoomShader.uniform( "power", mRoom.getPower() );
-	mRoomShader.uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader.uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
+    gl::ScopedGlslProg scp(mRoomShader);
+	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
+	mRoomShader->uniform( "roomDims", mRoom.getDims() );
+	mRoomShader->uniform( "power", mRoom.getPower() );
+	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
+	mRoomShader->uniform( "timePer", mRoom.getTimePer() * 1.5f + 0.5f );
 	mRoom.draw();
-	mRoomShader.unbind();
 	
-	mRoomFbo.unbindFramebuffer();
+	mRoomFbo->unbindFramebuffer();
 	glDisable( GL_CULL_FACE );
 }
 
@@ -222,7 +220,7 @@ void ProtoApp::draw()
 	
 	// SET MATRICES TO WINDOW
 	gl::setMatricesWindow( getWindowSize(), false );
-	gl::setViewport( getWindowBounds() );
+	gl::viewport(getWindowSize() );
 
 	gl::disableDepthRead();
 	gl::disableDepthWrite();
@@ -231,7 +229,7 @@ void ProtoApp::draw()
 	gl::color( ColorA( 1.0f, 1.0f, 1.0f, 1.0f ) );
 	
 	// DRAW ROOM FBO
-	mRoomFbo.bindTexture();
+	mRoomFbo->bindTexture();
 	gl::drawSolidRect( getWindowBounds() );
 	
 	// SET MATRICES TO SPRING CAM
@@ -242,7 +240,7 @@ void ProtoApp::draw()
 	
 	// SAVE FRAMES
 	if( mSaveFrames && mNumSavedFrames < 5000 ){
-		writeImage( getHomeDirectory() + "Room/" + toString( mNumSavedFrames ) + ".png", copyWindowSurface() );
+		writeImage( getHomeDirectory() / "Room" / toString( mNumSavedFrames ) / ".png", copyWindowSurface() );
 		mNumSavedFrames ++;
 	}
 
@@ -257,7 +255,7 @@ void ProtoApp::drawInfoPanel()
 {
 	gl::pushMatrices();
 	gl::translate( mRoom.getDims() );
-	gl::scale( Vec3f( -1.0f, -1.0f, 1.0f ) );
+	gl::scale( vec3( -1.0f, -1.0f, 1.0f ) );
 	gl::color( Color( 1.0f, 1.0f, 1.0f ) * ( 1.0 - mRoom.getPower() ) );
 	gl::enableAlphaBlending();
 	
@@ -279,14 +277,13 @@ void ProtoApp::drawInfoPanel()
 
 	// DRAW TIME BAR
 	float timePer		= mRoom.getTimePer();
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 2.0f ), Vec2f( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 2.0f ), vec2( X0 + timePer * ( iconWidth ), Y1 + 2.0f + 4.0f ) ) );
 
 	// DRAW FPS BAR
 	float fpsPer		= getAverageFps()/60.0f;
-	gl::drawSolidRect( Rectf( Vec2f( X0, Y1 + 4.0f + 4.0f ), Vec2f( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
+	gl::drawSolidRect( Rectf( vec2( X0, Y1 + 4.0f + 4.0f ), vec2( X0 + fpsPer * ( iconWidth ), Y1 + 4.0f + 6.0f ) ) );
 	
 	gl::popMatrices();
 }
 
-
-CINDER_APP_BASIC( ProtoApp, RendererGl )
+CINDER_APP( ProtoApp, RendererGl )
