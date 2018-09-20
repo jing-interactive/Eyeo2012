@@ -13,7 +13,7 @@ out vec2 vTexCoord0;
 
 void main()
 {
-	vVertex			= ciModelMatrix * vec4( ciPosition );
+	vVertex			= ciModelMatrix * ciPosition;
 	vNormal			= ciNormal;//normalize( vec3( mMatrix * vec4( gl_Normal, 0.0 ) ) );
 	
 	vEyeDir			= normalize( eyePos - vVertex.xyz );

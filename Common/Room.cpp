@@ -2,6 +2,7 @@
 //  Room.cpp
 //  PROTOTYPE
 
+#define GLM_FORCE_SWIZZLE
 #include "cinder/app/App.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/gl/VboMesh.h"
@@ -25,17 +26,22 @@ Room::Room( const vec3 &dims, bool isPowerOn, bool isGravityOn )
 	mTimeElapsed	= 0.0f;
 	mTimeMulti		= 60.0f;
 	mTimer			= 0.0f;
+	mTimeDelta		= 0.0f;
 	mTick			= false;
 	
 	mDims		= dims;
 	mDimsDest	= dims;
 	
+	// POWER
 	mIsPowerOn		= isPowerOn;
 	if( mIsPowerOn ) mPower = 1.0f;
 	else			 mPower = 0.0f;
 	
+	// GRAVITY
 	mIsGravityOn	= isGravityOn;
 	mDefaultGravity = vec3( 0.0f, GRAVITY, 0.0f );
+	// PERLIN
+	mPerlin			= Perlin( 4 );
 }
 
 void Room::init()
@@ -129,9 +135,9 @@ void Room::updateTime( bool saveFrame )
 {
 	float prevTime	= mTime;
 	mTime			= (float)app::getElapsedSeconds();
-	float dt		= mTime - prevTime;
-	if( saveFrame ) dt = 1.0f/60.0f;
-	mTimeAdjusted	= dt * mTimeMulti;
+	mTimeDelta		= mTime - prevTime;
+	if( saveFrame ) mTimeDelta = 1.0f/60.0f;
+	mTimeAdjusted	= mTimeDelta * mTimeMulti;
 	mTimeElapsed	+= mTimeAdjusted;
 	
 	mTimer += mTimeAdjusted;
@@ -142,7 +148,7 @@ void Room::updateTime( bool saveFrame )
 	}
 }
 
-void Room::update( bool saveFrame )
+void Room::update( float roomScale, bool saveFrame )
 {
 	if( mIsPowerOn )	mPower -= ( mPower - 1.0f ) * 0.2f;
 	else				mPower -= ( mPower - 0.0f ) * 0.2f;
@@ -150,7 +156,7 @@ void Room::update( bool saveFrame )
 	if( mIsGravityOn )	mGravity -= ( mGravity - mDefaultGravity ) * 0.2f;
 	else				mGravity -= ( mGravity - vec3() ) * 0.2f;
 	
-	mDims -= ( mDims - mDimsDest ) * 0.1f;
+	mDims -= ( mDims - mDimsDest * roomScale ) * 0.1f;
 	
 	updateTime( saveFrame );
 }
@@ -160,6 +166,56 @@ void Room::draw()
 	gl::draw( mVbo );
 }
 
+void Room::drawWalls( float power, 
+					 const gl::Texture &backTex, 
+					 const gl::Texture &leftTex, 
+					 const gl::Texture &rightTex, 
+					 const gl::Texture &ceilingTex,
+					 const gl::Texture &floorTex,
+					 const gl::Texture &blankTex )
+{
+	if( Rand::randFloat() < power ){
+		if( Rand::randFloat() < power ){
+			backTex.bind();
+		} else {
+			blankTex.bind();
+		}
+		gl::drawBillboard( vec3( 0.0f, 0.0f, -mDims.z ), vec2( mDims.xy * 2.0f ), 0.0f, {1,0,0}, {0, 1, 0} );
+		gl::drawBillboard( vec3( 0.0f, 0.0f, mDims.z ), vec2( mDims.xy * 2.0f ), 0.0f, {1,0,0}, {0, 1, 0} );
+	}
+	
+	if( Rand::randFloat() < power ){
+		if( Rand::randFloat() < power ){
+			leftTex.bind();
+		} else {
+			blankTex.bind();
+		}
+		gl::drawBillboard( vec3( mDims.x, 0.0f, 0.0f ), vec2( mDims.zy * 2.0f ), 0.0f, {0,0,1}, {0, 1, 0} );
+	}
+	
+	if( Rand::randFloat() < power ){
+		if( Rand::randFloat() < power ){
+			rightTex.bind();
+		} else {
+			blankTex.bind();
+		}
+		gl::drawBillboard( vec3( -mDims.x, 0.0f, 0.0f ), vec2( mDims.zy * 2.0f ), 0.0f, {0,0,1}, {0, 1, 0} );
+	}
+	
+	if( Rand::randFloat() < power ){
+		if( Rand::randFloat() < power ){
+			ceilingTex.bind();
+		} else {
+			blankTex.bind();
+		}
+		gl::drawBillboard( vec3( 0.0f, mDims.y, 0.0f ), vec2( mDims.xz * 2.0f ), 0.0f, {1,0,0}, {0,0,1} );
+	}
+	
+	if( power > 0.5f ){
+		floorTex.bind();
+		gl::drawBillboard( vec3( 0.0f, -mDims.y, 0.0f ), vec2( mDims.xz * 2.0f ), 0.0f, {1,0,0}, {0,0,1} );
+	}
+}
 void Room::adjustTimeMulti( float amt )
 {
 	mTimeMulti = constrain( mTimeMulti - amt, 0.0f, (float)MAX_TIMEMULTI );
@@ -187,6 +243,12 @@ float Room::getLightPower()
 	return lightPower;
 }
 
+vec3 Room::getRandRoomPos()
+{
+	return vec3( Rand::randFloat( -mDims.x, mDims.x ) * 0.9f,
+				  Rand::randFloat( -mDims.y, mDims.y ) * 0.9f,
+				  Rand::randFloat( -mDims.z, mDims.z ) * 0.9f );
+}
 vec3 Room::getRandCeilingPos()
 {
 	return vec3( Rand::randFloat( -mDims.x * 0.8f, mDims.x * 0.8f ), 
@@ -214,3 +276,24 @@ float Room::getFloorLevel()
 	return -mDims.y;
 }
 
+float Room::getCeilingLevel()
+{
+	return mDims.y;
+}
+
+std::vector<vec3> Room::getRandRoomEntryPos()
+{
+	std::vector<vec3> points;
+	vec3 pos = getRandCeilingPos();
+	vec3 p1 = pos;
+	
+	float n1 = mPerlin.fBm( mTimeElapsed * 0.1f );
+	float n2 = mPerlin.fBm( mTimeElapsed * 0.13f );
+	
+	vec3 p2 = glm::normalize(vec3( n1, -1.0f, n2 ));
+	
+	points.push_back( p1 );
+	points.push_back( p2 );
+	
+	return points;
+}

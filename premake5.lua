@@ -41,6 +41,7 @@ solution "Eyeo2012"
 
     includedirs {
         "../Cinder/include",
+        "Common",
     }
 
     function create_example_project( example_path )
@@ -52,6 +53,7 @@ solution "Eyeo2012"
             files { 
                 leaf_name .. "/include/**",
                 leaf_name .. "/src/**",
+                "Common/**",
             }
 
             includedirs {
@@ -78,7 +80,7 @@ solution "Eyeo2012"
 
     local examples = os.matchdirs("*")
     for _, example in ipairs(examples) do
-        if example ~= ".git" and example ~= "vs2015" and example ~= "x64" then
+        if example ~= ".git" and example ~= ".vscode" and example ~= "vs2015" and example ~= "x64" and example ~= "Common" then
             create_example_project(example)
         end
     end

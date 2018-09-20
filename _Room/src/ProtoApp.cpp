@@ -201,8 +201,8 @@ void ProtoApp::drawIntoRoomFbo()
     mat4 m = glm::scale(mRoom.getDims());
 	
     gl::ScopedGlslProg scp(mRoomShader);
-	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
-	mRoomShader->uniform( "mMatrix", m );
+	mRoomShader->uniform( "ciModelViewProjection", mSpringCam.mMvpMatrix );
+	mRoomShader->uniform( "ciModelMatrix", m );
 	mRoomShader->uniform( "eyePos", mSpringCam.mEye );
 	mRoomShader->uniform( "roomDims", mRoom.getDims() );
 	mRoomShader->uniform( "power", mRoom.getPower() );
