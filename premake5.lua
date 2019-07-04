@@ -36,8 +36,8 @@ solution "Eyeo2012"
 
     flags {
         "MultiProcessorCompile",
-        "StaticRuntime"
     }
+    staticruntime "On"
 
     includedirs {
         "../Cinder/include",
@@ -62,7 +62,7 @@ solution "Eyeo2012"
 
             configuration "Debug"
                 libdirs {
-                    "../Cinder/lib/msw/x64/Debug/v140"
+                    "../Cinder/lib/msw/x64/Debug/v142"
                 }
                 links {
                     "cinder",
@@ -70,7 +70,7 @@ solution "Eyeo2012"
 
             configuration "Release"
                 libdirs {
-                    "../Cinder/lib/msw/x64/Release/v140"
+                    "../Cinder/lib/msw/x64/Release/v142"
                 }
                 links {
                     "cinder",
@@ -80,7 +80,7 @@ solution "Eyeo2012"
 
     local examples = os.matchdirs("*")
     for _, example in ipairs(examples) do
-        if example ~= ".git" and example ~= ".vscode" and example ~= "vs2015" and example ~= "x64" and example ~= "Common" then
+        if example ~= ".git" and example ~= ".vscode" and example ~= "vs2019" and example ~= "x64" and example ~= "Common" then
             create_example_project(example)
         end
     end

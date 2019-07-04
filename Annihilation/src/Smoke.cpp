@@ -32,7 +32,7 @@ Smoke::Smoke( const vec3 &pos, const vec3 &vel, float radius, float lifespan )
 void Smoke::update( float timeDelta )
 {
 	mPos	+= mVel * timeDelta;
-	mVel	-= mVel * 0.01 * timeDelta;
+	mVel	-= mVel * 0.01f * timeDelta;
 	mAge	+= timeDelta;
 	mAgePer  = 1.0f - mAge/mLifespan;
 	//			mRadius *= 0.99f;

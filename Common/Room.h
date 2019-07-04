@@ -5,6 +5,7 @@
 #pragma once
 #include "cinder/Perlin.h"
 #include "cinder/gl/Vbo.h"
+#include "cinder/gl/Texture.h"
 
 class Room
 {

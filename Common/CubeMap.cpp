@@ -12,7 +12,7 @@
 #include "CubeMap.h"
 
 using ci::Surface8u;
-using boost::shared_ptr;
+using std::shared_ptr;
 
 CubeMap::CubeMap(){}
 CubeMap::CubeMap( GLsizei texWidth, GLsizei texHeight, const Surface8u &pos_x, const Surface8u &pos_y, const Surface8u &pos_z, const Surface8u &neg_x, const Surface8u &neg_y, const Surface8u &neg_z )
@@ -50,20 +50,24 @@ void CubeMap::unbind()
 
 void CubeMap::enableFixedMapping()
 {
-	glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP );
+#if 0
+    glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP );
 	glTexGeni( GL_T, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP );
 	glTexGeni( GL_R, GL_TEXTURE_GEN_MODE, GL_NORMAL_MAP );
 	glEnable(GL_TEXTURE_GEN_S);
 	glEnable(GL_TEXTURE_GEN_T);
 	glEnable(GL_TEXTURE_GEN_R);
+#endif
 	glEnable( GL_TEXTURE_CUBE_MAP );
 }
 
 void CubeMap::disableFixedMapping()
 {
+#if 0
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
 	glDisable(GL_TEXTURE_GEN_R);
+#endif
 	glDisable( GL_TEXTURE_CUBE_MAP );
 }
 
