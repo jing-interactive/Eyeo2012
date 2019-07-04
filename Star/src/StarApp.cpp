@@ -627,7 +627,7 @@ void StarApp::drawIntoRoomFbo()
 	mRoomShader->uniform( "att", 1.0115f );
 	mRoomShader->uniform( "cubeMap", 0 );
 	mRoomShader->uniform( "spectrumTex", 1 );
-	mRoomShader->uniform( "starPos", Vec4f( mStar.mPos.xyz(), mStar.mRadius ) );
+	mRoomShader->uniform( "starPos", vec4( mStar.mPos.xyz(), mStar.mRadius ) );
 	mRoomShader->uniform( "color", mStar.mColor );
 	mRoomShader->uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
 	mRoomShader->uniform( "mMatrix", m );

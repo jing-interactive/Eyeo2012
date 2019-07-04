@@ -253,12 +253,12 @@ void RDiffusion::setMode( int index )
 	}
 }
 
-Vec2i RDiffusion::toFboVec( const ci::vec3 &pos, float scale, float res )
+ivec2 RDiffusion::toFboVec( const ci::vec3 &pos, float scale, float res )
 {
 	int xi = (int)( pos.x/(scale*res) ) + mFboSize.x/2;
 	int zi = (int)( pos.z/(scale*res) ) + mFboSize.x/2;
 	
-	return Vec2i( xi, zi );
+	return ivec2( xi, zi );
 }
 
 gl::Texture RDiffusion::getTexture()

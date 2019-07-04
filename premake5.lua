@@ -42,6 +42,7 @@ solution "Eyeo2012"
     includedirs {
         "../Cinder/include",
         "Common",
+        "Common/CinderTraer/include",
     }
 
     function create_example_project( example_path )

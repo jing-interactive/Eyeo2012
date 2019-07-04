@@ -81,7 +81,7 @@ class AnnihilationApp : public App {
 	int					mThisFbo, mNextFbo;
 	gl::Fbo				mParticlesFbo;
 	gl::Fbo				mBloomFbo[2];
-	Vec2i				mFboSize;
+	ivec2				mFboSize;
 	Rectf				mFboRect;
 	Area				mFboArea;
 	
@@ -178,7 +178,7 @@ void AnnihilationApp::setup()
 	
 	int fboXRes		= APP_WIDTH/ROOM_FBO_RES;
 	int fboYRes		= APP_HEIGHT/ROOM_FBO_RES;	
-	mFboSize		= Vec2i( fboXRes, fboYRes );
+	mFboSize		= ivec2( fboXRes, fboYRes );
 	mFboRect		= Rectf( 0.0f, 0.0f, (float)fboXRes, (float)fboYRes );
 	mFboArea		= Area( 0, 0, fboXRes, fboYRes );
 	
@@ -332,8 +332,8 @@ void AnnihilationApp::drawIntoRoomFbo()
 	mRoomShader->uniform( "roomDims", mRoom.getDims() );
 	mRoomShader->uniform( "mainPower", mRoom.getPower() );
 	mRoomShader->uniform( "lightPower", mRoom.getLightPower() );
-	mRoomShader->uniform( "antimatter", Vec4f( mController.mAntimatter->mPos.xyz(), mController.mAntimatter->mRadius ) );
-	mRoomShader->uniform( "matter", Vec4f( mController.mMatter->mPos.xyz(), mController.mMatter->mRadius ) );
+	mRoomShader->uniform( "antimatter", vec4( mController.mAntimatter->mPos.xyz(), mController.mAntimatter->mRadius ) );
+	mRoomShader->uniform( "matter", vec4( mController.mMatter->mPos.xyz(), mController.mMatter->mRadius ) );
 	mRoom.draw();
 	mRoomShader->unbind();
 	
@@ -437,7 +437,7 @@ void AnnihilationApp::draw()
 	mMatterShader.uniform( "mainPower", mRoom.getPower() );
 	mMatterShader.uniform( "mvpMatrix", mSpringCam.mMvpMatrix );
 	mMatterShader.uniform( "roomDim", mRoom.getDims() );
-	mMatterShader.uniform( "antimatter", Vec4f( mController.mAntimatter->mPos.xyz(), mController.mAntimatter->mRadius ) );
+	mMatterShader.uniform( "antimatter", vec4( mController.mAntimatter->mPos.xyz(), mController.mAntimatter->mRadius ) );
 	mController.drawMatter();
 	mMatterShader.unbind();
 	

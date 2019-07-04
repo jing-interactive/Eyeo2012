@@ -172,7 +172,7 @@ void Controller::updateBubbles( float dt )
 	int vIndex = 0;
 	for( vector<Bubble>::iterator it = mBubbles.begin(); it != mBubbles.end(); ++it ){        
 		mBubbleVerts[vIndex].vertex = it->mPos;
-		mBubbleVerts[vIndex].color  = Vec4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		mBubbleVerts[vIndex].color  = vec4( 1.0f, 1.0f, 1.0f, 1.0f );
         vIndex++;
 	}
 }

@@ -26,7 +26,7 @@ class RDiffusion {
 	void			drawIntoNormalsFbo( ci::gl::GlslProg *shader );
 	void			draw();
 	void			setMode( int index );
-	ci::Vec2i		toFboVec( const ci::vec3 &pos, float scale, float res );
+	ci::ivec2		toFboVec( const ci::vec3 &pos, float scale, float res );
 	ci::gl::Texture getTexture();
 	ci::gl::Texture getHeightsTexture();
 	ci::gl::Texture getNormalsTexture();

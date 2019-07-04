@@ -121,7 +121,7 @@ void ProtoApp::setup()
 	
 //	// PARAMS
 //	mShowParams		= false;
-//	mParams			= params::InterfaceGl( "Flocking", Vec2i( 200, 150 ) );
+//	mParams			= params::InterfaceGl( "Flocking", ivec2( 200, 150 ) );
 //	mParams.addParam( "Time Multi", &mTimeMulti, "min=0.0 max=180.0 step=1.0 keyIncr=t keyDecr=T" );
 }
 

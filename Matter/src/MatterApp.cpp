@@ -82,7 +82,7 @@ class MatterApp : public App {
 	// FBO
 	gl::Fbo				mParticlesFbo;
 	gl::Fbo				mParticlesBloomFbo[2];
-	Vec2i				mFboSize;
+	ivec2				mFboSize;
 	Rectf				mFboRect;
 	Area				mFboArea;
 	int					mThisFbo, mNextFbo;
@@ -156,7 +156,7 @@ void MatterApp::setup()
 	
 	int fboXRes		= APP_WIDTH/ROOM_FBO_RES;
 	int fboYRes		= APP_HEIGHT/ROOM_FBO_RES;	
-	mFboSize		= Vec2i( fboXRes, fboYRes );
+	mFboSize		= ivec2( fboXRes, fboYRes );
 	mFboRect		= Rectf( 0.0f, 0.0f, (float)fboXRes, (float)fboYRes );
 	mFboArea		= Area( 0, 0, fboXRes, fboYRes );
 	mRoomFbo		= gl::Fbo::create( fboXRes, fboYRes, format );
@@ -196,7 +196,7 @@ void MatterApp::setup()
 	mMouseOffset	= vec2();
 	mMousePressed	= false;
 	
-//	mParams = params::InterfaceGl( "Matter/Antimatter", Vec2i( 200, 150 ) );
+//	mParams = params::InterfaceGl( "Matter/Antimatter", ivec2( 200, 150 ) );
 //	mParams.addParam( "Time Multi", &mTimeMulti, "min=0.0 max=120.0 step=1.0 keyIncr=t keyDecr=T" );
 }
 

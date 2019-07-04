@@ -396,10 +396,10 @@ void Controller::updateSparks( float t )
 	int vIndex = 0;
 	for( list<Spark>::iterator it = mSparks.begin(); it != mSparks.end(); ++it ){        
 		mSparkVerts[vIndex].vertex = it->mPos; //0.7f
-		mSparkVerts[vIndex].color  = Vec4f( 1.0f, 0.8f, 0.5f, it->mAgePer );
+		mSparkVerts[vIndex].color  = vec4( 1.0f, 0.8f, 0.5f, it->mAgePer );
 		vIndex++;
 		mSparkVerts[vIndex].vertex = it->mPos - it->mVel; //0.7f
-		mSparkVerts[vIndex].color  = Vec4f( 1.0f, 0.3f, 0.0f, 0.0f );
+		mSparkVerts[vIndex].color  = vec4( 1.0f, 0.3f, 0.0f, 0.0f );
         vIndex++;
 	}
 }

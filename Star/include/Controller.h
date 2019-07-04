@@ -12,7 +12,7 @@ class Controller {
   public:
 	struct DustVertex {
         ci::vec3 vertex;
-        ci::Vec4f color;
+        ci::vec4 color;
     };
 	
 	struct Dust {

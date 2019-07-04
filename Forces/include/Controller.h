@@ -25,7 +25,7 @@ class Controller
 	struct VboVertex {
         ci::vec3 vertex;
 //		ci::vec3 normal;
-        ci::Vec4f color;
+        ci::vec4 color;
     };
 	
 	Controller();

@@ -45,7 +45,7 @@ class AntMillApp : public App {
 	void			drawIntoBlurFbo();
 	void			blurFbo();
 	void			readFboPixels();
-	Vec2i			toFboVec( const vec2 &pos );
+	ivec2			toFboVec( const vec2 &pos );
 	void			drawIntoRoomFbo();
 	virtual void	draw();
 	void			drawInfoPanel();
@@ -346,14 +346,14 @@ void AntMillApp::readFboPixels()
 			Ant *ant = &mController.mAnts[i];
 			
 			vec3 p1   = ant->mLeftSensorPos;
-			Vec2i pos1 = toFboVec( p1.xz() );
+			ivec2 pos1 = toFboVec( p1.xz() );
 			glReadPixels( pos1.x, pos1.y, 1, 1, GL_RGB, GL_FLOAT, (void *)pixel );
 			float r1 = pixel[0];
 			float g1 = pixel[1];
 			float b1 = pixel[2];
 			
 			vec3 p2   = ant->mRightSensorPos;
-			Vec2i pos2 = toFboVec( p2.xz() );
+			ivec2 pos2 = toFboVec( p2.xz() );
 			glReadPixels( pos2.x, pos2.y, 1, 1, GL_RGB, GL_FLOAT, (void *)pixel );
 			float r2 = pixel[0];// * 0.99f;
 			float g2 = pixel[1];// * 0.99f;
@@ -372,12 +372,12 @@ void AntMillApp::readFboPixels()
 	mBlurFbos[mThisFbo].unbindFramebuffer();
 }
 
-Vec2i AntMillApp::toFboVec( const vec2 &pos )
+ivec2 AntMillApp::toFboVec( const vec2 &pos )
 {
 	int xi = FBO_WIDTH - (int)( pos.x + mRoom.getDims().x );
 	int zi = (int)( pos.y + mRoom.getDims().z );
 	
-	return Vec2i( xi, zi );
+	return ivec2( xi, zi );
 }
 
 void AntMillApp::drawIntoRoomFbo()

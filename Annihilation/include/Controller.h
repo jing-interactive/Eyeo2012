@@ -28,7 +28,7 @@ class Controller {
 public:
 	struct SparkVertex {
         ci::vec3 vertex;
-        ci::Vec4f color;
+        ci::vec4 color;
     };
 	
 	struct Hair {

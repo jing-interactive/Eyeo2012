@@ -188,13 +188,13 @@ void Controller::updateFieldLines( float dt, bool tick )
 			float alpha = ( 1.0f - i*FieldLine::sInvLen ) * it->mAgePer * 0.5f;
 			mFieldLineVerts[vIndex].vertex = it->mPositions[i];
 //			mFieldLineVerts[vIndex].normal = it->mNormals[i];
-			mFieldLineVerts[vIndex].color  = Vec4f( it->mColor, it->mColor, it->mColor, alpha );
+			mFieldLineVerts[vIndex].color  = vec4( it->mColor, it->mColor, it->mColor, alpha );
 			vIndex++;
 			
 			alpha = ( 1.0f - (i+1)*FieldLine::sInvLen ) * it->mAgePer * 0.5f;
 			mFieldLineVerts[vIndex].vertex = it->mPositions[i+1];
 //			mFieldLineVerts[vIndex].normal = it->mNormals[i+1];
-			mFieldLineVerts[vIndex].color  = Vec4f( it->mColor, it->mColor, it->mColor, alpha );
+			mFieldLineVerts[vIndex].color  = vec4( it->mColor, it->mColor, it->mColor, alpha );
 			vIndex++;
 		}
 	}

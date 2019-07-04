@@ -70,7 +70,7 @@ void Controller::updateDusts( float dt )
 	int vIndex = 0;
 	for( vector<Dust>::iterator it = mDusts.begin(); it != mDusts.end(); ++it ){        
 		mDustVerts[vIndex].vertex = it->mPos;
-		mDustVerts[vIndex].color  = Vec4f( it->mCol.r, it->mCol.g, it->mCol.b, it->mCol.a );
+		mDustVerts[vIndex].color  = vec4( it->mCol.r, it->mCol.g, it->mCol.b, it->mCol.a );
         vIndex++;
 	}
 }

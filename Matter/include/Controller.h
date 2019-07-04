@@ -14,7 +14,7 @@ class Controller {
 public:
 	struct AnchorVertex {
         ci::vec3 vertex;
-        ci::Vec4f color;
+        ci::vec4 color;
     };
 	
 	Controller();

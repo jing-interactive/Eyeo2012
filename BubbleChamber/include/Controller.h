@@ -25,7 +25,7 @@ class Controller
   public:
 	struct BubbleVertex {
         ci::vec3 vertex;
-        ci::Vec4f color;
+        ci::vec4 color;
     };
 	
 	struct Gib {
